@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget xmlns     = "http://www.w3.org/ns/widgets"
+        xmlns:gap = "http://phonegap.com/ns/1.0"
+        id        = "com.iragon.MuonTruyen"
+        version   = "1.0.1">
+	<name>Muon Truyen</name>
+	<description>
+		Mượn truyện của các bạn về đọc chút nhé
+	</description>
+
+	<author href="https://www.facebook.com/nguyen.duc.loc.2407" email="loc.nd247@gmail.com">
+		Lộc Nguyễn
+	</author>
+
+	<icon src="assets/img/icon.png" />
+	<gap:splash src="assets/img/slash.png" />
+	<preference name="AutoHideSplashScreen" value="true" />
+	<preference name="SplashScreenDelay" value="2000" />
+
+	<preference name="phonegap-version" value="cli-6.5.0" />
+	<plugin name="cordova-plugin-whitelist" source="npm" />
+	<plugin name="cordova-plugin-inappbrowser" source="npm" />
+
+	<access origin="*"/>
+	<allow-intent href="http://*/*" />
+	<allow-intent href="https://*/*" />
+	<allow-intent href="tel:*" />
+	<allow-intent href="sms:*" />
+	<allow-intent href="mailto:*" />
+	<allow-intent href="geo:*" />
+	<platform name="android">
+		<allow-intent href="market:*" />
+	</platform>
+</widget>

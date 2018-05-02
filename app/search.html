@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mượn Truyện</title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="Mượn truyện về đọc chút nhé" name="description" />
+    <meta content="Lộc Nguyễn" name="author" />
+    <meta content="mượn truyện, truyện tranh, truyện hay" name="keywords" />
+    <!-- ================== BEGIN BASE CSS STYLE ================== -->
+    <link href="assets/css/font.css" rel="stylesheet" />
+    <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="assets/css/animate.min.css" rel="stylesheet" />
+    <link href="assets/css/style.min.css" rel="stylesheet" />
+    <link href="assets/css/style-responsive.min.css" rel="stylesheet" />
+    <link href="assets/css/theme.css" rel="stylesheet" />
+    <link href="assets/css/custom.css" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- ================== END BASE CSS STYLE ================== -->
+    <!-- ================== BEGIN BASE JS ================== -->
+    <script src="assets/plugins/pace/pace.min.js"></script>
+    <script src="assets/plugins/jquery/jquery-1.9.1.min.js"></script>
+    <!-- ================== END BASE JS ================== -->
+    <script src="assets/js/app_config.js"></script>
+    <script>
+        if (typeof (Storage) !== "undefined") {
+            checkLogin(0);
+        } else {
+            dl_alert('danger', 'Bộ nhớ không hoạt động', false);
+        }
+        var param_keyword = getParam('keyword');
+        if (param_keyword == '') {
+            dl_alert('danger', 'Không có từ khoá tìm kiếm', true);
+            window.location.href="index.html";
+        }
+    </script>
+    <script src="cordova.js"></script>
+</head>
+<body>
+    <div class="dl-overlay"></div>
+    <div id="alert-flash" class="alert"></div>
+    <div id="header" class="header navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button id="btn-more-menu" style="background: lightblue;" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#header-navbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <i class="logined dl-notify hidden"></i>
+                </button>
+                <a href="index.html" class="navbar-brand a-logo">
+                    <img src="assets/img/logo.png">
+                    <span class="brand-text f-s-18">
+                    MƯỢN TRUYỆN
+                </span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="header-navbar">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a class="f-s-16" href="index.html">Trang chủ</a></li>
+                    <li>
+                        <form class="search-form" action="search.html">
+                        <input type="text" id="search" name="keyword" required>
+                        <input class="btn" type="submit" value="Search">
+                        </form>
+                    </li>
+                    <li><a class="f-s-16" href="tags.html">Danh sách thẻ tag</a></li>
+                    <li class="not_logined"><a class="f-s-16" href="login.html">Đăng nhập</a></li>
+                    <li class="not_logined"><a class="f-s-16" href="register.html">Đăng ký</a></li>
+                    <li class="logined"><a class="f-s-16" href="follow.html">Truyện đang theo dõi <i class="dl-notify"></i></a></li>
+                    <li class="logined"><a class="f-s-16" href="profile.html">Thông tin</a></li>
+                    <li class="logined"><a onclick="logout()" class="f-s-16">Thoát</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="content" class="content">
+        <div class="container">
+            <div class="row row-space-30">
+                <div class="col-md-12">
+                    <div id="image-refresh">
+                        <img src="assets/img/refresh.gif">
+                    </div>
+                    <div class="post-detail section-container">
+                        <h3 class="page-title"></h3>
+                        <div id="list-books">
+                        </div>
+                        <div class="clear5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-copyright" class="footer-copyright">
+    </div>
+
+    <!-- ================== BEGIN BASE JS ================== -->
+    <script src="assets/plugins/jquery/jquery-migrate-1.1.0.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <!--[if lt IE 9]>
+    <script src="assets/crossbrowserjs/html5shiv.js"></script>
+    <script src="assets/crossbrowserjs/respond.min.js"></script>
+    <script src="assets/crossbrowserjs/excanvas.min.js"></script>
+    <![endif]-->
+    <script src="assets/plugins/jquery-cookie/jquery.cookie.js"></script>
+    <script src="assets/js/theme.min.js"></script>
+    <!-- ================== END BASE JS ================== -->
+    <script src="assets/js/app_custom.js"></script>
+    <script>
+        $(document).ready(function() {
+            App.init();
+            show_search(param_keyword);
+        });
+    </script>
+</body>
+</html>
