@@ -543,7 +543,8 @@ function login() {
     $('.form-control').removeClass('input-error');
     var params = {
         username: $.trim($('#username').val()),
-        password: $('#password').val()
+        password: $('#password').val(),
+        device_id: localStorage.getItem("device_id", '')
     };
     send_api('POST', '/login', params, function(res) {
         $('#loading-btn').hide();
@@ -574,7 +575,8 @@ function register() {
         name: $.trim($('#name').val()),
         email: $.trim($('#email').val()),
         password: $('#password').val(),
-        password2: $('#password2').val()
+        password2: $('#password2').val(),
+        device_id: localStorage.getItem("device_id", '')
     };
     send_api('POST', '/register', params, function(res) {
         $('#loading-btn').hide();
@@ -716,6 +718,41 @@ function show_profile() {
             html += '<span>'+res.data.email+'</span>';
             html += '</div>';
             html += '<div class="a-profile">';
+            html += '<span><input id="open_form_btn" class="dl-btn-default" type="button" value="Đổi mật khẩu" onclick="show_change_password()"></span>';
+            html += '</div>';
+
+            html += '<div id="change-password-form" style="display:none">';
+            html += '<div class="a-profile">';
+            html += '<label>Mật khẩu hiện tại</label>';
+            html += '<span><input id="current_password" type="password"><span class="form-error" id="current_password_error"></span></span>';
+            html += '</div>';
+            html += '<div class="a-profile form-dl-error" id="current_password_error">';
+            html += '<label></label>';
+            html += '<span></span>';
+            html += '</div>';
+            html += '<div class="a-profile">';
+            html += '<label>Mật khẩu mới</label>';
+            html += '<span><input id="password" type="password"></span>';
+            html += '</div>';
+            html += '<div class="a-profile form-dl-error" id="password_error">';
+            html += '<label></label>';
+            html += '<span></span>';
+            html += '</div>';
+            html += '<div class="a-profile">';
+            html += '<label>Xác nhận mật khẩu</label>';
+            html += '<span><input id="password2" type="password"></span>';
+            html += '</div>';
+            html += '<div class="a-profile form-dl-error" id="password2_error">';
+            html += '<label></label>';
+            html += '<span></span>';
+            html += '</div>';
+            html += '<div class="a-profile">';
+            html += '<label></label>';
+            html += '<span><input class="dl-btn-default" onclick="change_password()" value="Lưu" type="button"></span>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div class="a-profile">';
             html += '<label>Số truyện theo dõi</label>';
             html += '<span>'+show_number(res.data.follows)+'</span>';
             html += '</div>';
@@ -755,6 +792,14 @@ function show_profile() {
                 html += '<span>'+show_number(res.options.images)+'</span>';
                 html += '</div>';
                 html += '<div class="a-profile">';
+                html += '<label>Scraper</label>';
+                html += '<span>'+res.options.running_scraper+'</span>';
+                html += '</div>';
+                html += '<div class="a-profile">';
+                html += '<label>Reload</label>';
+                html += '<span>'+res.options.running_reload+'</span>';
+                html += '</div>';
+                html += '<div class="a-profile">';
                 html += '<label>Lấy thêm truyện</label>';
                 html += '<span><img id="loading-btn" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" /><input style="float:none" class="admin-btn" id="scraper-btn" onclick="scraper()" type="button" value="SCRAPER"></span>';
                 html += '</div>';
@@ -762,6 +807,38 @@ function show_profile() {
                 $('#profile').parent().append(html);
             }
         } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+
+function show_change_password() {
+    $('#change-password-form').show();
+    $('#open_form_btn').hide();
+}
+
+function change_password() {
+    $('.form-dl-error').hide();
+    $('input[type="password"]').removeClass('input-error');
+    var params = {
+        current_password: $.trim($('#current_password').val()),
+        password: $('#password').val(),
+        password2: $('#password2').val()
+    };
+    send_api('POST', '/changepassword', params, function(res) {
+        $('#loading-btn').hide();
+        $('#login-btn').show();
+        if (res.success) {
+            dl_alert('success', 'Thay đổi mật khẩu thành công', true);
+            window.location.reload();
+        } else {
+            $.each(res.data, function( index, value ) {
+                if(typeof(value) != 'undefined' && value != '' && value != null && value != 'null') {
+                    $('#'+index+'_error span').html(value);
+                    $('#'+index+'_error').show();
+                    $('#'+index).addClass('input-error');
+                }
+            });
             dl_alert('danger', res.message, false);
         }
     });

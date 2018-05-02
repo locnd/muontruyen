@@ -44,7 +44,7 @@ class Scraper
             $log->save();
             if($number_chapters == 0) {
                 $dem++;
-                // if($dem >=5 ) { return true; }
+                if($dem >=10 ) { return true; }
             }
         }
         $html_base->clear();
@@ -72,7 +72,12 @@ class Scraper
                 echo '---- ' . $book->slug . "\n";
             $number_chapters = $this->get_chapters($book);
             if($number_chapters > 0) {
-                $book->update_follows_notify();
+                foreach ($book->follows as $follow) {
+                    $follow->status = Follow::UNREAD;
+                    $follow->updated_at = date('Y-m-d H:i:s');
+                    $follow->save();
+                    $this->send_push_notification($follow->user_id, $book);
+                }
             }
             return $number_chapters;
         }
@@ -439,8 +444,43 @@ page.open("%s", function (status) {
             $html = file_get_contents($htmlPath);
         }
         usleep(100000);
-        unlink($fetchPath);
-        unlink($htmlPath);
+        if (file_exists($fetchPath)){
+            unlink($fetchPath);
+        }
+        if (file_exists($htmlPath)){
+            unlink($htmlPath);
+        }
         return $html;
+    }
+
+    private function send_push_notification($user_id, $book) {
+        $api_key = 'AAAAJAcz9dM:APA91bHGhUo2vCU6p53zMD5_YnfIKnZbFkCf5eoaMghSufF7yHN0qPokC5dIBa5tIYjGh4crDXf2KCHpsB0A24D3GHYeVfSlNgYltud7z9UG5kvJ5lrnMdJcO4VSk2vkVb3jz7Bgphw3';
+        $device = Device::find()->where(array('user_id'=>$user_id))->one();
+        if(empty($device)) {
+            return true;
+        }
+        $device_id = $device->device_id;
+        $fields = array(
+            'registration_ids' => array($device_id),
+            'data' => array(
+                'title' => '',
+                'message' => 'Truyện bạn đang theo dõi có cập nhật chương mới',
+                'vibrate' => 1,
+                'sound' => 1
+            )
+        );
+        $headers = array(
+            'Authorization: key=' . $api_key,
+            'Content-Type: application/json'
+        );
+        $ch = curl_init();
+        curl_setopt( $ch,CURLOPT_URL, 'https://android.googleapis.com/gcm/send' );
+        curl_setopt( $ch,CURLOPT_POST, true );
+        curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
+        curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
+        $result = curl_exec($ch );
+        curl_close( $ch );
     }
 }

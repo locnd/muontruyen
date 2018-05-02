@@ -510,6 +510,15 @@ class Apiv1Controller extends Controller
             $options['chapters'] = Chapter::find()->count();
             $options['in_active_chapters'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
             $options['images'] = Image::find()->count();
+            $options['running_scraper'] = 'stop';
+            $options['running_reload'] = 'stop';
+            $setting_model = new Setting();
+            if($setting_model->get_setting('running_scraper') != '') {
+                $options['running_scraper'] = 'running';
+            }
+            if($setting_model->get_setting('running_reload') != '') {
+                $options['running_reload'] = 'running';
+            }
         }
         return array(
             'success' => true,
@@ -522,6 +531,27 @@ class Apiv1Controller extends Controller
                 'reads' => count($user->reads)
             ),
             'options' => $options
+        );
+    }
+    public function actionChangepassword() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        $errors = $user->change_password(Yii::$app->request->post());
+        if($errors === true) {
+            return array(
+                'success' => true,
+                'data' => $errors
+            );
+        }
+        return array(
+            'success' => false,
+            'data' => $errors,
+            'message' => 'Thay đổi mật khẩu thất bại'
         );
     }
     public function actionScraper() {

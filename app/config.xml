@@ -20,7 +20,10 @@
 	<preference name="phonegap-version" value="cli-6.5.0" />
 	<plugin name="cordova-plugin-whitelist" source="npm" />
 	<plugin name="cordova-plugin-inappbrowser" source="npm" />
-
+	<plugin name="cordova-plugin-screen-orientation" source="npm" />
+	<plugin name="phonegap-plugin-push" spec="1.8.0" source="npm">
+		<param name="SENDER_ID" value="154739668435" />
+	</plugin>
 	<access origin="*"/>
 	<allow-intent href="http://*/*" />
 	<allow-intent href="https://*/*" />

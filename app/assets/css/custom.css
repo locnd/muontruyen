@@ -129,7 +129,7 @@ div.alert {
 .form-page .form-error {
     color:red;
 }
-.form-page .input-error {
+.form-page .input-error, input.input-error {
     border-color:red;
 }
 #footer-copyright.footer-copyright {
@@ -436,4 +436,33 @@ h3.page-title b {
 .a-tag img {
     width: 25px;
     margin-right: 10px;
+}
+.btn-fullscreen {
+    width:30px;
+    height:30px;
+    border-radius: 15px;
+    line-height: 30px;
+    text-align: center;
+    font-weight: bold;
+    position: fixed;
+    right: 155px;
+    bottom: 5px;
+    z-index: 99;
+    color: black;
+    background: lightgrey;
+}
+.dl-btn-default {
+    background: lightblue;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: 600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+#change-password-form input[type="password"] {
+    padding: 5px 10px;
+}
+.form-dl-error {
+    display:none;
 }

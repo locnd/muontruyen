@@ -27,6 +27,10 @@ class User extends ModelCommon implements IdentityInterface
     {
         return $this->hasMany(Read::className(), ['user_id' => 'id']);
     }
+    public function getDevice()
+    {
+        return $this->hasOne(Device::className(), ['user_id' => 'id']);
+    }
     public function rules()
     {
         return [
@@ -88,6 +92,15 @@ class User extends ModelCommon implements IdentityInterface
             while (User::find()->where(array('token' => $user->token))->count() > 0) {
                 $user->token = $this->randomToken();
             }
+        }
+        if(!empty($data['device_id'])) {
+            $device = Device::find()->where(array('user_id'=>$user->id))->one();
+            if(empty($device)) {
+                $device = new Device();
+                $device->user_id = $user->id;
+            }
+            $device->device_id = $data['device_id'];
+            $device->save();
         }
         $user->last_login = date('Y-m-d H:i:s');
         $user->save();
@@ -152,6 +165,40 @@ class User extends ModelCommon implements IdentityInterface
             $user->token = $this->randomToken();
         }
         $user->save();
+        if(!empty($data['device_id'])) {
+            $device = new Device();
+            $device->user_id = $user->id;
+            $device->device_id = $data['device_id'];
+            $device->save();
+        }
         return $user;
+    }
+
+    function change_password($data = array()) {
+        $errors = array();
+        if(empty($data['current_password'])) {
+            $errors['current_password'] = 'Mật khẩu hiện tại không được để trống.';
+        }
+        if(empty($data['password'])) {
+            $errors['password'] = 'Mật khẩu mới không được để trống.';
+        }
+        if(empty($data['password2'])) {
+            $errors['password2'] = 'Xác nhận mật khẩu mới không được để trống.';
+        }
+        if(!empty($errors)) {
+            return $errors;
+        }
+        if(md5($this->salt.'_'.$data['current_password']) != $this->password) {
+            $errors['current_password'] = 'Mật khẩu hiện tại không đúng.';
+        }
+        if($data['password'] != $data['password2']) {
+            $errors['password2'] = 'Xác nhận mật khẩu mới không đúng.';
+        }
+        if(!empty($errors)) {
+            return $errors;
+        }
+        $this->password = md5($this->salt.'_'.$data['password']);
+        $this->save();
+        return true;
     }
 }

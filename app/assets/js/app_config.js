@@ -1,9 +1,35 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 function onDeviceReady() {
     window.open = cordova.InAppBrowser.open;
+
+    var push = PushNotification.init({
+        "android": {
+            "senderID": "154739668435"
+        },
+        "ios": {"alert": "true", "badge": "true", "sound": "true", "clearBadge": "true" },
+        "windows": {}
+    });
+
+    push.on('registration', function(data) {
+        localStorage.setItem("device_id", data.registrationId);
+    });
+
+    push.on('notification', function(data) {
+        if ( data.additionalData.foreground ){
+            //alert("when the app is active");
+            //dl_alert('success', data.message, false);
+        } else {
+            //alert("when the app is not active");
+            dl_alert('success', data.message, false);
+        }
+    });
+
+    push.on('error', function(e) {
+        dl_alert('danger', e.message, false);
+    });
 }
 
-// var API_URL = 'http://truyentranh.me/api/v1';
+// var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
 
 function getParam(name) {
@@ -38,6 +64,7 @@ $(document).ready(function() {
     show_elements();
     check_unread();
     check_alert();
+    fullscreen(false);
 });
 
 var mouseY = 0;
@@ -187,4 +214,43 @@ function check_alert() {
 function move_to_top() {
     $("html, body").animate({ scrollTop: 0 }, 500);
     return true;
+}
+
+function orientation() {
+    var sc = screen.orientation.type;
+    if(sc.indexOf('portrait') > -1 ) {
+        screen.orientation.lock('landscape');
+    } else {
+        screen.orientation.lock('portrait');
+    }
+}
+
+function fullscreen(change) {
+    var screen = localStorage.getItem("screen");
+    if (screen !== null && screen !== '') {} else {
+        screen = 'normal';
+    }
+    if(change) {
+        if(screen == 'fullscreen') {
+            screen = 'normal';
+        } else {
+            screen = 'fullscreen';
+        }
+    }
+    if(screen == 'fullscreen') {
+        $('#header').hide();
+        $('#footer-copyright').hide();
+        $('.btn-fullscreen').css('right', '15px');
+        $('#content').css('margin', '10px 0 0 0');
+        $('#content').css('padding-bottom', '0');
+        $('#content .container .col-md-12').css('padding', '0 5px');
+    } else {
+        $('#header').show();
+        $('#footer-copyright').show();
+        $('.btn-fullscreen').css('right', '155px');
+        $('#content').css('margin', '84px 0 0 0');
+        $('#content').css('padding-bottom', '40px');
+        $('#content .container .col-md-12').css('padding', '0 15px');
+    }
+    localStorage.setItem("screen", screen);
 }

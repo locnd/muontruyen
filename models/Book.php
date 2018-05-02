@@ -27,14 +27,6 @@ class Book extends ModelCommon
         return $this->hasMany(BookTag::className(), ['book_id' => 'id']);
     }
 
-    public function update_follows_notify() {
-        foreach ($this->follows as $follow) {
-            $follow->status = Follow::UNREAD;
-            $follow->updated_at = date('Y-m-d H:i:s');
-            $follow->save();
-        }
-    }
-
     public function save_tags($tag_ids) {
         foreach ($this->bookTags as $book_tag) {
             $book_tag->delete();
