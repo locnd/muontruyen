@@ -8,19 +8,19 @@
     <meta content="Lộc Nguyễn" name="author" />
     <meta content="mượn truyện, truyện tranh, truyện hay" name="keywords" />
     <!-- ================== BEGIN BASE CSS STYLE ================== -->
-    <link href="assets/css/font.css" rel="stylesheet" />
-    <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="assets/css/animate.min.css" rel="stylesheet" />
-    <link href="assets/css/style.min.css" rel="stylesheet" />
-    <link href="assets/css/style-responsive.min.css" rel="stylesheet" />
-    <link href="assets/css/theme.css" rel="stylesheet" />
-    <link href="assets/css/custom.css" rel="stylesheet" />
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link href="/assets/css/font.css" rel="stylesheet" />
+    <link href="/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/assets/css/animate.min.css" rel="stylesheet" />
+    <link href="/assets/css/style.min.css" rel="stylesheet" />
+    <link href="/assets/css/style-responsive.min.css" rel="stylesheet" />
+    <link href="/assets/css/theme.css" rel="stylesheet" />
+    <link href="/assets/css/custom.css" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
     <!-- ================== END BASE CSS STYLE ================== -->
     <!-- ================== BEGIN BASE JS ================== -->
-    <script src="assets/plugins/pace/pace.min.js"></script>
-    <script src="assets/plugins/jquery/jquery-1.9.1.min.js"></script>
+    <script src="/assets/plugins/pace/pace.min.js"></script>
+    <script src="/assets/plugins/jquery/jquery-1.9.1.min.js"></script>
     <!-- ================== END BASE JS ================== -->
 </head>
 <body>
@@ -45,15 +45,15 @@
 </div>
 
 <!-- ================== BEGIN BASE JS ================== -->
-<script src="assets/plugins/jquery/jquery-migrate-1.1.0.min.js"></script>
-<script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script src="/assets/plugins/jquery/jquery-migrate-1.1.0.min.js"></script>
+<script src="/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 <!--[if lt IE 9]>
-<script src="assets/crossbrowserjs/html5shiv.js"></script>
-<script src="assets/crossbrowserjs/respond.min.js"></script>
-<script src="assets/crossbrowserjs/excanvas.min.js"></script>
+<script src="/assets/crossbrowserjs/html5shiv.js"></script>
+<script src="/assets/crossbrowserjs/respond.min.js"></script>
+<script src="/assets/crossbrowserjs/excanvas.min.js"></script>
 <![endif]-->
-<script src="assets/plugins/jquery-cookie/jquery.cookie.js"></script>
-<script src="assets/js/theme.min.js"></script>
+<script src="/assets/plugins/jquery-cookie/jquery.cookie.js"></script>
+<script src="/assets/js/theme.min.js"></script>
 <!-- ================== END BASE JS ================== -->
 <script>
     $(document).ready(function() {

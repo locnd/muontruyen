@@ -12,7 +12,7 @@ class Book extends ModelCommon
 
     public function getChapters()
     {
-        return $this->hasMany(Chapter::className(), ['book_id' => 'id'])->where(array('status'=>Chapter::ACTIVE))->orderBy(['created_at' => SORT_DESC, 'id' => SORT_ASC]);
+        return $this->hasMany(Chapter::className(), ['book_id' => 'id'])->where(array('status'=>Chapter::ACTIVE))->orderBy(['stt' => SORT_DESC, 'id' => SORT_ASC]);
     }
     public function getServer()
     {
@@ -59,5 +59,15 @@ class Book extends ModelCommon
         $book_tag->book_id = $this->id;
         $book_tag->tag_id = $tag->id;
         $book_tag->save();
+    }
+
+    public function get_image() {
+        if($this->image == 'default.jpg') {
+            if(\Yii::$app->params['use_image_source']) {
+                return $this->image_source;
+            }
+            return \Url::home(true).'uploads/books/'.$this->image;
+        }
+        return \Url::home(true).'uploads/books/'.$this->slug.'/'.$this->image;
     }
 }

@@ -11,6 +11,7 @@
 
     <div class="login-content">
         <form method="POST" class="margin-bottom-0">
+            <input id="crsf_token" type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
             <div class="form-group m-b-20">
                 <?php $option1 = array(
                     'type' => 'text',

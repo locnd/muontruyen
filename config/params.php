@@ -98,4 +98,50 @@ function convert_to_mysql_time($time) {
     return trim($tmp_date_parse[2].'-'.$tmp_date_parse[1].'-'.$tmp_date_parse[0].' '.$tmp_time);
 }
 
+function make_page_url($url, $filters, $sorts='', $page=1) {
+    if(empty($filters) && empty($sorts) && $page == 1) {
+        return $url;
+    }
+    $url .= '?';
+    foreach ($filters as $key => $filter) {
+        if(!empty($filter)) {
+            if(is_string($filter)) {
+                $url .= $key.'='.$filter.'&';
+            } elseif(is_array($filter)) {
+                foreach ($filter as $v) {
+                    $url .= $key.'[]='.$v.'&';
+                }
+            }
+        }
+    }
+    if(is_array($sorts)) {
+        foreach ($sorts as $key => $sort) {
+            if(!empty($sort)) {
+                $url .= $key.'='.$sort.'&';
+            }
+        }
+    } elseif(is_string($sorts) && $sorts!='') {
+        $url .= 'sort='.$sorts.'&';
+    }
+    if($page == 1) {
+        return substr($url, 0, -1);
+    }
+    $url .= 'page='.$page;
+    return $url;
+}
+
+function show_date($date, $is_time=true, $has_second = true) {
+    if(empty($date)) {
+        return '';
+    }
+    $format = 'd-m-Y';
+    if($is_time) {
+        $format = 'd-m-Y H:i:s';
+        if(!$has_second) {
+            $format = 'd-m-Y H:i';
+        }
+    }
+    return date($format, strtotime($date));
+}
+
 return $params;

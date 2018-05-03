@@ -384,6 +384,8 @@ class Scraper
     }
 
     private function parse_url_by_phantom($url) {
+        $time_stamp = time();
+
         $fetchScript = 'var fs = require("fs");
 var page = require(\'webpage\').create();
 
@@ -392,8 +394,8 @@ page.open("%s", function (status) {
   phantom.exit();
 });';
         $phantomPath = Yii::$app->params['app'].'/phantom/phantomjs';
-        $fetchPath = Yii::$app->params['app'].'/phantom/fetch.js';
-        $htmlPath = Yii::$app->params['app'].'/phantom/page.html';
+        $fetchPath = Yii::$app->params['app'].'/phantom/fetch'.$time_stamp.'.js';
+        $htmlPath = Yii::$app->params['app'].'/phantom/page'.$time_stamp.'.html';
 
         file_put_contents($fetchPath, sprintf($fetchScript, $url, $htmlPath ));
         exec($phantomPath . ' '.$fetchPath);

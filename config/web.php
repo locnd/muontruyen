@@ -13,7 +13,7 @@ $config = [
     ],
     'components' => [
         'request' => [
-            'enableCsrfValidation' => false,
+            'enableCsrfValidation' => true,
             'cookieValidationKey' => 'secret-l2o4c0n7g1u9y8e8n-iragon',
             'baseUrl' => '',
         ],
@@ -56,12 +56,14 @@ $config = [
             //'suffix' => '.html',
             'rules' => [
                 'api/v1/<action:\w+>' => 'apiv1/<action>',
+                'ajax/<action:\w+>' => 'ajax/<action>',
 
                 'admin' => 'admin/dashboard/index',
                 'admin/login' => 'admin/dashboard/login',
                 'admin/logout' => 'admin/dashboard/logout',
                 'admin/<controller:\w+>' => 'admin/<controller>/index',
                 'admin/<controller:\w+>/<action:\w+>' => 'admin/<controller>/<action>',
+                'admin/<controller:\w+>/<action:\w+>/<id:\d+>' => 'admin/<controller>/<action>',
 
                 '' => 'front/home/index',
                 '<controller:\w+>/<action:\w+>' => 'front/<controller>/<action>',

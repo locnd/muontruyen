@@ -25,6 +25,7 @@ class Apiv1Controller extends Controller
 {
     public function beforeAction($action)
     {
+        $this->enableCsrfValidation = false;
         Yii::$app->response->format = Response::FORMAT_JSON;
         return parent::beforeAction($action);
     }
@@ -110,9 +111,9 @@ class Apiv1Controller extends Controller
                     $options['unread'] = Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count();
                 }
             }
-            $book->count_views = $book->count_views + 1;
-            $book->save();
         }
+        $book->count_views = $book->count_views + 1;
+        $book->save();
         $book_data = $book->to_array();
         $chapters = array();
         foreach ($book->chapters as $chapter) {
@@ -617,7 +618,7 @@ class Apiv1Controller extends Controller
                 'message' => 'Không tìm thấy chương truyện'
             );
         }
-        $chapters = Chapter::find()->where(array('book_id'=>$chapter->book_id,'status' => Chapter::ACTIVE))->orderBy(['stt' => SORT_ASC, 'id' => SORT_DESC])->all();
+        $chapters = Chapter::find()->where(array('book_id'=>$chapter->book_id,'status' => Chapter::ACTIVE))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all();
         for($i=0;$i<count($chapters);$i++) {
             if($chapters[$i]->id == $chapter_id) {
                 if($is_down == 1 && !empty($chapters[$i+1])) {

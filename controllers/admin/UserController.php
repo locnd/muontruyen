@@ -52,11 +52,24 @@ class UserController extends Controller
         if($filters['to_date'] != '') {
             $users->andWhere(['<=', 'created_at', convert_to_mysql_time($filters['to_date'].' 23:59:59')]);
         }
+
+        $total = $users->count();
+
+        $limit = 20;
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $users->limit($limit)->offset($offset)->orderBy(['id' => SORT_DESC]);
         $users = $users->all();
 
         return $this->render('/admin/user/index', array(
             'users' => $users,
-            'filters' => $filters
+            'filters' => $filters,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit
         ));
     }
 }
