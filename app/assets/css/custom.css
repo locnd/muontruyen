@@ -472,3 +472,10 @@ h3.page-title b {
 #change-password-form .a-profile div span {
     color: red;
 }
+.right-btn {
+    color: white;
+    background: lightblue;
+    padding: 5px 10px;
+    float: right;
+    border-radius: 5px;
+}

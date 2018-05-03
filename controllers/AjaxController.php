@@ -86,4 +86,42 @@ class AjaxController extends Controller
             'success' => true
         );
     }
+    public function actionResetchaptername()
+    {
+        if (!Yii::$app->user->isGuest) {
+            if (!Yii::$app->session->get('is_admin', 0)) {
+                return array(
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập trang này'
+                );
+            }
+        } else {
+            return array(
+                'success' => false,
+                'message' => 'Bạn chưa đăng nhập'
+            );
+        }
+
+        $book_id = (int)Yii::$app->request->post('book_id', 0);
+        $book = Book::find()->where(array('id' => $book_id))->one();
+        if (empty($book)) {
+            return array(
+                'success' => false,
+                'message' => 'Book not found'
+            );
+        }
+        $book_name = trim(strtolower($book->title));
+        foreach ($book->chapters as$chapter) {
+            $chapter_name = str_replace($book_name, '', trim(strtolower($chapter->name)));
+            $chapter_name = trim($chapter_name, ' -–');
+            if($chapter->name != $chapter_name) {
+                $chapter->name = $chapter_name;
+                $chapter->save();
+            }
+        }
+
+        return array(
+            'success' => true
+        );
+    }
 }

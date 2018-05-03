@@ -374,6 +374,65 @@ class Scraper
     public function reload_book($book) {
         if($this->echo)
             echo '---- ' . $book->slug . "\n";
+        if(empty($book->slug)) {
+            $server = $book->server;
+            $html = $this->curl_getcontent($book->url);
+            $html_base = HtmlDomParser::str_get_html($html);
+            if(empty($html_base)) {
+                return 1;
+            }
+            $title = trim($html_base->find($server->title_key)[0]->plaintext);
+            $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
+
+            $new_slug = $slug = $this->createSlug($title);
+
+            $check_slug = Book::find()->where(array('slug'=>$new_slug))->count();
+            $tm = 1;
+            while($check_slug > 0) {
+                $tm++;
+                $new_slug = $slug.'-'.$tm;
+                $check_slug = Book::find()->where(array('slug'=>$new_slug))->count();
+            }
+            $slug = $new_slug;
+
+            $image_src = $html_base->find($server->image_key)[0]->src;
+            $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$server->slug.'/'.$slug;
+
+            $image = $this->save_image($image_src, $image_dir);
+
+            $tmp_li = $html_base->find('p.p_Content')[0]->parent();
+            $tmp_p = $tmp_li->find('p')[1];
+            $description = trim($this->remove_symbols(html_entity_decode(trim($tmp_p->plaintext)), true, true, false, true, '(),.:;?!_"\-\''));
+            if($description == '' || strtolower(trim($description,'.')) == 'đang cập nhật') {
+                $description = 'Chưa có thông tin';
+            }
+
+            $book->status = Book::ACTIVE;
+            $book->image_source = $image_src;
+            $book->image = $image;
+            $book->title = $title;
+            $book->slug = $slug;
+            $book->description = $description;
+            $book->release_date = date('Y-m-d H:i:s');
+            $book->save();
+
+            $tags = $html_base->find($server->list_tags_key);
+            foreach ($tags as $tag) {
+                $book->add_tag(trim(html_entity_decode($tag->plaintext)));
+            }
+
+            $html_base->clear();
+            unset($html_base);
+
+            if($this->echo)
+                echo '---- ' . $slug . "\n";
+
+            $number_chapters = $this->get_chapters($book);
+            if($number_chapters > 0) {
+                $book->release_date = date('Y-m-d H:i:s');
+                $book->save();
+            }
+        }
         $this->get_chapters($book,1, false);
     }
     public function reload_chapter($chapter, $way = 'curl') {

@@ -85,7 +85,9 @@
                 </div>
             </div>
             <div class="row">
+                <h4 style="float: left;margin-left: 10px;"><?php echo count($book->chapters); ?> chương</h4>
                 <a onclick="sort_chapters()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-sort"></i></a>
+                <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
                 <div class="col-sm-12">
                     <table class="table table-striped table-bordered data-table admin-table">
                         <thead>
@@ -152,6 +154,30 @@
             params['book_id'] = $('#book_id').val();
             params['_csrf'] = $('#crsf_token').val();
             var url = '/ajax/sortchapters';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+    function reset_chapters_name() {
+        if(confirm('Bạn có chắc là muốn reset lại tên các chương truyện không?')) {
+            var params = {};
+            params['book_id'] = $('#book_id').val();
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/resetchaptername';
             $.ajax({
                 url: url,
                 type: 'POST',
