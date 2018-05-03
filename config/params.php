@@ -1,7 +1,7 @@
 <?php
 
 $params = [
-    'app' => '/var/www/truyentranh/truyentranh',
+    'app' => '/var/www/muontruyen/muontruyen',
 //    'app' => '/home/cp486787/public_html',
 
     'adminEmail' => 'loc.nd247@gmail.com',

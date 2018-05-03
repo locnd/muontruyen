@@ -43,6 +43,7 @@ class ReloadController extends Controller
         $setting_model->set_setting('running_reload', 'yes');
 
         $scraper = new Scraper();
+        $scraper->echo = false;
         $book_model = new Book();
         $books = $book_model->get_data(array('will_reload' => 1));
         if(count($books) > 0) {

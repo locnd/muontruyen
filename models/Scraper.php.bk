@@ -11,7 +11,7 @@ class Scraper
     public $proxyAuth = 'galvin24x7:egor99';
     public $echo = true;
 
-    public function parse_server($server, $page=1, $to_page=1, $log, $skip = true)
+    public function parse_server($server, $page=1, $to_page=1, $log)
     {
         if($page > $to_page) {
             return true;
@@ -44,7 +44,7 @@ class Scraper
             $log->save();
             if($number_chapters == 0) {
                 $dem++;
-                if($skip && $dem >=3 ) { return true; }
+                if($dem >=10 ) { return true; }
             }
         }
         $html_base->clear();
@@ -63,16 +63,15 @@ class Scraper
     private function parse_book($server, $a_href)
     {
         $book = Book::find()->where(array('url'=>$a_href))->one();
+        if(!empty($book) && $book->status == Book::INACTIVE) {
+            return 1;
+        }
+
         if(!empty($book)) {
             if($this->echo)
                 echo '---- ' . $book->slug . "\n";
-            if($book->status == Book::INACTIVE) {
-                return 1;
-            }
             $number_chapters = $this->get_chapters($book);
             if($number_chapters > 0) {
-                $book->release_date = date('Y-m-d H:i:s');
-                $book->save();
                 foreach ($book->follows as $follow) {
                     $follow->status = Follow::UNREAD;
                     $follow->updated_at = date('Y-m-d H:i:s');
@@ -106,27 +105,25 @@ class Scraper
         $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$server->slug.'/'.$slug;
 
         $image = $this->save_image($image_src, $image_dir);
-
-        $tmp_li = $html_base->find('p.p_Content')[0]->parent();
-        $tmp_p = $tmp_li->find('p')[1];
-        $description = trim($tmp_p->plaintext);
+        $book_id = $html_base->find($server->book_id_key)[0]->value;
 
         $book = new Book();
         $book->status = Book::ACTIVE;
         $book->server_id = $server->id;
+        $book->server_book_id = $book_id;
         $book->url = $a_href;
         $book->image_source = $image_src;
         $book->image = $image;
         $book->title = $title;
         $book->slug = $slug;
+        $description = trim($html_base->find($server->description_key)[0]->plaintext);
         $description = $this->remove_symbols(html_entity_decode($description), true, true, false, true, '(),.:;?!_"\-\'');
         $book->description = empty($description) ? 'Chưa có thông tin' : $description;
-        $book->release_date = date('Y-m-d H:i:s');
         $book->save();
 
         $tags = $html_base->find($server->list_tags_key);
         foreach ($tags as $tag) {
-            $book->add_tag(trim(html_entity_decode($tag->plaintext)));
+            $book->addScraperTag(strtolower(trim(html_entity_decode($tag->plaintext))));
         }
 
         $html_base->clear();
@@ -137,11 +134,29 @@ class Scraper
         return $this->get_chapters($book);
     }
 
-    private function get_chapters($book, $page=1, $skip=true, $dem=0) {
-        $url = $book->url;
-        if($page > 1) {
-            $url = str_replace('.html','/trang.'.$page.'.html', $url);
+    private function get_release_date($release_date) {
+        if(strlen($release_date) == 16) {
+            $release_date .= ':00';
         }
+        if(strlen($release_date) == 10) {
+            $release_date .= ' 00:00:00';
+        }
+        $release_date = str_replace('/','-', $release_date);
+        $release_date = str_replace('/','-', $release_date);
+        $release_date_array = explode(' ', $release_date);
+        $release_day_array = explode('-', $release_date_array[0]);
+        if(strlen($release_day_array[0]) == 2
+            && strlen($release_day_array[1]) == 2
+            && strlen($release_day_array[2]) == 4) {
+            $release_date = $release_day_array[2].'-'.$release_day_array[1].'-'.$release_day_array[0].' '.$release_date_array[1];
+        }
+        return $release_date;
+    }
+
+    private function get_chapters($book, $page=1, $skip=true, $dem=0) {
+        $url = $book->server->list_chapters_url;
+        $url = str_replace('{book_id}', $book->server_book_id, $url);
+        $url = str_replace('{page}', $page, $url);
 
         $html = $this->curl_getcontent($url);
         $html_base = HtmlDomParser::str_get_html($html);
@@ -152,17 +167,47 @@ class Scraper
         if(count($chapters) == 0) {
             return $dem;
         }
-        $book_name = strtolower($book->title);
+        $dem_skip = 0;
         foreach ($chapters as $num => $chapter) {
-            $chapter_url = $this->get_full_href($book->server, $chapter->href);
+            $chapter_url = $chapter->href;
+            $chapter_url_parsers = explode('/',$chapter_url);
+            $server_chapter_id = 0;
+            foreach($chapter_url_parsers as $parse) {
+                $parse = str_replace('c','',$parse);
+                if(is_numeric($parse)) {
+                    $server_chapter_id = (int) $parse;
+                    break;
+                }
+            }
+            if($server_chapter_id == 0) {
+                continue;
+            }
+            $chapter_url = $this->get_full_href($book->server, $chapter_url);
+
             $name = trim(strtolower(html_entity_decode($chapter->plaintext)));
-            $name = trim(str_replace($book_name,'',$name),' -–');
             $name = str_replace('chapter','chương',$name);
             $name = str_replace('chap','chương',$name);
             $name = str_replace('chuong','chương',$name);
 
+            $release_date_key = $book->server->release_date_key;
+            while(substr($release_date_key,0,3) == '../') {
+                $chapter = $chapter->parent();
+                $release_date_key = substr($release_date_key,3);
+            }
+            $release_date = trim($chapter->find($release_date_key)[0]->plaintext);
+            $release_date = $this->get_release_date($release_date);
+
+            if(empty($book->release_date) || strtotime($book->release_date) < strtotime($release_date)) {
+                $book->release_date = $release_date;
+                $book->save();
+            }
+
             $chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
             if(!empty($chapter) && $skip) {
+                $dem_skip++;
+                if($dem_skip >= 3) {
+                    return $dem;
+                }
                 continue;
             }
             $dem++;
@@ -170,12 +215,16 @@ class Scraper
             if(empty($chapter)) {
                 $chapter = new Chapter();
                 $chapter->book_id = $book->id;
-                $chapter->stt = $num+1;
+                $chapter->stt = $dem;
+                $chapter->server_chapter_id = $server_chapter_id;
                 $chapter->url = $chapter_url;
                 $chapter->name = $name;
+                $chapter->release_date = $release_date;
                 $chapter->status = Chapter::ACTIVE;
                 $chapter->save();
+                $chapter->increa_stt();
             }
+
             $this->parse_chapter($chapter);
         }
         $html_base->clear();
@@ -197,7 +246,7 @@ class Scraper
         if(!empty($html_base)) {
             $images = $html_base->find($chapter->book->server->images_key);
         }
-        if(count($images) == 0 || $way == 'phantom') {
+        if(count($images) < 2 || $way == 'phantom') {
             $way = 'phantom';
             $file_html = $this->parse_url_by_phantom($chapter->url);
             if($file_html != '') {
@@ -226,9 +275,9 @@ class Scraper
             if(empty($new_image)) {
                 $new_image = new Image();
                 $new_image->chapter_id = $chapter->id;
+                $new_image->image = $image_name;
                 $new_image->image_source = $image_src;
             }
-            $new_image->image = $image_name;
             $new_image->status = Image::ACTIVE;
             $new_image->stt = $id;
             $new_image->save();

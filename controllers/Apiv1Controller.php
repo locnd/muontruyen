@@ -121,6 +121,7 @@ class Apiv1Controller extends Controller
             }
             $tmp_data = $chapter->to_array();
             $tmp_data['read'] = false;
+            $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() > 0) {
                 $tmp_data['read'] = true;
             }
