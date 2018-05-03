@@ -20,6 +20,7 @@
                                         <th><?php echo 'Title';?></th>
                                         <th><?php echo 'Image';?></th>
                                         <th><?php echo 'Url';?></th>
+                                        <th><?php echo 'Chapters';?></th>
                                         <th><?php echo 'Views';?></th>
                                         <th><?php echo 'Status';?></th>
                                         <th><?php echo 'Created date';?></th>
@@ -30,9 +31,10 @@
                                     <?php foreach ($books as $book) { ?>
                                         <tr id="item-<?php echo $book->id; ?>">
                                             <td><?php echo $book->id; ?></td>
-                                            <td class="item-name"><?php echo $book->title; ?></td>
+                                            <td class="item-name"><a href="/admin/book/detail/<?php echo $book->id; ?>"><?php echo $book->title; ?></a></td>
                                             <td><img class="show_profile_image mini-image" src="<?php echo $book->get_image(); ?>"></td>
-                                            <td><?php echo $book->url; ?></td>
+                                            <td><a href="<?php echo $book->url; ?>" target="_blank"><?php echo $book->url; ?></a></td>
+                                            <td><?php echo count($book->chapters); ?></td>
                                             <td><?php echo $book->count_views; ?></td>
                                             <td><?php echo $book->status == 1 ? 'Active' : 'Inactive'; ?></td>
                                             <td><?php echo date('d-m-Y H:i:s',strtotime($book->created_at)); ?></td>

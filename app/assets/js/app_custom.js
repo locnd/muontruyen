@@ -724,27 +724,15 @@ function show_profile() {
             html += '<div id="change-password-form" style="display:none">';
             html += '<div class="a-profile">';
             html += '<label>Mật khẩu hiện tại</label>';
-            html += '<span><input id="current_password" type="password"></span>';
-            html += '</div>';
-            html += '<div class="a-profile form-dl-error" id="current_password_error">';
-            html += '<label></label>';
-            html += '<span></span>';
+            html += '<div><input id="current_password" type="password"><br><span class="form-dl-error" id="current_password_error"></span></div>';
             html += '</div>';
             html += '<div class="a-profile">';
             html += '<label>Mật khẩu mới</label>';
-            html += '<span><input id="password" type="password"></span>';
-            html += '</div>';
-            html += '<div class="a-profile form-dl-error" id="password_error">';
-            html += '<label></label>';
-            html += '<span></span>';
+            html += '<div><input id="password" type="password"><br><span class="form-dl-error" id="password_error"></span></div>';
             html += '</div>';
             html += '<div class="a-profile">';
             html += '<label>Xác nhận mật khẩu</label>';
-            html += '<span><input id="password2" type="password"></span>';
-            html += '</div>';
-            html += '<div class="a-profile form-dl-error" id="password2_error">';
-            html += '<label></label>';
-            html += '<span></span>';
+            html += '<div><input id="password2" type="password"><br><span class="form-dl-error" id="password2_error"></span></div>';
             html += '</div>';
             html += '<div class="a-profile">';
             html += '<label></label>';
@@ -799,10 +787,6 @@ function show_profile() {
                 html += '<label>Reload</label>';
                 html += '<span>'+res.options.running_reload+'</span>';
                 html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Lấy thêm truyện</label>';
-                html += '<span><img id="loading-btn" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" /><input style="float:none" class="admin-btn" id="scraper-btn" onclick="scraper()" type="button" value="SCRAPER"></span>';
-                html += '</div>';
                 html += '</div>';
                 $('#profile').parent().append(html);
             }
@@ -818,7 +802,7 @@ function show_change_password() {
 }
 
 function change_password() {
-    $('.form-dl-error').hide();
+    $('.form-dl-error').html('');
     $('input[type="password"]').removeClass('input-error');
     var params = {
         current_password: $.trim($('#current_password').val()),
@@ -834,8 +818,7 @@ function change_password() {
         } else {
             $.each(res.data, function( index, value ) {
                 if(typeof(value) != 'undefined' && value != '' && value != null && value != 'null') {
-                    $('#'+index+'_error span').html(value);
-                    $('#'+index+'_error').show();
+                    $('#'+index+'_error').html(value);
                     $('#'+index).addClass('input-error');
                 }
             });

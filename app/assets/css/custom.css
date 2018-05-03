@@ -463,12 +463,12 @@ h3.page-title b {
 #change-password-form input[type="password"] {
     padding: 5px 10px;
 }
-.form-dl-error {
-    display:none;
-}
-.form-dl-error label {
+#change-password-form .a-profile label {
     float: left;
 }
-.form-dl-error span {
+#change-password-form .a-profile div {
     display: table-cell;
+}
+#change-password-form .a-profile div span {
+    color: red;
 }

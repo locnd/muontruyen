@@ -556,43 +556,6 @@ class Apiv1Controller extends Controller
             'message' => 'Thay đổi mật khẩu thất bại'
         );
     }
-    public function actionScraper() {
-        $user = $this->check_user();
-        if(!empty($user['error'])) {
-            return array(
-                'success' => false,
-                'message' => $user['message']
-            );
-        }
-        if(empty($user->is_admin)) {
-            return array(
-                'success' => false,
-                'message' => 'Không có quyền thực hiện'
-            );
-        }
-
-        $setting_model = new Setting();
-        if($setting_model->get_setting('running_scraper') != '') {
-            return array(
-                'success' => true
-            );
-        }
-        $setting_model->set_setting('running_scraper', 'yes');
-
-        $scraper = new Scraper();
-        $scraper->echo = false;
-        $servers = Server::find(array('status'=>Server::ACTIVE))->all();
-        $log = new ScraperLog();
-        foreach ($servers as $server) {
-            $log->number_servers++;
-            $log->save();
-            $scraper->parse_server($server, 1, 2, $log);
-        }
-        $setting_model->set_setting('running_scraper', '');
-        return array(
-            'success' => true
-        );
-    }
     public function actionMovechapter()
     {
         $user = $this->check_user();
