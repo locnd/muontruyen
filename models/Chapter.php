@@ -12,7 +12,7 @@ class Chapter extends ModelCommon
 
     public function getImages()
     {
-        return $this->hasMany(Image::className(), ['chapter_id' => 'id'])->where(array('dl_images.status'=>Image::ACTIVE))->orderBy(['stt' => SORT_ASC]);
+        return $this->hasMany(Image::className(), ['chapter_id' => 'id'])->where(array('status'=>Image::ACTIVE))->orderBy(['stt' => SORT_ASC]);
     }
     public function getBook()
     {

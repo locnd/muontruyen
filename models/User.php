@@ -17,7 +17,7 @@ class User extends ModelCommon implements IdentityInterface
 
     public function getGroups()
     {
-        return $this->hasMany(Group::className(), ['user_id' => 'id'])->where(array('dl_groups.status'=>Group::ACTIVE));
+        return $this->hasMany(Group::className(), ['user_id' => 'id'])->where(array('status'=>Group::ACTIVE));
     }
     public function getFollows()
     {

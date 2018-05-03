@@ -37,8 +37,8 @@ class DailyController extends Controller
 
         $setting_model = new Setting();
         $daily_page = $setting_model->get_setting('page_daily');
-        if($daily_page != '') {
-            $page = 2;
+        if($daily_page == '') {
+            $page = 3;
         } else {
             $page = (int) $daily_page;
         }

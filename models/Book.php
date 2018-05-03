@@ -12,7 +12,7 @@ class Book extends ModelCommon
 
     public function getChapters()
     {
-        return $this->hasMany(Chapter::className(), ['book_id' => 'id'])->where(array('dl_chapters.status'=>Chapter::ACTIVE))->orderBy(['stt' => SORT_DESC, 'id' => SORT_ASC]);
+        return $this->hasMany(Chapter::className(), ['book_id' => 'id'])->where(array('status'=>Chapter::ACTIVE))->orderBy(['created_at' => SORT_DESC, 'id' => SORT_ASC]);
     }
     public function getServer()
     {

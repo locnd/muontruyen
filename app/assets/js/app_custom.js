@@ -724,7 +724,7 @@ function show_profile() {
             html += '<div id="change-password-form" style="display:none">';
             html += '<div class="a-profile">';
             html += '<label>Mật khẩu hiện tại</label>';
-            html += '<span><input id="current_password" type="password"><span class="form-error" id="current_password_error"></span></span>';
+            html += '<span><input id="current_password" type="password"></span>';
             html += '</div>';
             html += '<div class="a-profile form-dl-error" id="current_password_error">';
             html += '<label></label>';

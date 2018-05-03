@@ -466,3 +466,9 @@ h3.page-title b {
 .form-dl-error {
     display:none;
 }
+.form-dl-error label {
+    float: left;
+}
+.form-dl-error span {
+    display: table-cell;
+}

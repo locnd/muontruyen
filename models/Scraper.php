@@ -109,7 +109,10 @@ class Scraper
 
         $tmp_li = $html_base->find('p.p_Content')[0]->parent();
         $tmp_p = $tmp_li->find('p')[1];
-        $description = trim($tmp_p->plaintext);
+        $description = trim($this->remove_symbols(html_entity_decode(trim($tmp_p->plaintext)), true, true, false, true, '(),.:;?!_"\-\''));
+        if($description == '' || strtolower(trim($description,'.')) == 'đang cập nhật') {
+            $description = 'Chưa có thông tin';
+        }
 
         $book = new Book();
         $book->status = Book::ACTIVE;
@@ -119,8 +122,7 @@ class Scraper
         $book->image = $image;
         $book->title = $title;
         $book->slug = $slug;
-        $description = $this->remove_symbols(html_entity_decode($description), true, true, false, true, '(),.:;?!_"\-\'');
-        $book->description = empty($description) ? 'Chưa có thông tin' : $description;
+        $book->description = $description;
         $book->release_date = date('Y-m-d H:i:s');
         $book->save();
 
@@ -134,7 +136,13 @@ class Scraper
 
         if($this->echo)
             echo '---- ' . $slug . "\n";
-        return $this->get_chapters($book);
+
+        $number_chapters = $this->get_chapters($book);
+        if($number_chapters > 0) {
+            $book->release_date = date('Y-m-d H:i:s');
+            $book->save();
+        }
+        return $number_chapters;
     }
 
     private function get_chapters($book, $page=1, $skip=true, $dem=0) {
@@ -170,7 +178,7 @@ class Scraper
             if(empty($chapter)) {
                 $chapter = new Chapter();
                 $chapter->book_id = $book->id;
-                $chapter->stt = $num+1;
+                $chapter->stt = ($page - 1) * 100 + $num+1;
                 $chapter->url = $chapter_url;
                 $chapter->name = $name;
                 $chapter->status = Chapter::ACTIVE;
