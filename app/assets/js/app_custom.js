@@ -750,45 +750,23 @@ function show_profile() {
             html += '</div>';
             $('#profile').html(html);
             if(res.data.is_admin) {
-                var html ='<div class="section-container a-book">';
+                var html ='<div class="section-container a-book" id="admin-cp">';
                 html += '<div class="a-profile"><h3>Dành cho quản trị</h3></div>';
+                html += '<div class="clear5"></div>';
+                html += '<a href="http://muontruyen.tk">Administrator Backend</a>';
                 html += '<div class="clear5"></div>';
                 html += '<hr>';
                 html += '<div class="clear5"></div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số thành viên</label>';
-                html += '<span>'+show_number(res.options.users)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số truyện</label>';
-                html += '<span>'+show_number(res.options.books)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số truyện bị ẩn</label>';
-                html += '<span>'+show_number(res.options.in_active_books)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số chương</label>';
-                html += '<span>'+show_number(res.options.chapters)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số chương bị ẩn</label>';
-                html += '<span>'+show_number(res.options.in_active_chapters)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Tổng số hình ảnh</label>';
-                html += '<span>'+show_number(res.options.images)+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Scraper</label>';
-                html += '<span>'+res.options.running_scraper+'</span>';
-                html += '</div>';
-                html += '<div class="a-profile">';
-                html += '<label>Reload</label>';
-                html += '<span>'+res.options.running_reload+'</span>';
-                html += '</div>';
                 html += '</div>';
                 $('#profile').parent().append(html);
+                $.each(res.options, function( index, value ) {
+                    var admin_html = '';
+                    admin_html += '<div class="a-profile">';
+                    admin_html += '<label>'+index+'</label>';
+                    admin_html += '<span>'+show_number(value)+'</span>';
+                    admin_html += '</div>';
+                    $('#admin-cp').append(admin_html);
+                });
             }
         } else {
             dl_alert('danger', res.message, false);

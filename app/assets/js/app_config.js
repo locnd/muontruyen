@@ -79,7 +79,15 @@ $(document).ready(function() {
                 if (moving >= 200) {
                     $('#image-refresh').show();
                 }
-                $('body').css('margin-top', (80+moving/3) + 'px');
+                var screen = localStorage.getItem("screen");
+                if (screen !== null && screen !== '') {} else {
+                    screen = 'normal';
+                }
+                if(screen == 'normal') {
+                    $('body').css('margin-top', (80 + moving / 3) + 'px');
+                } else {
+                    $('body').css('margin-top', (moving / 3) + 'px');
+                }
             } else {
                 $(document).unbind("touchmove");
             }

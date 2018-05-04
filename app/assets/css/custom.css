@@ -335,9 +335,6 @@ li.logined i.dl-notify {
 .admin-btn {
     cursor: pointer;
 }
-#image-refresh img {
-    width: 50px;
-}
 #image-refresh {
     width: 100%;
     text-align: center;
@@ -479,4 +476,7 @@ h3.page-title b {
     float: right;
     border-radius: 5px;
     margin-top: 5px;
+}
+#image-refresh i {
+    font-size: 45px;
 }

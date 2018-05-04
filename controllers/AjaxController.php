@@ -112,6 +112,10 @@ class AjaxController extends Controller
             );
         }
         $book_name = trim(strtolower($book->title));
+        $tmp_name = trim(strtolower(Yii::$app->request->post('tmp_name', '')));
+        if($tmp_name != '') {
+            $book_name = $tmp_name;
+        }
         foreach ($book->chapters as$chapter) {
             $chapter_name = str_replace($book_name, '', trim(strtolower($chapter->name)));
             $chapter_name = trim($chapter_name, ' -–');

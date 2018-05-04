@@ -506,20 +506,25 @@ class Apiv1Controller extends Controller
         }
         $options = array();
         if($user->is_admin == 1) {
-            $options['users'] = User::find()->count();
-            $options['books'] = Book::find()->count();
-            $options['in_active_books'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
-            $options['chapters'] = Chapter::find()->count();
-            $options['in_active_chapters'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
-            $options['images'] = Image::find()->count();
-            $options['running_scraper'] = 'stop';
-            $options['running_reload'] = 'stop';
+            $options['Tổng số thành viên'] = User::find()->count();
+            $options['Tổng số truyện'] = Book::find()->count();
+            $options['Tổng số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
+            $options['Tổng số chương'] = Chapter::find()->count();
+            $options['Tổng số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
+            $options['Tổng số hình ảnh'] = Image::find()->count();
+
+            $options['Scraper'] = 'stop';
+            $options['Reload'] = 'stop';
+            $options['Daily'] = 'stop';
             $setting_model = new Setting();
             if($setting_model->get_setting('running_scraper') != '') {
-                $options['running_scraper'] = 'running';
+                $options['Scraper'] = 'running';
             }
             if($setting_model->get_setting('running_reload') != '') {
-                $options['running_reload'] = 'running';
+                $options['Reload'] = 'running';
+            }
+            if($setting_model->get_setting('running_daily') != '') {
+                $options['Daily'] = 'running';
             }
         }
         return array(
