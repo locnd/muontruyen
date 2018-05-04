@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Setting;
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
@@ -119,6 +120,38 @@ class AjaxController extends Controller
                 $chapter->save();
             }
         }
+
+        return array(
+            'success' => true
+        );
+    }
+    public function actionEditsetting()
+    {
+        if (!Yii::$app->user->isGuest) {
+            if (!Yii::$app->session->get('is_admin', 0)) {
+                return array(
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập trang này'
+                );
+            }
+        } else {
+            return array(
+                'success' => false,
+                'message' => 'Bạn chưa đăng nhập'
+            );
+        }
+
+        $setting_id = (int)Yii::$app->request->post('setting_id', 0);
+        $setting = Setting::find()->where(array('id' => $setting_id))->one();
+        if (empty($setting)) {
+            return array(
+                'success' => false,
+                'message' => 'Setting not found'
+            );
+        }
+        $value = Yii::$app->request->post('value', '');
+        $setting->value = trim($value);
+        $setting->save();
 
         return array(
             'success' => true
