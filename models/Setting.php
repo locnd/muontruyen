@@ -20,10 +20,8 @@ class Setting extends ModelCommon
         if(empty($setting)) {
             $setting = new Setting();
             $setting->name = $key;
-            $setting->created_at = date('Y-m-d H:i:s');
         }
         $setting->value = $value;
-        $setting->updated_at = date('Y-m-d H:i:s');
         $setting->save();
     }
     public function delete_setting($key) {

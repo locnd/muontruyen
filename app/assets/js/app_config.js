@@ -216,6 +216,11 @@ function move_to_top() {
     return true;
 }
 
+function move_to_bottom() {
+    $("html, body").animate({ scrollTop: $(document).height() }, 500);
+    return true;
+}
+
 function orientation() {
     var sc = screen.orientation.type;
     if(sc.indexOf('portrait') > -1 ) {

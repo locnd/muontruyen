@@ -150,7 +150,7 @@ function display_list_chapters(chapters) {
     if(chapters.length == 0) {
         html += '<div class="book-chapter-list">Không có chương nào</div>';
     } else {
-        html += '<div class="book-chapter-list">Danh sách chương ('+chapters.length+' chương)<a href="javascript:;" onclick="to_first_chap()" class="right-btn">Đến chương đầu</a></div>';
+        html += '<div class="book-chapter-list">Danh sách chương ('+chapters.length+' chương)<a href="javascript:;" onclick="move_to_bottom()" class="right-btn">Đến chương đầu</a></div>';
         html += '<div class="clear10"></div>';
         for(var i=0;i<chapters.length;i++) {
             var chapter = chapters[i];
@@ -176,10 +176,6 @@ function display_list_chapters(chapters) {
     }
     $('#chapters-list').html(html);
     $('#chapters-list').show();
-}
-
-function to_first_chap() {
-    $("html, body").animate({ scrollTop: $(document).height() }, 500);
 }
 
 function move_chapter(chapter_id, is_down) {

@@ -38,13 +38,12 @@ class DailyController extends Controller
         $setting_model = new Setting();
         $daily_page = $setting_model->get_setting('page_daily');
         if($daily_page == '') {
-            $page = 3;
+            $page = 2;
         } else {
             $page = (int) $daily_page;
         }
         $setting_model->set_setting('running_scraper', 'yes');
         $scraper = new Scraper();
-        $scraper->echo = false;
         $servers = Server::find(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         foreach ($servers as $server) {
