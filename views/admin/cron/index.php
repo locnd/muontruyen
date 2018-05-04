@@ -98,15 +98,14 @@
             data: params,
             dataType: 'json',
             success: function(result){
-                console.log(result);
                 if(result.success) {
-                    //window.location.reload();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                 }
             },
             error: function( xhr ) {
-                //window.location.reload();
+                window.location.reload();
             }
         });
     }

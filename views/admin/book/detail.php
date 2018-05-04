@@ -42,6 +42,10 @@
                             <td><?php echo $book->slug;?></td>
                         </tr>
                         <tr class="highlight">
+                            <td class="field"><?php echo 'Url'; ?></td>
+                            <td><?php echo $book->url;?></td>
+                        </tr>
+                        <tr class="highlight">
                             <td class="field">
                                 <?php echo 'Description'; ?><br>
                                 <a onclick="open_edit('description')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>

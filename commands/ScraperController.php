@@ -36,12 +36,13 @@ class ScraperController extends Controller
         ini_set('max_execution_time', 24*60*60);
 
         $setting_model = new Setting();
-        if($setting_model->get_setting('running_scraper') != '') {
+        if($setting_model->get_setting('cron_running') != '') {
             return ExitCode::OK;
         }
-        $setting_model->set_setting('running_scraper', 'yes');
+        $setting_model->set_setting('cron_running', 'yes');
 
         $scraper = new Scraper();
+        $scraper->echo = false;
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='scraper';
@@ -51,7 +52,7 @@ class ScraperController extends Controller
             $log->save();
             $scraper->parse_server($server, $page, $to_page, $log);
         }
-        $setting_model->set_setting('running_scraper', '');
+        $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }
 }

@@ -32,6 +32,7 @@ class DashboardController extends Controller
                 return $this->redirect('/');
             }
         }
+
         $this->layout = 'admin_login';
         $data = array();
         if (Yii::$app->request->post()){

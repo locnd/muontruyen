@@ -70,7 +70,7 @@ class Scraper
         if(!empty($book)) {
             if($this->echo)
                 echo '---- ' . $book->slug . "\n";
-            if($book->status == Book::INACTIVE) {
+            if($book->status == Book::INACTIVE || $book->will_reload == 1) {
                 return 1;
             }
             $number_chapters = $this->get_chapters($book);
@@ -168,17 +168,18 @@ class Scraper
         $book_name = strtolower($book->title);
         foreach ($chapters as $num => $chapter) {
             $chapter_url = $this->get_full_href($book->server, $chapter->href);
+
+            $chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
+            if(!empty($chapter) && ($skip || $chapter->will_reload == 1)) {
+                continue;
+            }
+            $dem++;
+
             $name = trim(strtolower(html_entity_decode($chapter->plaintext)));
             $name = trim(str_replace($book_name,'',$name),' -–');
             $name = str_replace('chapter','chương',$name);
             $name = str_replace('chap','chương',$name);
             $name = str_replace('chuong','chương',$name);
-
-            $chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
-            if(!empty($chapter) && $skip) {
-                continue;
-            }
-            $dem++;
 
             if(empty($chapter)) {
                 $chapter = new Chapter();

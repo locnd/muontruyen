@@ -35,11 +35,10 @@ class DailyController extends Controller
         ini_set('max_execution_time', 24*60*60);
 
         $setting_model = new Setting();
-        if($setting_model->get_setting('running_daily') != '') {
+        if($setting_model->get_setting('cron_running') != '') {
             return ExitCode::OK;
         }
-        $setting_model->set_setting('running_daily', 'yes');
-        $setting_model->set_setting('running_scraper', 'yes');
+        $setting_model->set_setting('cron_running', 'yes');
 
         $book_count = Book::find()->count();
         $page = ceil($book_count / 36);
@@ -48,6 +47,7 @@ class DailyController extends Controller
         }
 
         $scraper = new Scraper();
+        $scraper->echo = false;
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='daily';
@@ -57,8 +57,7 @@ class DailyController extends Controller
             $log->save();
             $scraper->parse_server($server, $page, $page, $log, false);
         }
-        $setting_model->set_setting('running_daily', '');
-        $setting_model->set_setting('running_scraper', '');
+        $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }
 }

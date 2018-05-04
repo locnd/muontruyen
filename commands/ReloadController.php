@@ -38,38 +38,86 @@ class ReloadController extends Controller
         ini_set('max_execution_time', 24*60*60);
 
         $setting_model = new Setting();
-        if($setting_model->get_setting('running_reload') != '') {
+        if($setting_model->get_setting('cron_running') != '') {
             return ExitCode::OK;
         }
-        $setting_model->set_setting('running_reload', 'yes');
+        $setting_model->set_setting('cron_running', 'yes');
 
         $log = new ScraperLog();
         $log->type='reload';
         $log->save();
 
         $scraper = new Scraper();
+        $scraper->echo = false;
         $book_model = new Book();
         $books = $book_model->get_data(array('will_reload' => 1));
+        $book_ids = array();
         if(count($books) > 0) {
             foreach ($books as $book) {
+                $book_ids[] = $book->id;
                 $log->number_books++;
                 $scraper->reload_book($book);
                 $book->will_reload = 0;
                 $book->save();
             }
         }
+
+        $connection = Yii::$app->getDb();
+        $command = $connection->createCommand("
+SELECT url
+FROM dl_books b
+LEFT OUTER JOIN dl_chapters c ON (b.id = c.chapter_id)
+WHERE c.book_id IS NULL;
+");
+        $result = $command->queryAll();
+        $urls = array();
+        foreach ($result as $r) {
+            if(!empty($r['url'])) {
+                $urls[] = $r['url'];
+            }
+        }
+        if(!empty($urls)) {
+            $chapters = Chapter::find()->where(array('url' => $urls))->andWhere(['not in', 'id', $book_ids])->all();
+            foreach ($chapters as $chapter) {
+                $log->number_chapters++;
+                $scraper->reload_chapter($chapter);
+            }
+        }
+
         $chapter_model = new Chapter();
         $chapters = $chapter_model->get_data(array('will_reload' => 1));
+        $chapter_ids = array();
         if(count($chapters) > 0) {
             foreach ($chapters as $chapter) {
+                $chapter_ids[] = $chapter->id;
                 $log->number_chapters++;
                 $scraper->reload_chapter($chapter);
                 $chapter->will_reload = 0;
                 $chapter->save();
             }
         }
+        $command = $connection->createCommand("
+SELECT url
+FROM dl_chapters c
+LEFT OUTER JOIN dl_images i ON (c.id = i.chapter_id)
+WHERE i.chapter_id IS NULL;
+");
+        $result = $command->queryAll();
+        $urls = array();
+        foreach ($result as $r) {
+            if(!empty($r['url'])) {
+                $urls[] = $r['url'];
+            }
+        }
+        if(!empty($urls)) {
+            $chapters = Chapter::find()->where(array('url' => $urls))->andWhere(['not in', 'id', $chapter_ids])->all();
+            foreach ($chapters as $chapter) {
+                $log->number_chapters++;
+                $scraper->reload_chapter($chapter);
+            }
+        }
         $log->save();
-        $setting_model->set_setting('running_reload', '');
+        $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }
 }
