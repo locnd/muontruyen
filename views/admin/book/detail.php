@@ -74,6 +74,19 @@
                             </td>
                         </tr>
                         <tr class="highlight">
+                            <td class="field"><?php echo 'Reload'; ?><br>
+                                <a onclick="open_edit('will_reload')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
+                            </td>
+                            <td>
+                                <span id="cur_will_reload"><?php echo $book->will_reload == 1 ? 'True' : 'False'; ?></span>
+                                <select class="form-control" id="new_will_reload" style="display: none">
+                                    <option value="0" <?php echo ($book->will_reload == 0)?'selected':''; ?>>False</option>
+                                    <option value="1" <?php echo ($book->will_reload == 1)?'selected':''; ?>>True</option>
+                                </select>
+                                <button onclick="save('will_reload')" id="btn_will_reload" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
                             <td class="field"><?php echo 'Release date'; ?></td>
                             <td><?php echo show_date($book->release_date);?></td>
                         </tr>
@@ -98,8 +111,11 @@
                         <th><?php echo 'Name';?></th>
                         <th><?php echo 'Url';?></th>
                         <th><?php echo 'Stt';?></th>
+                        <th><?php echo 'Reload';?></th>
+                        <th><?php echo 'Images';?></th>
                         <th><?php echo 'Status';?></th>
                         <th><?php echo 'Created date';?></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -109,8 +125,15 @@
                             <td class="item-name"><?php echo $chapter->name; ?></td>
                             <td><a href="<?php echo $chapter->url; ?>" target="_blank"><?php echo $chapter->url; ?></td>
                             <td><?php echo $chapter->stt; ?></td>
+                            <td><?php echo $chapter->will_reload == 1 ? 'True' :'False'; ?></td>
+                            <td><?php echo count($chapter->images); ?></td>
                             <td><?php echo $chapter->status == 1 ? 'Active' : 'Inactive'; ?></td>
                             <td><?php echo date('d-m-Y H:i:s',strtotime($chapter->created_at)); ?></td>
+                            <td><?php
+                                $will_reload = $chapter->will_reload == 0 ? 'Make Reload' :'Cancel Reload';
+                                ?>
+                                <a onclick="will_reload(<?php echo $chapter->id; ?>)" style="padding: 3px 7px;<?php echo $will_reload=='Cancel Reload'?'background:lightgrey;border-color:lightgrey':'';?>" href="javascript:;" title="<?php echo 'Reload'; ?>" class="btn btn-primary"><?php echo $will_reload; ?></a>
+                            </td>
                         </tr>
                     <?php } ?>
                     </tbody>
@@ -180,6 +203,30 @@
             params['_csrf'] = $('#crsf_token').val();
             params['tmp_name'] = $('#tmp_name').val();
             var url = '/ajax/resetchaptername';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+    function will_reload(chapter_id) {
+        if(confirm('Bạn có chắc là muốn load lại chương truyện không?')) {
+            var params = {};
+            params['chapter_id'] = chapter_id;
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/reloadchapter';
             $.ajax({
                 url: url,
                 type: 'POST',

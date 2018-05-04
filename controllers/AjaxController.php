@@ -161,4 +161,37 @@ class AjaxController extends Controller
             'success' => true
         );
     }
+    function actionReloadchapter() {
+        if (!Yii::$app->user->isGuest) {
+            if (!Yii::$app->session->get('is_admin', 0)) {
+                return array(
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập trang này'
+                );
+            }
+        } else {
+            return array(
+                'success' => false,
+                'message' => 'Bạn chưa đăng nhập'
+            );
+        }
+
+        $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
+        $chapter = Chapter::find()->where(array('id' => $chapter_id))->one();
+        if(empty($chapter)) {
+            return array(
+                'success' => false,
+                'message' => 'Chapter not found'
+            );
+        }
+        if($chapter->will_reload == 0) {
+            $chapter->will_reload = 1;
+        } else {
+            $chapter->will_reload = 0;
+        }
+        $chapter->save();
+        return array(
+            'success' => true
+        );
+    }
 }
