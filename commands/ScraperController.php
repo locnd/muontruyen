@@ -42,8 +42,10 @@ class ScraperController extends Controller
         $setting_model->set_setting('running_scraper', 'yes');
 
         $scraper = new Scraper();
-        $servers = Server::find(array('status'=>Server::ACTIVE))->all();
+        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
+        $log->type='scraper';
+        $log->save();
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();

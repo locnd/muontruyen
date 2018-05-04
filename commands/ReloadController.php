@@ -16,6 +16,7 @@ use app\models\Scraper;
 use app\models\Book;
 use app\models\Chapter;
 use app\models\Setting;
+use app\models\ScraperLog;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -42,11 +43,16 @@ class ReloadController extends Controller
         }
         $setting_model->set_setting('running_reload', 'yes');
 
+        $log = new ScraperLog();
+        $log->type='reload';
+        $log->save();
+
         $scraper = new Scraper();
         $book_model = new Book();
         $books = $book_model->get_data(array('will_reload' => 1));
         if(count($books) > 0) {
             foreach ($books as $book) {
+                $log->number_books++;
                 $scraper->reload_book($book);
                 $book->will_reload = 0;
                 $book->save();
@@ -56,11 +62,13 @@ class ReloadController extends Controller
         $chapters = $chapter_model->get_data(array('will_reload' => 1));
         if(count($chapters) > 0) {
             foreach ($chapters as $chapter) {
+                $log->number_chapters++;
                 $scraper->reload_chapter($chapter);
                 $chapter->will_reload = 0;
                 $chapter->save();
             }
         }
+        $log->save();
         $setting_model->set_setting('running_reload', '');
         return ExitCode::OK;
     }

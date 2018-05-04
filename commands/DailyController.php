@@ -7,8 +7,6 @@
 
 namespace app\commands;
 
-use Yii;
-
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -16,6 +14,7 @@ use app\models\Scraper;
 use app\models\Server;
 use app\models\ScraperLog;
 use app\models\Setting;
+use app\models\Book;
 /**
  * This command echoes the first argument that you have entered.
  *
@@ -36,22 +35,29 @@ class DailyController extends Controller
         ini_set('max_execution_time', 24*60*60);
 
         $setting_model = new Setting();
-        $daily_page = $setting_model->get_setting('page_daily');
-        if($daily_page == '') {
-            $page = 2;
-        } else {
-            $page = (int) $daily_page;
+        if($setting_model->get_setting('running_daily') != '') {
+            return ExitCode::OK;
         }
+        $setting_model->set_setting('running_daily', 'yes');
         $setting_model->set_setting('running_scraper', 'yes');
+
+        $book_count = Book::find()->count();
+        $page = ceil($book_count / 36);
+        if($book_count % 36 == 0) {
+            $page++;
+        }
+
         $scraper = new Scraper();
-        $servers = Server::find(array('status'=>Server::ACTIVE))->all();
+        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
+        $log->type='daily';
+        $log->save();
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();
             $scraper->parse_server($server, $page, $page, $log, false);
         }
-        $setting_model->set_setting('page_daily', $page + 1);
+        $setting_model->set_setting('running_daily', '');
         $setting_model->set_setting('running_scraper', '');
         return ExitCode::OK;
     }
