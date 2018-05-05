@@ -499,3 +499,43 @@ table.no-border-table tr, table.no-border-table td{
     text-align: center;
     font-style: italic;
 }
+
+.dl-default-btn {
+    background: lightblue;
+    border-radius: 5px;
+    color: white;
+    height: 34px;
+    width: 34px;
+    text-align: center;
+    line-height: 34px;
+}
+.fl-r {
+    float: right;
+}
+.fl-l {
+    float: left;
+}
+.w-100-40 {
+    width: calc(100% - 40px);
+    min-width: 100px;
+}
+.clear5 {
+    clear:both;
+    height: 5px;
+}
+.clear0 {
+    clear:both;
+    height: 0px;
+}
+#add-image-form .a-new-image {
+    margin: 5px 0;
+}
+#add-image-form .img-url {
+    width: calc(100% - 100px);
+    margin-right: 10px;
+    float: left;
+    min-width: 200px;
+}
+#add-image-form .img-stt {
+    width: 80px;
+}

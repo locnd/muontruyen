@@ -107,6 +107,18 @@
             </div>
         </div>
     </div>
+    <div class="dl-modal" id="report-modal">
+        <div class="modal_header">Báo lỗi truyện</div>
+        <div class="dl_hr"></div>
+        <div class="modal_content">
+            <textarea placeholder="Nội dung lỗi..." id="report_content" class="form-control"></textarea>
+            <div class="clear5"></div>
+        </div>
+        <div class="modal_footer">
+            <div id="send-report-btn" class="admin-btn" onclick="send_report()">Lưu</div>
+            <div class="admin-btn" onclick="close_modal('report-modal')" style="background:lightgrey">Huỷ bỏ</div>
+        </div>
+    </div>
     <a class="btn-fullscreen" onclick="fullscreen(true)"><i class="fa fa-arrows-alt"></i></a>
     <div id="footer-copyright" class="footer-copyright">
     </div>

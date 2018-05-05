@@ -60,13 +60,14 @@ class ReloadController extends Controller
                 $book->will_reload = 0;
                 $book->save();
             }
+            $log->save();
         }
 
         $connection = Yii::$app->getDb();
         $command = $connection->createCommand("
-SELECT url
+SELECT b.url
 FROM dl_books b
-LEFT OUTER JOIN dl_chapters c ON (b.id = c.chapter_id)
+LEFT OUTER JOIN dl_chapters c ON (b.id = c.book_id)
 WHERE c.book_id IS NULL;
 ");
         $result = $command->queryAll();
@@ -82,6 +83,7 @@ WHERE c.book_id IS NULL;
                 $log->number_chapters++;
                 $scraper->reload_chapter($chapter);
             }
+            $log->save();
         }
 
         $chapter_model = new Chapter();
@@ -95,9 +97,10 @@ WHERE c.book_id IS NULL;
                 $chapter->will_reload = 0;
                 $chapter->save();
             }
+            $log->save();
         }
         $command = $connection->createCommand("
-SELECT url
+SELECT c.url
 FROM dl_chapters c
 LEFT OUTER JOIN dl_images i ON (c.id = i.chapter_id)
 WHERE i.chapter_id IS NULL;
@@ -115,8 +118,8 @@ WHERE i.chapter_id IS NULL;
                 $log->number_chapters++;
                 $scraper->reload_chapter($chapter);
             }
+            $log->save();
         }
-        $log->save();
         $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }

@@ -52,7 +52,7 @@ function display_paging(pages, current_page, total_page) {
 
 function display_a_book(book) {
     var html = '<div class="section-container a-book">';
-    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.title+'</a></div>';
+    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
     html += '<div class="a-cover">';
     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
@@ -96,6 +96,8 @@ function show_book(id) {
                     show_select_tag(res.tags[i], res.tags[i].is_checked);
                 }
             }
+            $('#send-report-btn').attr('onclick','send_report('+res.data.id+',0)');
+
             var is_following = res.options.is_following;
             display_book_info(res.data, is_following, res.tags);
             display_list_chapters(res.chapters);
@@ -110,9 +112,44 @@ function show_book(id) {
     });
 }
 
+function open_reports() {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    show_modal('report-modal');
+}
+
+function send_report(book_id, chapter_id) {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    var content = $.trim($('#report_content').val());
+    if(content == '') {
+        dl_alert('danger', 'Hãy nhập nội dung lỗi', false);
+        return false;
+    }
+    var params = {
+        book_id: book_id,
+        chapter_id: chapter_id,
+        content: content
+    };
+    send_api('POST', '/report', params, function (res) {
+        $('#loading-btn').hide();
+        if (res.success) {
+            close_modal('report-modal');
+            dl_alert('success', 'Đã báo lỗi thành công', false);
+            $('#report_content').val('');
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+
 function display_book_info(book, is_following, tags) {
     var html = '<div class="clear10"></div>';
-    html += '<div class="book-title">'+book.title+'</div>';
+    html += '<div class="book-title">'+book.name+'</div>';
     html += '<div class="clear10"></div>';
     html += '<div class="book-cover">';
     html += '<img src="'+book.image+'">';
@@ -420,9 +457,12 @@ function show_chapter(id) {
             }
 
             var html = '<div class="clear10"></div>';
-            html+='<a class="book-title" href="book.html?id='+book.id+'">'+book.title+'</a>';
+            html+='<a class="book-title" href="book.html?id='+book.id+'">'+book.name+'</a>';
             html+='<div class="clear10"></div>';
+            html+='<div id="report">';
+            html+='<a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>';
             html+='<div class="clear10"></div>';
+            html+='</div>';
             var paging_html = '';
             paging_html+='<select id="chapter_selecter" class="select-chap" onchange="change_chapter('+book.id+')">';
             for(var i=0;i<chapters.length;i++) {
@@ -461,6 +501,7 @@ function show_chapter(id) {
             html+='<a class="btn-back" href="book.html?id='+book.id+'">Quay về</a>';
             html+='<div class="clear10"></div>';
             $('#chapter-page').html(html);
+            $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "book.html?id="+id;
@@ -499,7 +540,7 @@ function show_follow(tab, is_first) {
                 for (var i = 0; i < books.length; i++) {
                     var book = books[i];
                     html += '<div class="section-container a-book">';
-                    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.title+'</a></div>';
+                    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
                     html += '<div class="a-cover" style="width: 90px">';
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
@@ -739,21 +780,20 @@ function show_profile() {
             html += '<span><input class="dl-btn-default" onclick="change_password()" value="Lưu" type="button"></span>';
             html += '</div>';
             html += '</div>';
-
-            html += '<div class="a-profile">';
-            html += '<label>Số truyện theo dõi</label>';
-            html += '<span>'+show_number(res.data.follows)+'</span>';
-            html += '</div>';
-            html += '<div class="a-profile">';
-            html += '<label>Số chương đã đọc</label>';
-            html += '<span>'+show_number(res.data.reads)+'</span>';
-            html += '</div>';
             $('#profile').html(html);
+            $.each(res.data.options, function( index, value ) {
+                var admin_html = '';
+                admin_html += '<div class="a-profile">';
+                admin_html += '<label>'+index+'</label>';
+                admin_html += '<span>'+show_number(value)+'</span>';
+                admin_html += '</div>';
+                $('#profile').append(admin_html);
+            });
             if(res.data.is_admin) {
                 var html ='<div class="section-container a-book" id="admin-cp">';
                 html += '<div class="a-profile"><h3>Dành cho quản trị</h3></div>';
                 html += '<div class="clear5"></div>';
-                html += '<a href="http://muontruyen.tk">Administrator Backend</a>';
+                html += '<a style="margin-left:20px" href="http://muontruyen.tk">Administrator Backend</a>';
                 html += '<div class="clear5"></div>';
                 html += '<hr>';
                 html += '<div class="clear5"></div>';
@@ -857,7 +897,7 @@ function edit_name(chapter_id) {
     $('.input-admin').show();
 }
 function edit_title() {
-    $('#action').val('title');
+    $('#action').val('name');
     $('#input-textarea').val($.trim($('.book-title').html()));
     $('#input-textarea').css('height', '36px');
     $('.input-admin').show();

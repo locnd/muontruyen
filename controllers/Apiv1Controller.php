@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Report;
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
@@ -56,7 +57,7 @@ class Apiv1Controller extends Controller
         foreach ($books as $book) {
             $tmp = $book->to_array();
             if(!empty($book->chapters[0])) {
-                $tmp['title'] .= ' - '.$book->chapters[0]->name;
+                $tmp['name'] .= ' - '.$book->chapters[0]->name;
             }
             $data[] = $tmp;
         }
@@ -504,27 +505,23 @@ class Apiv1Controller extends Controller
                 'message' => $user['message']
             );
         }
+        $user_options = array();
+        $user_options['Số truyện theo dõi'] = count($user->follows);
+        $user_options['Số chương đã đọc'] = count($user->reads);
+
         $options = array();
         if($user->is_admin == 1) {
-            $options['Tổng số thành viên'] = User::find()->count();
-            $options['Tổng số truyện'] = Book::find()->count();
-            $options['Tổng số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
-            $options['Tổng số chương'] = Chapter::find()->count();
-            $options['Tổng số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
-            $options['Tổng số hình ảnh'] = Image::find()->count();
+            $options['Số thành viên'] = User::find()->count();
+            $options['Số truyện'] = Book::find()->count();
+            $options['Số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
+            $options['Số chương'] = Chapter::find()->count();
+            $options['Số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
+            $options['Số hình ảnh'] = Image::find()->count();
 
-            $options['Scraper'] = 'stop';
-            $options['Reload'] = 'stop';
-            $options['Daily'] = 'stop';
+            $options['Cron'] = 'stop';
             $setting_model = new Setting();
-            if($setting_model->get_setting('running_scraper') != '') {
-                $options['Scraper'] = 'running';
-            }
-            if($setting_model->get_setting('running_reload') != '') {
-                $options['Reload'] = 'running';
-            }
-            if($setting_model->get_setting('running_daily') != '') {
-                $options['Daily'] = 'running';
+            if($setting_model->get_setting('cron_running') != '') {
+                $options['Cron'] = 'running';
             }
         }
         return array(
@@ -534,10 +531,67 @@ class Apiv1Controller extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => $user->is_admin,
-                'follows' => count($user->follows),
-                'reads' => count($user->reads)
+                'options' => $user_options
             ),
             'options' => $options
+        );
+    }
+    public function actionReport() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+
+        $content = strtolower(trim(Yii::$app->request->post('content', '')));
+        if($content == '') {
+            return array(
+                'success' => false,
+                'message' => 'Không có nội dung báo lỗi'
+            );
+        }
+
+        $book_id = (int)Yii::$app->request->post('book_id', 0);
+        $book = Book::find()->where(array('id'=>$book_id, 'status' => Book::ACTIVE))->count();
+        if($book == 0) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy truyện'
+            );
+        }
+
+        $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
+        if($chapter_id > 0) {
+            $chapter = Chapter::find()->where(array('id' => $chapter_id, 'status' => Chapter::ACTIVE))->count();
+            if ($chapter == 0) {
+                return array(
+                    'success' => false,
+                    'message' => 'Không tìm thấy chương truyện'
+                );
+            }
+        }
+
+        $count = Report::find()->where(array(
+            'user_id' => $user->id,
+            'book_id' => $book_id,
+            'chapter_id' => $chapter_id,
+        ))->count();
+        if($count > 2) {
+            return array(
+                'success' => false,
+                'message' => 'Bạn đã báo lỗi quá nhiều lần cho truyện này'
+            );
+        }
+        $report = new Report();
+        $report->user_id = $user->id;
+        $report->book_id = $book_id;
+        $report->chapter_id = $chapter_id;
+        $report->content = $content;
+        $report->save();
+        return array(
+            'success' => true
         );
     }
     public function actionChangepassword() {
@@ -814,8 +868,8 @@ class Apiv1Controller extends Controller
                 'message' => 'Hãy điền thông tin'
             );
         }
-        if($action == 'title') {
-            $book->title = $content;
+        if($action == 'name') {
+            $book->name = $content;
             $book->save();
         }elseif($action == 'description') {
             $book->description = $content;
@@ -835,7 +889,7 @@ class Apiv1Controller extends Controller
         $keyword = Yii::$app->request->get('keyword','');
         $books = Book::find()->where(array('status'=>Book::ACTIVE))->andFilterWhere([
             'or',
-            ['like', 'title', $keyword],
+            ['like', 'name', $keyword],
             ['like', 'slug', $keyword],
         ])->orderBy(array('release_date' => SORT_DESC, 'id' => SORT_DESC))->all();
 
@@ -843,7 +897,7 @@ class Apiv1Controller extends Controller
         foreach ($books as $book) {
             $tmp = $book->to_array();
             if(!empty($book->chapters[0])) {
-                $tmp['title'] .= ' - '.$book->chapters[0]->name;
+                $tmp['name'] .= ' - '.$book->chapters[0]->name;
             }
             $data[] = $tmp;
         }
@@ -883,7 +937,7 @@ class Apiv1Controller extends Controller
         foreach ($books as $book) {
             $tmp = $book->to_array();
             if(!empty($book->chapters[0])) {
-                $tmp['title'] .= ' - '.$book->chapters[0]->name;
+                $tmp['name'] .= ' - '.$book->chapters[0]->name;
             }
             $data[] = $tmp;
         }

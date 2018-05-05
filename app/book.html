@@ -105,6 +105,10 @@
                     <div class="post-detail section-container">
                         <div id="book-info" class="section-container a-book hide-before-load">
                         </div>
+                        <div id="report">
+                            <a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>
+                            <div class="clear0"></div>
+                        </div>
                         <div id="chapters-list" class="section-container a-book hide-before-load">
                         </div>
                         <div id="list_group" class="section-container dl-modal a-book hide-before-load">
@@ -129,6 +133,18 @@
         <div class="modal_footer">
             <div class="admin-btn" onclick="save_tags()">Lưu</div>
             <div class="admin-btn" onclick="close_modal('tag-modal')" style="background:lightgrey">Huỷ bỏ</div>
+        </div>
+    </div>
+    <div class="dl-modal" id="report-modal">
+        <div class="modal_header">Báo lỗi truyện</div>
+        <div class="dl_hr"></div>
+        <div class="modal_content">
+            <textarea placeholder="Nội dung lỗi..." id="report_content" class="form-control"></textarea>
+            <div class="clear5"></div>
+        </div>
+        <div class="modal_footer">
+            <div id="send-report-btn" class="admin-btn" onclick="send_report()">Lưu</div>
+            <div class="admin-btn" onclick="close_modal('report-modal')" style="background:lightgrey">Huỷ bỏ</div>
         </div>
     </div>
 

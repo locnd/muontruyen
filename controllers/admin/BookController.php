@@ -2,6 +2,7 @@
 
 namespace app\controllers\admin;
 
+use app\models\Chapter;
 use yii\web\Controller;
 use app\models\Book;
 use Yii;
@@ -9,8 +10,9 @@ use Yii;
 class BookController extends Controller
 {
     public $layout = 'admin';
-    
-    public function actionIndex() {
+
+    public function beforeAction($action)
+    {
         if (!Yii::$app->user->isGuest) {
             if(!Yii::$app->session->get('is_admin', 0)) {
                 Yii::$app->session->addFlash('error', 'Bạn không có quyền truy cập trang này');
@@ -19,18 +21,22 @@ class BookController extends Controller
         } else {
             return $this->redirect('/admin/login');
         }
+        return parent::beforeAction($action);
+    }
+    
+    public function actionIndex() {
         $this->view->params['page_id'] = 'book_list';
 
         $filters = array(
-            'title' => trim(getParam('title')),
+            'name' => trim(getParam('name')),
             'url' => trim(getParam('url')),
             'status' => trim(getParam('status')),
             'from_date' => trim(getParam('from_date')),
             'to_date' => trim(getParam('to_date', date('d-m-Y')))
         );
         $books = Book::find()->where(['>', 'id', 0]);
-        if($filters['title'] != '') {
-            $books->andWhere(['like', 'title', $filters['title']]);
+        if($filters['name'] != '') {
+            $books->andWhere(['like', 'name', $filters['name']]);
         }
         if($filters['url'] != '') {
             $books->andWhere(['like', 'url', $filters['url']]);
@@ -71,6 +77,16 @@ class BookController extends Controller
         }
         return $this->render('/admin/book/detail', array(
             'book' => $book
+        ));
+    }
+    public function actionChapter($id) {
+        $this->view->params['page_id'] = 'chapter_detail';
+        $chapter = Chapter::find()->where(array('id'=>$id))->one();
+        if(empty($chapter)) {
+            throw new \yii\base\Exception( "Chapter not found" );
+        }
+        return $this->render('/admin/book/chapter', array(
+            'chapter' => $chapter
         ));
     }
 }

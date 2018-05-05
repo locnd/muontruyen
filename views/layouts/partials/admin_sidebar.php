@@ -26,8 +26,9 @@
                     <li <?php echo ($page_id == 'user_create')?'class="active"':'';?>><a href="/admin/user/create"><?php echo 'Add'; ?></a></li>
                 </ul>
             </li>
-            <li <?php echo (in_array($page_id, array('book_list','book_detail')))?'class="active"':'';?>><a href="/admin/book"><i class="fa fa-book"></i> <span><?php echo 'Books'; ?></span></a></li>
+            <li <?php echo (in_array($page_id, array('book_list','book_detail','chapter_detail')))?'class="active"':'';?>><a href="/admin/book"><i class="fa fa-book"></i> <span><?php echo 'Books'; ?></span></a></li>
             <li <?php echo $page_id=='cron'?'class="active"':'';?>><a href="/admin/cron"><i class="fa fa-exchange"></i> <span><?php echo 'Cron'; ?></span></a></li>
+            <li <?php echo $page_id=='report'?'class="active"':'';?>><a href="/admin/report"><i class="fa fa-bug"></i> <span><?php echo 'Reports'; ?></span></a></li>
 
             <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
         </ul>

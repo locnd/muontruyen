@@ -480,3 +480,17 @@ h3.page-title b {
 #image-refresh i {
     font-size: 45px;
 }
+.clear0 {
+    clear: both;
+    height: 0;
+}
+.fl-r {
+    float: right;
+}
+#report-modal {
+    top: calc(50% - 215px);
+}
+#report_content {
+    height: 200px;
+    font-size: 15px;
+}

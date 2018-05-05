@@ -18,6 +18,10 @@ class Chapter extends ModelCommon
     {
         return $this->hasOne(Book::className(), ['id' => 'book_id']);
     }
+    public function getReads()
+    {
+        return $this->hasMany(Read::className(), ['chapter_id' => 'id']);
+    }
 
     public function increa_stt() {
         $chapters = Chapter::find()->where(['>=', 'stt', $this->stt])

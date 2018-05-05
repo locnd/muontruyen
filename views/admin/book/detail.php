@@ -17,10 +17,10 @@
                                 <a onclick="open_edit('title')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
                             </th>
                             <th class="po-re" style="position: relative;">
-                                <h4 id="cur_title"><?php echo $book->title;?></h4>
+                                <h4 id="cur_title"><?php echo $book->name;?></h4>
                                 <input type="hidden" id="book_id" value="<?php echo $book->id;?>">
-                                <input type="text" class="form-control" id="new_title" value="<?php echo $book->title;?>" style="display: none">
-                                <button onclick="save('title')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
+                                <input type="text" class="form-control" id="new_title" value="<?php echo $book->name;?>" style="display: none">
+                                <button onclick="save('name')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
                             </th>
                         </tr>
                     </thead>
@@ -43,7 +43,7 @@
                         </tr>
                         <tr class="highlight">
                             <td class="field"><?php echo 'Url'; ?></td>
-                            <td><?php echo $book->url;?></td>
+                            <td><a href="<?php echo $book->url; ?>" target="_blank"><?php echo $book->url;?></a></td>
                         </tr>
                         <tr class="highlight">
                             <td class="field">
@@ -126,7 +126,7 @@
                     <?php foreach ($book->chapters as $chapter) { ?>
                         <tr id="item-<?php echo $chapter->id; ?>">
                             <td><?php echo $chapter->id; ?></td>
-                            <td class="item-name"><?php echo $chapter->name; ?></td>
+                            <td class="item-name"><a href="/admin/book/chapter/<?php echo $chapter->id; ?>"><?php echo $chapter->name; ?></a></td>
                             <td><a href="<?php echo $chapter->url; ?>" target="_blank"><?php echo $chapter->url; ?></td>
                             <td><?php echo $chapter->stt; ?></td>
                             <td><?php echo $chapter->will_reload == 1 ? 'True' :'False'; ?></td>

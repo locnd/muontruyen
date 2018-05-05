@@ -55,7 +55,7 @@ class DailyController extends Controller
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();
-            $scraper->parse_server($server, $page, $page, $log, false);
+            $scraper->parse_server($server, $page, $page, $log, true);
         }
         $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;

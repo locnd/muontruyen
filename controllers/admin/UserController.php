@@ -9,8 +9,9 @@ use Yii;
 class UserController extends Controller
 {
     public $layout = 'admin';
-    
-    public function actionIndex() {
+
+    public function beforeAction($action)
+    {
         if (!Yii::$app->user->isGuest) {
             if(!Yii::$app->session->get('is_admin', 0)) {
                 Yii::$app->session->addFlash('error', 'Bạn không có quyền truy cập trang này');
@@ -19,6 +20,10 @@ class UserController extends Controller
         } else {
             return $this->redirect('/admin/login');
         }
+        return parent::beforeAction($action);
+    }
+
+    public function actionIndex() {
         $this->view->params['page_id'] = 'user_list';
 
         $filters = array(
