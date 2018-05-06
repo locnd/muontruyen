@@ -1,7 +1,7 @@
 
 <ol class="breadcrumb dl-breadcrumb">
     <li><a href="/admin"><i class="fa fa-home"></i> <?php echo 'Dashboard';?></a></li>
-    <li class="active"><?php echo 'List';?> <?php echo 'Books';?></li>
+    <li class="active"><?php echo 'List';?> <?php echo 'Chapter';?></li>
 </ol>
 <input id="crsf_token" type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
 <div class="row">
@@ -14,41 +14,30 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12">
-                            <input id="book_url" placeholder="book_url" class="form-control fl-l w-100-40" type="text">
-                            <a class="dl-default-btn fl-r" onclick="add_book()" href="javascript:;"><i class="fa fa-plus"></i></a>
                             <table class="table table-striped table-bordered data-table admin-table">
                                 <thead>
                                     <tr>
                                         <th><?php echo 'ID';?></th>
                                         <th><?php echo 'Name';?></th>
-                                        <th><?php echo 'Image';?></th>
                                         <th><?php echo 'Url';?></th>
-                                        <th><?php echo 'Chapters';?></th>
-                                        <th><?php echo 'Views';?></th>
+                                        <th><?php echo 'Book';?></th>
+                                        <th><?php echo 'Images';?></th>
+                                        <th><?php echo 'Stt';?></th>
                                         <th><?php echo 'Status';?></th>
                                         <th><?php echo 'Created date';?></th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($books as $book) { ?>
-                                        <tr id="item-<?php echo $book->id; ?>">
-                                            <td><?php echo $book->id; ?></td>
-                                            <td class="item-name"><a href="/admin/book/detail/<?php echo $book->id; ?>"><?php echo $book->name; ?></a></td>
-                                            <td><img class="show_profile_image mini-image" src="<?php echo $book->get_image(); ?>"></td>
-                                            <td><a href="<?php echo $book->url; ?>" target="_blank"><?php echo $book->url; ?></a></td>
-                                            <td><?php echo count($book->chapters); ?></td>
-                                            <td><?php echo $book->count_views; ?></td>
-                                            <td><?php echo $book->status == 1 ? 'Active' : 'Inactive'; ?></td>
-                                            <td><?php echo date('d-m-Y H:i:s',strtotime($book->created_at)); ?></td>
-                                            <td>
-                                                <a href="/admin/book/detail/<?php echo $book->id; ?>" class="btn btn-success btn-icon btn-circle btn-lg m-r-5"><i class="fa fa-search"></i></a>
-                                                <?php if(empty($book->deleted_at)) { ?>
-                                                <a onclick="delete_item('book', <?php echo $book->id; ?>)" class="btn btn-danger btn-icon btn-circle btn-lg"><i class="fa fa-trash"></i></a>
-                                                <?php } else { ?>
-                                                <a onclick="restore_item('book', <?php echo $book->id; ?>)" class="btn btn-danger btn-icon btn-circle btn-lg"><i class="fa fa-refresh"></i></a>
-                                                <?php } ?>
-                                            </td>
+                                    <?php foreach ($chapters as $chapter) { ?>
+                                        <tr id="item-<?php echo $chapter->id; ?>">
+                                            <td><?php echo $chapter->id; ?></td>
+                                            <td class="item-name"><a href="/admin/book/chapter/<?php echo $chapter->id; ?>"><?php echo $chapter->name; ?></a></td>
+                                            <td><a href="<?php echo $chapter->url; ?>" target="_blank"><?php echo $chapter->url; ?></a></td>
+                                            <td><a href="/admin/book/detail/<?php echo $chapter->book->id; ?>"><?php echo $chapter->book->name; ?></a></td>
+                                            <td><?php echo count($chapter->images); ?></td>
+                                            <td><?php echo $chapter->stt; ?></td>
+                                            <td><?php echo $chapter->status == 1 ? 'Active' : 'Inactive'; ?></td>
+                                            <td><?php echo date('d-m-Y H:i:s',strtotime($chapter->created_at)); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -57,7 +46,7 @@
                     </div>
                     <div class="row">
                         <?php echo \Yii::$app->view->render('/layouts/partials/pagging', array(
-                            'url' => '/admin/book',
+                            'url' => '/admin/chapter',
                             'total' => $total,
                             'page' => $page,
                             'filters' => $filters,

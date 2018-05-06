@@ -6,6 +6,7 @@
 </ol>
 
 <input id="crsf_token" type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
+<input type="hidden" id="book_id" value="<?php echo $book->id;?>">
 <div class="profile-container">
     <div class="profile-section">
         <div class="profile-info">
@@ -18,7 +19,6 @@
                             </th>
                             <th class="po-re" style="position: relative;">
                                 <h4 id="cur_title"><?php echo $book->name;?></h4>
-                                <input type="hidden" id="book_id" value="<?php echo $book->id;?>">
                                 <input type="text" class="form-control" id="new_title" value="<?php echo $book->name;?>" style="display: none">
                                 <button onclick="save('name')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
                             </th>
@@ -103,7 +103,7 @@
             </div>
         </div>
         <div class="row">
-            <h4 style="float: left;margin-left: 10px;"><?php echo count($book->chapters); ?> chương</h4>
+            <h4 style="float: left;margin-left: 10px;"><?php echo count($chapters); ?> chương</h4>
             <a onclick="sort_chapters()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-sort"></i></a>
             <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
             <input placeholder="remove string" type="text" class="form-control" id="tmp_name" style="width:200px;float:right;margin-right:10px;">
@@ -123,7 +123,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($book->chapters as $chapter) { ?>
+                    <?php foreach ($chapters as $chapter) { ?>
                         <tr id="item-<?php echo $chapter->id; ?>">
                             <td><?php echo $chapter->id; ?></td>
                             <td class="item-name"><a href="/admin/book/chapter/<?php echo $chapter->id; ?>"><?php echo $chapter->name; ?></a></td>

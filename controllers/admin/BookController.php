@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\models\Chapter;
 use yii\web\Controller;
 use app\models\Book;
+use app\models\Image;
 use Yii;
 
 class BookController extends Controller
@@ -76,7 +77,8 @@ class BookController extends Controller
             throw new \yii\base\Exception( "Book not found" );
         }
         return $this->render('/admin/book/detail', array(
-            'book' => $book
+            'book' => $book,
+            'chapters' => Chapter::find()->where(array('book_id'=>$book->id))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all()
         ));
     }
     public function actionChapter($id) {
@@ -86,7 +88,8 @@ class BookController extends Controller
             throw new \yii\base\Exception( "Chapter not found" );
         }
         return $this->render('/admin/book/chapter', array(
-            'chapter' => $chapter
+            'chapter' => $chapter,
+            'images' => Image::find()->where(array('chapter_id'=>$chapter->id))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all()
         ));
     }
 }

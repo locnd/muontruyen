@@ -245,7 +245,7 @@ class Scraper
             }
             $new_image->image = $image_name;
             $new_image->status = Image::ACTIVE;
-            $new_image->stt = $id;
+            $new_image->stt = $id+1;
             $new_image->save();
             $dem++;
         }
@@ -434,14 +434,13 @@ class Scraper
         if($this->echo) {
             echo '---- ' . $chapter->book->slug . "\n";
         }
-        if(empty($chapter->name) && !empty($chapter->book_id)) {
+        if(empty($chapter->stt) && !empty($chapter->book_id)) {
             if($chapter->stt == 0) {
                 $last_chap = Chapter::find()->where(['>', 'stt', '0'])->andWhere(array('book_id' => $chapter->book_id))->orderBy(['stt' => SORT_DESC])->one();
                 if(!empty($last_chap)) {
                     $chapter->stt = $last_chap->stt + 1;
                 }
             }
-            $chapter->name = 'chương '.$chapter->stt;
             $chapter->save();
         }
         $this->parse_chapter($chapter);

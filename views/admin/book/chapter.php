@@ -7,6 +7,8 @@
 </ol>
 
 <input id="crsf_token" type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
+<input type="hidden" id="book_id" value="<?php echo $book->id;?>">
+<input type="hidden" id="chapter_id" value="<?php echo $chapter->id;?>">
 <div class="profile-container">
     <div class="profile-section">
         <div class="profile-info">
@@ -18,7 +20,6 @@
                             </th>
                             <th class="po-re" style="position: relative;">
                                 <h4 id="cur_title"><?php echo $book->name;?></h4>
-                                <input type="hidden" id="book_id" value="<?php echo $book->id;?>">
                                 <input type="text" class="form-control" id="new_title" value="<?php echo $book->name;?>" style="display: none">
                                 <button onclick="save('name')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
                             </th>
@@ -26,8 +27,14 @@
                     </thead>
                     <tbody>
                         <tr class="highlight">
-                            <td class="field"><?php echo 'Chapter'; ?></td>
-                            <td><?php echo $chapter->name;?></td>
+                            <td class="field">
+                                <a onclick="open_edit('name')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
+                            </td>
+                            <td>
+                                <span id="cur_name"><?php echo $chapter->name;?></span>
+                                <input type="text" class="form-control" id="new_name" value="<?php echo $chapter->name;?>" style="display: none">
+                                <button onclick="save('name')" id="btn_name" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
+                            </td>
                         </tr>
                         <tr class="highlight">
                             <td class="field"><?php echo 'Url'; ?></td>
@@ -38,6 +45,32 @@
                             <td><?php echo count($chapter->reads);?></td>
                         </tr>
                         <tr class="highlight">
+                            <td class="field"><?php echo 'Status'; ?><br>
+                                <a onclick="open_edit('status')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
+                            </td>
+                            <td>
+                                <span id="cur_status"><?php echo $chapter->status == 1 ? 'Active' : 'Inactive'; ?></span>
+                                <select class="form-control" id="new_status" style="display: none">
+                                    <option value="0" <?php echo ($chapter->status == 0)?'selected':''; ?>>Inactive</option>
+                                    <option value="1" <?php echo ($chapter->status == 1)?'selected':''; ?>>Active</option>
+                                </select>
+                                <button onclick="save('status')" id="btn_status" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="field"><?php echo 'Reload'; ?><br>
+                                <a onclick="open_edit('will_reload')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
+                            </td>
+                            <td>
+                                <span id="cur_will_reload"><?php echo $chapter->will_reload == 1 ? 'True' : 'False'; ?></span>
+                                <select class="form-control" id="new_will_reload" style="display: none">
+                                    <option value="0" <?php echo ($chapter->will_reload == 0)?'selected':''; ?>>False</option>
+                                    <option value="1" <?php echo ($chapter->will_reload == 1)?'selected':''; ?>>True</option>
+                                </select>
+                                <button onclick="save('will_reload')" id="btn_will_reload" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
                             <td class="field"><?php echo 'Created date'; ?></td>
                             <td><?php echo show_date($chapter->created_at);?></td>
                         </tr>
@@ -45,17 +78,16 @@
                 </table>
             </div>
         </div>
-        <div class="row">
-            <input type="hidden" id="chapter_id" value="<?php echo $chapter->id;?>">
-            <h4 style="float: left;margin-left: 10px;"><?php echo count($chapter->images); ?> ảnh</h4>
+        <div class="profile-info">
+            <h4 style="float: left;"><?php echo count($images); ?> ảnh</h4>
             <div class="clear0"></div>
-            <form id="add-image-form" style="padding: 0 10px;">
+            <form id="add-image-form">
             </form>
             <div class="clear5"></div>
-            <a id="save-btn" style="margin-left: 10px;width: 50px;display:none" class="dl-default-btn fl-l" onclick="save_images()" href="javascript:;">Save</a>
-            <a class="dl-default-btn fl-l" style="margin-left: 10px;" onclick="add_image()" href="javascript:;"><i class="fa fa-plus"></i></a>
+            <a id="save-btn" style="margin-right: 10px;width: 50px;display:none" class="dl-default-btn fl-l" onclick="save_images()" href="javascript:;">Save</a>
+            <a class="dl-default-btn fl-l" onclick="add_image()" href="javascript:;"><i class="fa fa-plus"></i></a>
             <div class="clear5"></div>
-            <?php foreach ($chapter->images as $image) { ?>
+            <?php foreach ($images as $image) { ?>
                 <img style="width:100%;max-width: 500px" src="<?php echo $image->get_image(); ?>">
                 <div class="clear5"></div>
             <?php } ?>
@@ -101,11 +133,11 @@
     }
     function save(attr) {
         var params = {};
-        params['book_id'] = $('#book_id').val();
+        params['chapter_id'] = $('#chapter_id').val();
         params['key'] = attr;
         params['value'] = $('#new_'+attr).val();
         params['_csrf'] = $('#crsf_token').val();
-        var url = '/ajax/editbook';
+        var url = '/ajax/editchapter';
         $.ajax({
             url: url,
             type: 'POST',

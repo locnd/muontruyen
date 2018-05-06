@@ -55,6 +55,30 @@ class AjaxController extends Controller
             'success' => true
         );
     }
+    public function actionEditchapter()
+    {
+        $chapter_id = (int) Yii::$app->request->post('chapter_id',0);
+        $chapter = Chapter::find()->where(array('id'=>$chapter_id))->one();
+        if(empty($chapter)) {
+            return array(
+                'success' => false,
+                'message' => 'Chapter not found'
+            );
+        }
+        $key = Yii::$app->request->post('key','');
+        $value = Yii::$app->request->post('value','');
+        if($key === '' || $value === '') {
+            return array(
+                'success' => false,
+                'message' => 'Chưa điền thông tin'
+            );
+        }
+        $chapter->$key = $value;
+        $chapter->save();
+        return array(
+            'success' => true
+        );
+    }
     public function actionSortchapters()
     {
         $book_id = (int) Yii::$app->request->post('book_id',0);

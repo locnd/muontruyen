@@ -525,10 +525,12 @@ table.no-border-table tr, table.no-border-table td{
 }
 .clear0 {
     clear:both;
-    height: 0px;
+    height: 0;
 }
 #add-image-form .a-new-image {
     margin: 5px 0;
+    float: left;
+    width: 100%;
 }
 #add-image-form .img-url {
     width: calc(100% - 100px);
@@ -538,4 +540,10 @@ table.no-border-table tr, table.no-border-table td{
 }
 #add-image-form .img-stt {
     width: 80px;
+    float: right;
+}
+input.dl_combobox {
+    background: white;
+    border: 1px solid #ccd0d4;
+    font-size: 14px;
 }

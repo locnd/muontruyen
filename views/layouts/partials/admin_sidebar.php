@@ -27,6 +27,7 @@
                 </ul>
             </li>
             <li <?php echo (in_array($page_id, array('book_list','book_detail','chapter_detail')))?'class="active"':'';?>><a href="/admin/book"><i class="fa fa-book"></i> <span><?php echo 'Books'; ?></span></a></li>
+            <li <?php echo (in_array($page_id, array('chapter_list')))?'class="active"':'';?>><a href="/admin/chapter"><i class="fa fa-file"></i> <span><?php echo 'Chapters'; ?></span></a></li>
             <li <?php echo $page_id=='cron'?'class="active"':'';?>><a href="/admin/cron"><i class="fa fa-exchange"></i> <span><?php echo 'Cron'; ?></span></a></li>
             <li <?php echo $page_id=='report'?'class="active"':'';?>><a href="/admin/report"><i class="fa fa-bug"></i> <span><?php echo 'Reports'; ?></span></a></li>
             <li class="has-sub<?php echo (in_array($page_id, array('book_error','chapter_error')))?' active':'';?>">
