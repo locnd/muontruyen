@@ -49,11 +49,11 @@
             <input type="hidden" id="chapter_id" value="<?php echo $chapter->id;?>">
             <h4 style="float: left;margin-left: 10px;"><?php echo count($chapter->images); ?> ảnh</h4>
             <div class="clear0"></div>
-            <form id="add-image-form">
+            <form id="add-image-form" style="padding: 0 10px;">
             </form>
             <div class="clear5"></div>
-            <a id="save-btn" style="margin-right: 20px;width: 50px;display:none" class="dl-default-btn fl-l" onclick="save_images()" href="javascript:;">Save</a>
-            <a class="dl-default-btn fl-l" onclick="add_image()" href="javascript:;"><i class="fa fa-plus"></i></a>
+            <a id="save-btn" style="margin-left: 10px;width: 50px;display:none" class="dl-default-btn fl-l" onclick="save_images()" href="javascript:;">Save</a>
+            <a class="dl-default-btn fl-l" style="margin-left: 10px;" onclick="add_image()" href="javascript:;"><i class="fa fa-plus"></i></a>
             <div class="clear5"></div>
             <?php foreach ($chapter->images as $image) { ?>
                 <img style="width:100%;max-width: 500px" src="<?php echo $image->get_image(); ?>">
@@ -83,15 +83,14 @@
             data: data,
             dataType: 'json',
             success: function(result){
-                console.log(result);
                 if(result.success) {
-                    //window.location.reload();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                 }
             },
             error: function( xhr ) {
-                //window.location.reload();
+                window.location.reload();
             }
         });
     }
@@ -123,78 +122,5 @@
                 window.location.reload();
             }
         });
-    }
-    function sort_chapters() {
-        if(confirm('Bạn có chắc là muốn sắp xếp lại chương truyện không?')) {
-            var params = {};
-            params['book_id'] = $('#book_id').val();
-            params['_csrf'] = $('#crsf_token').val();
-            var url = '/ajax/sortchapters';
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: params,
-                dataType: 'json',
-                success: function(result){
-                    if(result.success) {
-                        window.location.reload();
-                    } else {
-                        alert(result.message);
-                    }
-                },
-                error: function( xhr ) {
-                    window.location.reload();
-                }
-            });
-        }
-    }
-    function reset_chapters_name() {
-        if(confirm('Bạn có chắc là muốn reset lại tên các chương truyện không?')) {
-            var params = {};
-            params['book_id'] = $('#book_id').val();
-            params['_csrf'] = $('#crsf_token').val();
-            params['tmp_name'] = $('#tmp_name').val();
-            var url = '/ajax/resetchaptername';
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: params,
-                dataType: 'json',
-                success: function(result){
-                    if(result.success) {
-                        window.location.reload();
-                    } else {
-                        alert(result.message);
-                    }
-                },
-                error: function( xhr ) {
-                    window.location.reload();
-                }
-            });
-        }
-    }
-    function will_reload(chapter_id) {
-        if(confirm('Bạn có chắc là muốn load lại chương truyện không?')) {
-            var params = {};
-            params['chapter_id'] = chapter_id;
-            params['_csrf'] = $('#crsf_token').val();
-            var url = '/ajax/reloadchapter';
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: params,
-                dataType: 'json',
-                success: function(result){
-                    if(result.success) {
-                        window.location.reload();
-                    } else {
-                        alert(result.message);
-                    }
-                },
-                error: function( xhr ) {
-                    window.location.reload();
-                }
-            });
-        }
     }
 </script>

@@ -29,7 +29,17 @@
             <li <?php echo (in_array($page_id, array('book_list','book_detail','chapter_detail')))?'class="active"':'';?>><a href="/admin/book"><i class="fa fa-book"></i> <span><?php echo 'Books'; ?></span></a></li>
             <li <?php echo $page_id=='cron'?'class="active"':'';?>><a href="/admin/cron"><i class="fa fa-exchange"></i> <span><?php echo 'Cron'; ?></span></a></li>
             <li <?php echo $page_id=='report'?'class="active"':'';?>><a href="/admin/report"><i class="fa fa-bug"></i> <span><?php echo 'Reports'; ?></span></a></li>
-
+            <li class="has-sub<?php echo (in_array($page_id, array('book_error','chapter_error')))?' active':'';?>">
+                <a href="javascript:;">
+                    <b class="caret pull-right"></b>
+                    <i class="fa fa-exclamation-triangle"></i>
+                    <span><?php echo 'Error'; ?></span>
+                </a>
+                <ul class="sub-menu">
+                    <li <?php echo ($page_id == 'book_error')?'class="active"':'';?>><a href="/admin/error/book"><?php echo 'Books'; ?></a></li>
+                    <li <?php echo ($page_id == 'chapter_error')?'class="active"':'';?>><a href="/admin/error/chapter"><?php echo 'Chapters'; ?></a></li>
+                </ul>
+            </li>
             <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
         </ul>
     </div>
