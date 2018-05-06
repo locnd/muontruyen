@@ -148,9 +148,13 @@ function send_report(book_id, chapter_id) {
 }
 
 function display_book_info(book, is_following, tags) {
-    var html = '<div class="clear10"></div>';
+    var html = '';
     html += '<div class="book-title">'+book.name+'</div>';
     html += '<div class="clear10"></div>';
+    html += '<div id="report">';
+    html += '<a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>';
+    html += '<div class="clear0"></div>';
+    html += '</div>';
     html += '<div class="book-cover">';
     html += '<img src="'+book.image+'">';
     html += '</div>';

@@ -172,7 +172,11 @@ class Scraper
         foreach ($chapters as $num => $chapter) {
             $url = $this->get_full_href($book->server, $chapter->href);
             $db_chapter = Chapter::find()->where(array('url' => $url))->one();
-            if(!empty($db_chapter) && ($skip || $db_chapter->will_reload == 1)) {
+            if(!empty($db_chapter) &&
+                ($db_chapter->status == Chapter::INACTIVE || $db_chapter->will_reload == 1)) {
+                continue;
+            }
+            if(!empty($db_chapter) && $skip) {
                 $chap_skip++;
                 if($chap_skip >= 3) { break; }
                 continue;
@@ -244,10 +248,6 @@ class Scraper
             $new_image->stt = $id;
             $new_image->save();
             $dem++;
-        }
-        if($dem == 0) {
-            $chapter->status = Chapter::INACTIVE;
-            $chapter->save();
         }
         if($this->echo)
             echo ' - ' . $dem . ' images' . "\n";

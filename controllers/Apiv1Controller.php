@@ -172,6 +172,8 @@ class Apiv1Controller extends Controller
         foreach ($imgs as $image) {
             $images[] = $image->to_array();
         }
+        $book->count_views = $book->count_views + 1;
+        $book->save();
         return array(
             'success' => true,
             'data' => $chapter,
