@@ -92,6 +92,10 @@ class Scraper
                     $this->send_push_notification($follow->user_id, $book);
                 }
             }
+            if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
+                $book->will_reload = 1;
+                $book->save();
+            }
             return $number_chapters;
         }
 
@@ -152,6 +156,10 @@ class Scraper
             $book->release_date = date('Y-m-d H:i:s');
             $book->save();
         }
+        if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
+            $book->will_reload = 1;
+            $book->save();
+        }
         return $number_chapters;
     }
 
@@ -202,6 +210,10 @@ class Scraper
         foreach ($db_chapters as $db_chapter) {
             $db_chapter->save();
             $this->parse_chapter($db_chapter);
+            if(Image::find()->where(array('chapter_id'=>$db_chapter->id))->count() == 0) {
+                $db_chapter->will_reload = 1;
+                $db_chapter->save();
+            }
         }
         return $dem;
     }

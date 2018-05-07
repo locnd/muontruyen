@@ -94,17 +94,27 @@ class User extends ModelCommon implements IdentityInterface
             }
         }
         if(!empty($data['device_id'])) {
-            $device = Device::find()->where(array('user_id'=>$user->id))->one();
-            if(empty($device)) {
-                $device = new Device();
-                $device->user_id = $user->id;
-            }
-            $device->device_id = $data['device_id'];
-            $device->save();
+            $user->set_device($data['device_id']);
         }
         $user->last_login = date('Y-m-d H:i:s');
         $user->save();
         return $user;
+    }
+
+    private function set_device($device_id) {
+        $device = Device::find()->where(array('user_id'=>$this->id))->one();
+        if(empty($device)) {
+            $device = new Device();
+            $device->user_id = $this->id;
+        }
+        $device->device_id = $device_id;
+        $device->save();
+        $db_devices = Device::find()->where(array('device_id'=>$device_id))->orWhere(array('user_id'=>$this->id))->all();
+        foreach ($db_devices as $db_device) {
+            if($db_device->id != $device->id) {
+                $db_device->delete();
+            }
+        }
     }
 
     public function randomToken($length=48) {
@@ -166,10 +176,7 @@ class User extends ModelCommon implements IdentityInterface
         }
         $user->save();
         if(!empty($data['device_id'])) {
-            $device = new Device();
-            $device->user_id = $user->id;
-            $device->device_id = $data['device_id'];
-            $device->save();
+            $user->set_device($data['device_id']);
         }
         return $user;
     }
