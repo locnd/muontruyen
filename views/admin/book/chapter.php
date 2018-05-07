@@ -18,7 +18,7 @@
                         <tr>
                             <th style="text-align: right">
                             </th>
-                            <th class="po-re" style="position: relative;">
+                            <th class="po-re">
                                 <h4 id="cur_title"><?php echo $book->name;?></h4>
                                 <input type="text" class="form-control" id="new_title" value="<?php echo $book->name;?>" style="display: none">
                                 <button onclick="save('name')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>

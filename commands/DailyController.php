@@ -33,6 +33,7 @@ class DailyController extends Controller
     public function actionIndex()
     {
         ini_set('max_execution_time', 24*60*60);
+        ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
         if($setting_model->get_setting('cron_running') != '') {

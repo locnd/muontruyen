@@ -36,6 +36,7 @@ class ReloadController extends Controller
     public function actionIndex()
     {
         ini_set('max_execution_time', 24*60*60);
+        ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
         if($setting_model->get_setting('cron_running') != '') {
@@ -51,25 +52,21 @@ class ReloadController extends Controller
         $scraper->echo = false;
 
         $books = Book::find()->where(array('will_reload' => 1))->all();
-        if(count($books) > 0) {
-            foreach ($books as $book) {
-                $log->number_books++;
-                $scraper->reload_book($book);
-                $book->will_reload = 0;
-                $book->save();
-            }
+        foreach ($books as $book) {
+            $log->number_books++;
             $log->save();
+            $scraper->reload_book($book);
+            $book->will_reload = 0;
+            $book->save();
         }
 
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
-        if(count($chapters) > 0) {
-            foreach ($chapters as $chapter) {
-                $log->number_chapters++;
-                $scraper->reload_chapter($chapter);
-                $chapter->will_reload = 0;
-                $chapter->save();
-            }
+        foreach ($chapters as $chapter) {
+            $log->number_chapters++;
             $log->save();
+            $scraper->reload_chapter($chapter);
+            $chapter->will_reload = 0;
+            $chapter->save();
         }
 
         $setting_model->set_setting('cron_running', '');

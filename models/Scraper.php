@@ -123,9 +123,7 @@ class Scraper
         $image = $this->save_image($image_src, $image_dir);
 
         $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
-        if($description == '' || trim($description,'.') == 'Đang cập nhật') {
-            $description = 'Chưa có thông tin';
-        }
+
         $tags_arr = $html_base->find($server->list_tags_key);
         $tags = array();
         foreach ($tags_arr as $tag) {
@@ -387,13 +385,18 @@ class Scraper
         return $image;
     }
     public function reload_book($book) {
-        if($this->echo)
+        if($this->echo) {
             echo '---- ' . $book->slug . "\n";
+        }
+        if($book->status == Book::INACTIVE) {
+            return true;
+        }
         if(empty($book->slug)) {
             $server = $book->server;
+
             $html_base = $this->get_html_base($book->url);
             if(empty($html_base)) {
-                return true;
+                return 1;
             }
             $title = trim($html_base->find($server->title_key)[0]->plaintext);
             $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
@@ -412,8 +415,18 @@ class Scraper
             $image = $this->save_image($image_src, $image_dir);
 
             $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
-            if($description == '' || trim($description,'.') == 'Đang cập nhật') {
-                $description = 'Chưa có thông tin';
+
+            $tags_arr = $html_base->find($server->list_tags_key);
+            $tags = array();
+            foreach ($tags_arr as $tag) {
+                $tags[] = ucfirst(strtolower(trim(html_entity_decode($tag->plaintext))));
+            }
+
+            $html_base->clear();
+            unset($html_base);
+
+            foreach ($tags as $tag) {
+                $book->add_tag($tag);
             }
 
             $book->status = Book::ACTIVE;
@@ -424,23 +437,8 @@ class Scraper
             $book->description = $description;
             $book->release_date = date('Y-m-d H:i:s');
             $book->save();
-
-            $tags = $html_base->find($server->list_tags_key);
-            foreach ($tags as $tag) {
-                $book->add_tag(ucfirst(strtolower(trim(html_entity_decode($tag->plaintext)))));
-            }
-
-            $html_base->clear();
-            unset($html_base);
-
-            if($this->echo)
-                echo '---- ' . $slug . "\n";
         }
-        $number_chapters = $this->get_chapters($book, false);
-        if($number_chapters > 0) {
-            $book->release_date = date('Y-m-d H:i:s');
-            $book->save();
-        }
+        $this->get_chapters($book, false);
     }
     public function reload_chapter($chapter) {
         if($this->echo) {
