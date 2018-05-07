@@ -17,10 +17,11 @@ function onDeviceReady() {
     push.on('notification', function(data) {
         if ( data.additionalData.foreground ){
             //alert("when the app is active");
-            //dl_alert('success', data.message, false);
+            //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         } else {
             //alert("when the app is not active");
-            dl_alert('success', data.message, false);
+            localStorage.setItem("push_notification", 'true');
+            //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
     });
 
@@ -65,6 +66,7 @@ $(document).ready(function() {
     check_unread();
     check_alert();
     fullscreen(false);
+    check_push_notification();
 });
 
 var mouseY = 0;
@@ -195,7 +197,9 @@ function is_logined() {
 }
 function is_admin() {
     var is_admin = localStorage.getItem("is_admin");
-    if (is_admin !== null && is_admin !== '' && is_admin) {
+    if (is_admin !== null && is_admin !== ''
+        && typeof(is_admin) !== 'undefined' && is_admin !== 'undefined'
+        && is_admin !== '0' && is_admin !== 0) {
         return true;
     }
     return false;
@@ -216,6 +220,14 @@ function check_alert() {
     if(alert !== null && alert !== '') {
         var alert_parse = alert.split('_dl_');
         dl_alert(alert_parse[0], alert_parse[1], false);
+    }
+}
+
+function check_push_notification() {
+    var check = localStorage.getItem("push_notification");
+    if(check !== null && check !== '') {
+        localStorage.setItem("push_notification", "");
+        window.location.href="follow.html";
     }
 }
 

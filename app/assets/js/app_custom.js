@@ -596,7 +596,9 @@ function login() {
         $('#login-btn').show();
         if (res.success) {
             localStorage.setItem("token", res.data.token);
-            localStorage.setItem("is_admin", res.data.is_admin);
+            if(parseInt(res.data.is_admin) == 1) {
+                localStorage.setItem("is_admin", res.data.is_admin);
+            }
             dl_alert('success', 'Đăng nhập thành công', true);
             window.location.href = 'index.html';
         } else {
@@ -628,7 +630,6 @@ function register() {
         $('#login-btn').show();
         if (res.success) {
             localStorage.setItem("token", res.data.token);
-            localStorage.setItem("is_admin", res.data.is_admin);
             dl_alert('success', 'Đăng ký thành công', true);
             window.location.href = 'index.html';
         } else {
