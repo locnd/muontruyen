@@ -49,8 +49,8 @@ class ReloadController extends Controller
 
         $scraper = new Scraper();
         $scraper->echo = false;
-        $book_model = new Book();
-        $books = $book_model->get_data(array('will_reload' => 1));
+
+        $books = Book::find()->where(array('will_reload' => 1))->all();
         if(count($books) > 0) {
             foreach ($books as $book) {
                 $log->number_books++;
@@ -61,8 +61,7 @@ class ReloadController extends Controller
             $log->save();
         }
 
-        $chapter_model = new Chapter();
-        $chapters = $chapter_model->get_data(array('will_reload' => 1));
+        $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
         if(count($chapters) > 0) {
             foreach ($chapters as $chapter) {
                 $log->number_chapters++;

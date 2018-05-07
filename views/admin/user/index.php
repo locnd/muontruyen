@@ -20,6 +20,7 @@
                                         <th><?php echo 'Name';?></th>
                                         <th><?php echo 'Username';?></th>
                                         <th><?php echo 'Avatar';?></th>
+                                        <th><?php echo 'Email';?></th>
                                         <th><?php echo 'Permission';?></th>
                                         <th><?php echo 'Status';?></th>
                                         <th><?php echo 'Register date';?></th>
@@ -33,6 +34,7 @@
                                             <td class="item-name"><?php echo $user->name; ?></td>
                                             <td><?php echo $user->username; ?></td>
                                             <td><img class="show_profile_image mini-image" src="<?php echo '/uploads/users/default.png'; ?>"></td>
+                                            <td><?php echo $user->email; ?></td>
                                             <td class="item-type"><?php echo $user->is_admin == 1 ? 'Admin' : 'User'; ?></td>
                                             <td><?php echo $user->status == 1 ? 'Active' : 'Inactive'; ?></td>
                                             <td><?php echo date('d-m-Y H:i:s',strtotime($user->created_at)); ?></td>

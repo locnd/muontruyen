@@ -63,7 +63,7 @@ class ChapterController extends Controller
         $page = min($page, $total_page);
         $offset = ($page - 1) * $limit;
 
-        $chapters->limit($limit)->offset($offset)->orderBy(['book_id' => SORT_DESC, 'id' => SORT_DESC]);
+        $chapters->limit($limit)->offset($offset)->orderBy(['book_id' => SORT_DESC, 'stt' => SORT_DESC]);
         $chapters = $chapters->all();
 
         return $this->render('/admin/chapter/index', array(

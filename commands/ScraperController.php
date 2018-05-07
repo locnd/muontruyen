@@ -43,6 +43,7 @@ class ScraperController extends Controller
 
         $scraper = new Scraper();
         $scraper->echo = false;
+
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='scraper';

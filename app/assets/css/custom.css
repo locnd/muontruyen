@@ -494,3 +494,12 @@ h3.page-title b {
     height: 200px;
     font-size: 15px;
 }
+.search-form input[type="submit"] {
+    height: 34px;
+}
+.search-form input#search {
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}

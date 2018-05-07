@@ -184,6 +184,7 @@ class AjaxController extends Controller
         $book->url = $book_url;
         $book->status = Book::INACTIVE;
         $book->will_reload = 1;
+        $book->release_date = date('Y-m-d H:i:s');
         $book->save();
         return array(
             'success' => true

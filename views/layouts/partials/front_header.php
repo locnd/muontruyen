@@ -7,7 +7,7 @@
             <i class="logined dl-notify"></i>
         </button>
         <a href="/" class="navbar-brand a-logo">
-            <img src="assets/img/logo.png">
+            <img src="/assets/img/logo.png">
             <span class="brand-text f-s-18">
                 MƯỢN TRUYỆN
             </span>
