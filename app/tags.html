@@ -21,6 +21,7 @@
     <!-- ================== BEGIN BASE JS ================== -->
     <script src="assets/plugins/pace/pace.min.js"></script>
     <script src="assets/plugins/jquery/jquery-1.9.1.min.js"></script>
+    <script src="assets/plugins/jquery/jquery-ui.js"></script>
     <!-- ================== END BASE JS ================== -->
     <script src="assets/js/app_config.js"></script>
     <script>
@@ -56,8 +57,9 @@
                     <li><a class="f-s-16" href="index.html">Trang chủ</a></li>
                     <li>
                         <form class="search-form" action="search.html">
-                        <input type="text" id="search" name="keyword" required>
-                        <input class="btn" type="submit" value="Search">
+                            <input type="hidden" id="search" name="keyword" required>
+                            <select id="search_book_select"></select>
+                            <input class="btn" type="submit" value="Search">
                         </form>
                     </li>
                     <li><a class="f-s-16" href="tags.html">Danh sách thẻ tag</a></li>
@@ -96,7 +98,7 @@
 
     <!-- ================== BEGIN BASE JS ================== -->
     <script src="assets/plugins/jquery/jquery-migrate-1.1.0.min.js"></script>
-    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.js"></script>
     <!--[if lt IE 9]>
     <script src="assets/crossbrowserjs/html5shiv.js"></script>
     <script src="assets/crossbrowserjs/respond.min.js"></script>

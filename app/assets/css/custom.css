@@ -397,17 +397,12 @@ a.available_tag {
 .search-form {
     padding: 15px 25px;
 }
-.search-form input[type=text] {
-    float: left;
-    width: calc(100% - 100px);
-    min-width: 150px;
-}
 .search-form input[type=submit] {
-    height: 28px;
     line-height: 0;
     margin-left: 15px;
     color: white;
     background: lightblue;
+    height: 34px;
 }
 h3.page-title {
     padding: 10px;
@@ -494,12 +489,30 @@ h3.page-title b {
     height: 200px;
     font-size: 15px;
 }
-.search-form input[type="submit"] {
-    height: 34px;
-}
-.search-form input#search {
+.search-form input.ui-autocomplete-input {
     height: 34px;
     padding: 0 10px;
     border-radius: 3px;
     border: 1px solid #ccc;
+    float: left;
+    width: calc(100% - 100px);
+    min-width: 150px;
+}
+ul.ui-autocomplete.ui-front {
+    z-index: 1031;
+    background: lightgrey;
+    width: calc(100% - 150px) !important;
+    max-height: 290px;
+    overflow-y: scroll;
+    padding: 0;
+}
+ul.ui-autocomplete.ui-front li {
+    list-style: none;
+    line-height: 30px;
+    padding: 5px 20px;
+    border-bottom: 1px solid white;
+    color: black;
+}
+a.disable_a {
+    pointer-events: none;
 }

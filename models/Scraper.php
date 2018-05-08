@@ -388,15 +388,12 @@ class Scraper
         if($this->echo) {
             echo '---- ' . $book->slug . "\n";
         }
-        if($book->status == Book::INACTIVE) {
-            return true;
-        }
         if(empty($book->slug)) {
             $server = $book->server;
 
             $html_base = $this->get_html_base($book->url);
             if(empty($html_base)) {
-                return 1;
+                return true;
             }
             $title = trim($html_base->find($server->title_key)[0]->plaintext);
             $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
@@ -437,6 +434,9 @@ class Scraper
             $book->description = $description;
             $book->release_date = date('Y-m-d H:i:s');
             $book->save();
+        }
+        if($book->status == Book::INACTIVE) {
+            return true;
         }
         $this->get_chapters($book, false);
     }
@@ -505,8 +505,8 @@ page.open("%s", function (status) {
         $fields = array(
             'registration_ids' => array($device_id),
             'data' => array(
-                'title' => $book->name,
-                'message' => 'Truyện có cập nhật chương mới',
+                'title' => 'Mượn truyện',
+                'message' => 'Truyện bạn đang theo dõi có cập nhật chương mới',
                 'vibrate' => 1,
                 'sound' => 1
             )

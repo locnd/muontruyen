@@ -67,6 +67,7 @@ $(document).ready(function() {
     check_alert();
     fullscreen(false);
     check_push_notification();
+    get_book_list_for_search();
 });
 
 var mouseY = 0;
@@ -145,6 +146,35 @@ function show_unread(unread) {
             $('#btn-more-menu i.dl-notify').addClass('hidden');
         }
     }
+}
+
+function get_book_list_for_search() {
+    var book_list_json = localStorage.getItem("book_list_json");
+    var book_list_time = localStorage.getItem("book_list_time");
+    if(book_list_time !== null && book_list_time !== '' && book_list_json !== null && book_list_json !== '') {
+        if($.now() < parseInt(book_list_time) + 7200000) {
+            var book_list = JSON.parse(book_list_json);
+            show_book_list_for_search(book_list);
+            return true;
+        }
+    }
+    send_api('GET', '/bookforsearch', {}, function(data){
+        if(data.success) {
+            localStorage.setItem("book_list_json", JSON.stringify(data.data));
+            localStorage.setItem("book_list_time", $.now());
+            show_book_list_for_search(data.data);
+        }
+
+    });
+}
+
+function show_book_list_for_search(data) {
+    var html = '<option value=""></option>';
+    for(var i=0;i<data.length;i++) {
+        html += '<option value="'+data[i].id+'">'+data[i].name+'</option>';
+    }
+    $('#search_book_select').html(html);
+    $('#search_book_select').combobox();
 }
 
 function send_api(method, url, params, callback) {

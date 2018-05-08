@@ -64,11 +64,11 @@ foreach ($filters as $key => $value) { ?>
                     'type' => 'select',
                     'class' => 'form-control dl_combobox'
                 );
-                $tmp_users = app\models\Book::find()->all();
+                $tmp_users = app\models\User::find()->all();
                 $users_arr = array(
                     ''=>'Please select'
                 );
-                foreach ($users_arr as $tmp_user) {
+                foreach ($tmp_users as $tmp_user) {
                     $users_arr[$tmp_user->id] = $tmp_user->name;
                 }
                 echo_input($option_user, $users_arr, $value==='' ? '' : $value);
@@ -94,19 +94,6 @@ foreach ($filters as $key => $value) { ?>
 </div>
 </form>
 <script>
-    $(document).ready(function () {
-        <?php
-        $tmp_filter = $filters;
-        foreach ($tmp_filter as $k => $v) {
-            if ($v === '' || ($k == 'to_date' && $v === date('d-m-Y'))) {
-                unset($tmp_filter[$k]);
-            }
-        }
-        if(!empty($tmp_filter)) { ?>
-            $('#open-filter-btn').click();
-            $('.dl_combobox').combobox();
-        <?php } ?>
-    });
     $( function() {
         $.widget( "custom.combobox", {
             _create: function() {
@@ -217,10 +204,12 @@ foreach ($filters as $key => $value) { ?>
 
                 // Found a match, nothing to do
                 if ( valid ) {
+                    console.log(this.element.val());
                     return;
                 }
 
                 // Remove invalid value
+                console.log(this.input.val());
                 this.input
                     .val( "" )
                     .attr( "title", value + " didn't match any item" )
@@ -237,5 +226,18 @@ foreach ($filters as $key => $value) { ?>
                 this.element.show();
             }
         });
+    });
+    $(document).ready(function () {
+        <?php
+        $tmp_filter = $filters;
+        foreach ($tmp_filter as $k => $v) {
+            if ($v === '' || ($k == 'to_date' && $v === date('d-m-Y'))) {
+                unset($tmp_filter[$k]);
+            }
+        }
+        if(!empty($tmp_filter)) { ?>
+        $('#open-filter-btn').click();
+        <?php } ?>
+        $('.dl_combobox').combobox();
     });
 </script>

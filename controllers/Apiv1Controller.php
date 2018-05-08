@@ -182,6 +182,13 @@ class Apiv1Controller extends Controller
             'images' => $images
         );
     }
+    public function actionBookforsearch() {
+        $books = Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->all();
+        return array(
+            'success' => true,
+            'data' => $books
+        );
+    }
     public function actionRegister() {
         $user_model = new User();
         $errors = $user_model->createUser(Yii::$app->request->post());

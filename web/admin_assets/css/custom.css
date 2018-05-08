@@ -542,8 +542,12 @@ table.no-border-table tr, table.no-border-table td{
     width: 80px;
     float: right;
 }
-input.dl_combobox {
+input.ui-autocomplete-input {
     background: white;
     border: 1px solid #ccd0d4;
     font-size: 14px;
+    width: 100%;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 3px;
 }
