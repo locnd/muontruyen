@@ -505,7 +505,7 @@ page.open("%s", function (status) {
         $fields = array(
             'registration_ids' => array($device_id),
             'data' => array(
-                'title' => 'Mượn truyện',
+                'title' => 'Mượn Truyện',
                 'message' => 'Truyện bạn đang theo dõi có cập nhật chương mới',
                 'vibrate' => 1,
                 'sound' => 1

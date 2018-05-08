@@ -22,17 +22,17 @@ function show_home(page) {
                     }
                     pages.push(i);
                 }
-                display_paging(pages, page, res.count_pages);
+                display_paging('index.html?page=',pages, page, res.count_pages);
             }
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
-function display_paging(pages, current_page, total_page) {
+function display_paging(url,pages, current_page, total_page) {
     var html = '<ul class="a-pagging">';
     if(current_page > 1) {
-        html += '<li><a href="index.html">Đầu</a></li>';
+        html += '<li><a href="'+url+'1">Đầu</a></li>';
     }
     for(var i=0;i<pages.length;i++) {
         if(pages[i] == current_page) {
@@ -40,11 +40,11 @@ function display_paging(pages, current_page, total_page) {
         } else {
             html += '<li>';
         }
-        html += '<a href="index.html?page='+pages[i]+'">'+pages[i]+'</a>';
+        html += '<a href="'+url+''+pages[i]+'">'+pages[i]+'</a>';
         html += '</li>';
     }
     if(current_page < total_page) {
-        html += '<li><a href="index.html?page='+total_page+'">Cuối</a></li>';
+        html += '<li><a href="'+url+''+total_page+'">Cuối</a></li>';
     }
     html += '</ul>';
     $('#paging').html(html);
@@ -980,9 +980,10 @@ function save_data() {
         });
     }
 }
-function show_search(keyword) {
+function show_search(keyword, page) {
     var params = {
-        keyword: keyword
+        keyword: keyword,
+        page: page
     };
     $('h3.page-title').html('Tìm kiếm "<b>'+keyword+'</b>"');
     $('h3.page-title').show();
@@ -994,6 +995,22 @@ function show_search(keyword) {
                 for(var i=0;i<res.data.length;i++) {
                     display_a_book(res.data[i]);
                 }
+            }
+            if(res.count_pages > 1) {
+                var pages = [];
+                for (var i=1;i<=res.count_pages;i++) {
+                    if (res.count_pages > 3) {
+                        if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                            pages.push(i);
+                            continue;
+                        }
+                        if (i < page - 1 || i > page + 1) {
+                            continue;
+                        }
+                    }
+                    pages.push(i);
+                }
+                display_paging('search.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
             }
         } else {
             dl_alert('danger', res.message, false);

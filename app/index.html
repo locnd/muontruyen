@@ -30,8 +30,8 @@
         } else {
             dl_alert('danger', 'Bộ nhớ không hoạt động', false);
         }
-        var param_page = parseInt(getParam('page'));
-        if (param_page == 0) {
+        var param_page = getParam('page');
+        if (param_page == '') {
             param_page = 1;
         }
     </script>
@@ -87,8 +87,8 @@
                     <div class="post-detail section-container">
                         <div id="list-books">
                         </div>
-                        <div class="clear5"></div>
-                        <div class="section-container" id="paging">
+                        <div class="clear5" style="height:1px"></div>
+                        <div class="section-container" id="paging" style="margin-bottom: 20px;">
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_home(param_page);
+            show_home(parseInt(param_page));
         });
     </script>
 </body>

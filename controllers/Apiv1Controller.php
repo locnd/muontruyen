@@ -900,7 +900,17 @@ class Apiv1Controller extends Controller
             'or',
             ['like', 'name', $keyword],
             ['like', 'slug', $keyword],
-        ])->orderBy(array('release_date' => SORT_DESC, 'id' => SORT_DESC))->all();
+        ]);
+        $total = $books->count();
+
+        $limit = 10;
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+        $books = $books->all();
 
         $data = array();
         foreach ($books as $book) {
@@ -912,15 +922,17 @@ class Apiv1Controller extends Controller
         }
         if(empty($data)) {
             return array(
-                'success' => true,
+                'success' => false,
                 'message' => 'Không có truyện',
-                'total' => 0
+                'total' => 0,
+                'count_pages' => 0
             );
         }
         return array(
             'success' => true,
             'data' => $data,
-            'total' => count($data)
+            'total' => $total,
+            'count_pages' => $total_page
         );
     }
 
