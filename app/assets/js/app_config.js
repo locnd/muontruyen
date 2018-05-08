@@ -169,7 +169,7 @@ function get_book_list_for_search() {
 }
 
 function show_book_list_for_search(data) {
-    var html = '<option value=""></option>';
+    var html = '<option value="">Tìm kiếm truyện</option>';
     for(var i=0;i<data.length;i++) {
         html += '<option value="'+data[i].id+'">'+data[i].name+'</option>';
     }
@@ -292,17 +292,24 @@ function fullscreen(change) {
             screen = 'fullscreen';
         }
     }
+    var wid = $('#content').width();
+    var mg_r = 0;
+    if(wid > 1200) {
+        mg_r = (wid - 1010)/2;
+    }
     if(screen == 'fullscreen') {
+        mg_r = 15 + mg_r;
         $('#header').hide();
         $('#footer-copyright').hide();
-        $('.btn-fullscreen').css('right', '15px');
+        $('.btn-fullscreen').css('right', mg_r+'px');
         $('#content').css('margin', '10px 0 0 0');
         $('#content').css('padding-bottom', '0');
         $('#content .container .col-md-12').css('padding', '0 5px');
     } else {
+        mg_r = 155 + mg_r;
         $('#header').show();
         $('#footer-copyright').show();
-        $('.btn-fullscreen').css('right', '155px');
+        $('.btn-fullscreen').css('right', mg_r+'px');
         $('#content').css('margin', '84px 0 0 0');
         $('#content').css('padding-bottom', '40px');
         $('#content .container .col-md-12').css('padding', '0 15px');

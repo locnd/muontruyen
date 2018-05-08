@@ -18721,6 +18721,12 @@ $( function() {
                 var keyword = $('input.ui-autocomplete-input').val();
                 $('#search').val($.trim(keyword));
             });
+            $('input.ui-autocomplete-input').attr('placeholder','Tìm truyện');
+            var wid = $('#content').width();
+            if(wid > 1200) {
+                wid = 1010;
+            }
+            $('head').append('<style>ul.ui-autocomplete.ui-front{ width:'+(wid-30)+'px !important;}</style>');
         },
 
         _createAutocomplete: function() {

@@ -11,7 +11,7 @@ $params = [
     'meta_keywords' => 'mượn truyện, truyện tranh, truyện hay',
 
     'use_cache' => false,
-    'limit' => 10,
+    'limit' => 20,
     'use_image_source' => true,
     'debug' => true,
 ];

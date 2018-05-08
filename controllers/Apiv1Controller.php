@@ -137,6 +137,9 @@ class Apiv1Controller extends Controller
             if(BookTag::find()->where(array('tag_id' => $tag->id, 'book_id'=>$book->id))->count() > 0) {
                 $tmp['is_checked'] = true;
             }
+            if(!empty($tag->vn_name)) {
+                $tmp['name'] = $tag->vn_name;
+            }
             $tag_data[] = $tmp;
         }
         return array(
@@ -370,7 +373,11 @@ class Apiv1Controller extends Controller
         }
         $data = array();
         foreach ($books as $book) {
-            $data[] = $book->to_array();
+            $tmp = $book->to_array();
+            if(!empty($book->chapters[0])) {
+                $tmp['name'] .= ' - '.$book->chapters[0]->name;
+            }
+            $data[] = $tmp;
         }
         $groups = array();
         foreach ($user->groups as $group) {
@@ -491,6 +498,9 @@ class Apiv1Controller extends Controller
         foreach ($tags as $tag) {
             $tmp = $tag->to_array();
             $tmp['count'] = BookTag::find()->where(array('tag_id'=>$tag->id))->count();
+            if(!empty($tag->vn_name)) {
+                $tmp['name'] = $tag->vn_name;
+            }
             $data[] = $tmp;
         }
         if(empty($data)) {
@@ -903,7 +913,7 @@ class Apiv1Controller extends Controller
         ]);
         $total = $books->count();
 
-        $limit = 10;
+        $limit = Yii::$app->params['limit'];
         $total_page = ceil($total / $limit);
         $page = max((int) getParam('page', 1),1);
         $page = min($page, $total_page);

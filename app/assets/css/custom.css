@@ -395,14 +395,14 @@ a.available_tag {
     margin-bottom: 10px;
 }
 .search-form {
-    padding: 15px 25px;
+    padding: 15px;
 }
 .search-form input[type=submit] {
     line-height: 0;
-    margin-left: 15px;
     color: white;
     background: lightblue;
     height: 34px;
+    float: right;
 }
 h3.page-title {
     padding: 10px;
@@ -501,7 +501,6 @@ h3.page-title b {
 ul.ui-autocomplete.ui-front {
     z-index: 1031;
     background: lightgrey;
-    width: calc(100% - 150px) !important;
     max-height: 290px;
     overflow-y: scroll;
     padding: 0;
