@@ -89,7 +89,7 @@ class Scraper
                     $follow->status = Follow::UNREAD;
                     $follow->updated_at = date('Y-m-d H:i:s');
                     $follow->save();
-                    $this->send_push_notification($follow->user_id, $book);
+                    $this->send_push_notification($follow->user_id);
                 }
             }
             if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
@@ -495,18 +495,21 @@ page.open("%s", function (status) {
         return $html;
     }
 
-    private function send_push_notification($user_id, $book) {
+    public function send_push_notification($user_id, $message = '') {
         $api_key = 'AAAAJAcz9dM:APA91bHGhUo2vCU6p53zMD5_YnfIKnZbFkCf5eoaMghSufF7yHN0qPokC5dIBa5tIYjGh4crDXf2KCHpsB0A24D3GHYeVfSlNgYltud7z9UG5kvJ5lrnMdJcO4VSk2vkVb3jz7Bgphw3';
         $device = Device::find()->where(array('user_id'=>$user_id))->one();
         if(empty($device)) {
             return true;
         }
         $device_id = $device->device_id;
+        if($message == '') {
+            $message = 'Truyện bạn đang theo dõi có cập nhật chương mới';
+        }
         $fields = array(
             'registration_ids' => array($device_id),
             'data' => array(
                 'title' => 'Mượn Truyện',
-                'message' => 'Truyện bạn đang theo dõi có cập nhật chương mới',
+                'message' => $message,
                 'vibrate' => 1,
                 'sound' => 1
             )

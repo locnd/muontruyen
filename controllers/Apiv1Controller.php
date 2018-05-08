@@ -48,11 +48,18 @@ class Apiv1Controller extends Controller
     }
     public function actionHome()
     {
-        $model = new Book();
-        $books = $model->get_data(array('status'=>Book::ACTIVE), array(), array(
-            'order' => array('release_date' => SORT_DESC, 'id' => SORT_DESC),
-            'page' => max(1, (int) Yii::$app->request->get('page',1))
-        ));
+        $books = Book::find()->where(array('status'=>Book::ACTIVE));
+        $total = $books->count();
+
+        $limit = get_limit('mobile_limit');
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+        $books = $books->all();
+
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
@@ -68,20 +75,16 @@ class Apiv1Controller extends Controller
                 'count_pages' => 0
             );
         }
-        $count_books = Book::find()->where(array('status'=>Book::ACTIVE))->count();
-        $limit = Yii::$app->params['limit'];
         return array(
             'success' => true,
             'data' => $data,
-            'count_pages' => ceil($count_books/$limit)
+            'count_pages' => $total_page
         );
     }
     public function actionBook()
     {
-        $model = new Book();
         $id = (int) Yii::$app->request->get('id',0);
-        $count_books = Book::find()->where(array('status'=>Book::ACTIVE))->count();
-        $book = $model->get_data(array('id'=>$id, 'status'=>Book::ACTIVE),array(), array(),true);
+        $book = Book::find()->where(array('id'=>$id, 'status'=>Book::ACTIVE))->one();
         if(empty($book)) {
             return array(
                 'success' => false,
@@ -597,10 +600,10 @@ class Apiv1Controller extends Controller
             'book_id' => $book_id,
             'chapter_id' => $chapter_id,
         ))->count();
-        if($count > 2) {
+        if($count > 3) {
             return array(
                 'success' => false,
-                'message' => 'Bạn đã báo lỗi quá nhiều lần cho truyện này'
+                'message' => 'Bạn đã báo lỗi nhiều lần cho truyện này'
             );
         }
         $report = new Report();
@@ -913,7 +916,15 @@ class Apiv1Controller extends Controller
         ]);
         $total = $books->count();
 
-        $limit = Yii::$app->params['limit'];
+        $setting_model = new Setting();
+        $limit = $setting_model->get_setting('mobile_limit');
+        if($limit != '') {
+            $limit = (int) $limit;
+        } else {
+            $limit = Yii::$app->params['limit'];
+            $setting_model->get_setting('mobile_limit', $limit);
+        }
+
         $total_page = ceil($total / $limit);
         $page = max((int) getParam('page', 1),1);
         $page = min($page, $total_page);

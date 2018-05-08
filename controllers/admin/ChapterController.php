@@ -57,7 +57,7 @@ class ChapterController extends Controller
         }
         $total = $chapters->count();
 
-        $limit = 20;
+        $limit = get_limit();
         $total_page = ceil($total / $limit);
         $page = max((int) getParam('page', 1),1);
         $page = min($page, $total_page);

@@ -74,6 +74,16 @@
                             <td class="field"><?php echo 'Created date'; ?></td>
                             <td><?php echo show_date($chapter->created_at);?></td>
                         </tr>
+                        <?php if($reports = app\models\Report::find()->where(array(
+                                'book_id' => $book->id,
+                                'chapter_id' => $chapter->id,
+                                'status' => app\models\Report::STATUS_NEW,
+                            ))->count() > 0) { ?>
+                            <tr class="highlight">
+                                <td class="field"></td>
+                                <td><a href="javascript:;" onclick="mark_fixed()">Báo đã sửa lỗi</a></td>
+                            </tr>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>
@@ -103,6 +113,31 @@
         html += '</div>';
         $('#add-image-form').append(html);
         $('#save-btn').show();
+    }
+    function mark_fixed() {
+        if(confirm('Bạn đã hoàn thành sửa truyện?')) {
+            var params = {};
+            params['book_id'] = $('#book_id').val();
+            params['chapter_id'] = $('#chapter_id').val();
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/fixed';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
     }
     function save_images() {
         var url = '/ajax/addimage';

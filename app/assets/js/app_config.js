@@ -152,7 +152,7 @@ function get_book_list_for_search() {
     var book_list_json = localStorage.getItem("book_list_json");
     var book_list_time = localStorage.getItem("book_list_time");
     if(book_list_time !== null && book_list_time !== '' && book_list_json !== null && book_list_json !== '') {
-        if($.now() < parseInt(book_list_time) + 7200000) {
+        if($.now() < parseInt(book_list_time) + 3600000) {
             var book_list = JSON.parse(book_list_json);
             show_book_list_for_search(book_list);
             return true;

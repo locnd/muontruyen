@@ -26,6 +26,18 @@ function getParam($key, $default='', $method='get') {
     return '';
 }
 
+function get_limit($key='backend_limit') {
+    $setting_model = new app\models\Setting();
+    $limit = $setting_model->get_setting('mobile_limit');
+    if($limit != '') {
+        $limit = (int) $limit;
+    } else {
+        $limit = Yii::$app->params['limit'];
+        $setting_model->set_setting('mobile_limit', $limit);
+    }
+    return $limit;
+}
+
 function dump($data, $exit = true) {
     \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
     echo json_encode($data);

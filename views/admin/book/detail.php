@@ -98,6 +98,16 @@
                             <td class="field"><?php echo 'Created date'; ?></td>
                             <td><?php echo show_date($book->created_at);?></td>
                         </tr>
+                    <?php if($reports = app\models\Report::find()->where(array(
+                        'book_id' => $book->id,
+                        'chapter_id' => 0,
+                        'status' => app\models\Report::STATUS_NEW,
+                    ))->count() > 0) { ?>
+                        <tr class="highlight">
+                            <td class="field"></td>
+                            <td><a href="javascript:;" onclick="mark_fixed()">Báo đã sửa lỗi</a></td>
+                        </tr>
+                    <?php } ?>
                     </tbody>
                 </table>
             </div>
@@ -137,6 +147,7 @@
                                 $will_reload = $chapter->will_reload == 0 ? 'Make Reload' :'Cancel Reload';
                                 ?>
                                 <a onclick="will_reload(<?php echo $chapter->id; ?>)" style="padding: 3px 7px;<?php echo $will_reload=='Cancel Reload'?'background:lightgrey;border-color:lightgrey':'';?>" href="javascript:;" title="<?php echo 'Reload'; ?>" class="btn btn-primary"><?php echo $will_reload; ?></a>
+                                <a onclick="forge_delete(<?php echo $chapter->id; ?>)" class="btn btn-danger pd-3-8"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>
                     <?php } ?>
@@ -207,6 +218,56 @@
             params['_csrf'] = $('#crsf_token').val();
             params['tmp_name'] = $('#tmp_name').val();
             var url = '/ajax/resetchaptername';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+    function mark_fixed() {
+        if(confirm('Bạn đã hoàn thành sửa truyện?')) {
+            var params = {};
+            params['book_id'] = $('#book_id').val();
+            params['chapter_id'] = 0;
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/fixed';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+    function forge_delete(chapter_id) {
+        if(confirm('Bạn có chắc là muốn xoá chương truyện không?')) {
+            var params = {};
+            params['item_id'] = chapter_id;
+            params['item_type'] = 'chapter';
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/deleteitem';
             $.ajax({
                 url: url,
                 type: 'POST',

@@ -17,6 +17,10 @@ body {
     clear: both;
     height: 10px;
 }
+.clear15 {
+    clear: both;
+    height: 15px;
+}
 .a-book .a-title, .a-book .book-title {
     width:100%;
     padding: 5px 0;
@@ -514,4 +518,7 @@ ul.ui-autocomplete.ui-front li {
 }
 a.disable_a {
     pointer-events: none;
+}
+.navbar .nav.navbar-nav>li>a {
+    padding: 10px 25px;
 }

@@ -30,7 +30,7 @@
                                         <tr id="item-<?php echo $report->id; ?>">
                                             <td><?php echo $report->id; ?></td>
                                             <td><?php echo $report->user->name; ?></td>
-                                            <td><a href="/admin/book/detail/<?php echo $report->book->id ?>" target="_blank"><?php echo $report->book->name; ?></a></td>
+                                            <td><a href="/admin/book/detail/<?php echo $report->book->id ?>"><?php echo $report->book->name; ?></a></td>
                                             <td><?php if(!empty($report->chapter)) { ?><a href="/admin/book/chapter/<?php echo $report->chapter->id ?>" target="_blank"><?php echo $report->chapter->name; ?></a><?php } ?></td>
                                             <td><?php echo nl2br($report->content); ?></td>
                                             <td><?php echo $report->status == \app\models\Report::STATUS_FIXED ? 'Fixed' : 'New'; ?></td>

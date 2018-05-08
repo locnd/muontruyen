@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Report;
 use app\models\Scraper;
 use app\models\Setting;
 use Yii;
@@ -140,6 +141,45 @@ class AjaxController extends Controller
         $setting->value = trim($value);
         $setting->save();
 
+        return array(
+            'success' => true
+        );
+    }
+    function actionDeleteitem() {
+        $type = Yii::$app->request->post('item_type', '');
+        $item_id = (int)Yii::$app->request->post('item_id', 0);
+        if($type == 'chapter') {
+            $item = Chapter::find()->where(array('id' => $item_id))->one();
+        }
+        if(empty($item)) {
+            return array(
+                'success' => false,
+                'message' => 'Item not found'
+            );
+        }
+        $item->delete();
+        return array(
+            'success' => true
+        );
+    }
+    function actionFixed() {
+        $reports = Report::find()->where(array(
+            'book_id' => (int)Yii::$app->request->post('book_id', 0),
+            'chapter_id' => (int)Yii::$app->request->post('chapter_id', 0),
+            'status' => Report::STATUS_NEW,
+        ))->all();
+        if(empty($reports)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có báo lỗi nào cho truyện này'
+            );
+        }
+        $scraper = new Scraper();
+        foreach ($reports as $report) {
+            $report->status = Report::STATUS_FIXED;
+            $report->save();
+            $scraper->send_push_notification($report->user_id, 'Truyện đã được sửa lỗi');
+        }
         return array(
             'success' => true
         );

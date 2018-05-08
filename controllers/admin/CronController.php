@@ -28,7 +28,7 @@ class CronController extends Controller
         $this->view->params['page_id'] = 'cron';
 
         $settings = Setting::find()->all();
-        $logs = ScraperLog::find()->limit(100)->orderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC])->all();
+        $logs = ScraperLog::find()->limit(50)->orderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC])->all();
 
         return $this->render('/admin/cron/index', array(
             'settings' => $settings,
