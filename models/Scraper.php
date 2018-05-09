@@ -69,7 +69,7 @@ class Scraper
         if(substr($a_href,0,4) != 'http') {
             $a_href = $server->url.''.$a_href;
         }
-        return $a_href;
+        return str_replace('https:','http:', $a_href);
     }
 
     private function parse_book($server, $a_href)

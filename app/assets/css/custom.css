@@ -4,6 +4,15 @@ body {
     font-size: 16px;
     min-height: 100vh;
 }
+.dl_bg_color {
+    background: lightblue !important;
+}
+.dl_bd_color {
+    border-color: lightblue !important;
+}
+.dl_color {
+    color: lightblue !important;
+}
 .a-book, .form-page {
     background: #fff;
     padding: 10px;
@@ -504,10 +513,11 @@ h3.page-title b {
 }
 ul.ui-autocomplete.ui-front {
     z-index: 1031;
-    background: lightgrey;
+    background: aliceblue;
     max-height: 290px;
     overflow-y: scroll;
     padding: 0;
+    position: fixed !important;
 }
 ul.ui-autocomplete.ui-front li {
     list-style: none;

@@ -17,10 +17,9 @@ function onDeviceReady() {
     push.on('notification', function(data) {
         if ( data.additionalData.foreground ){
             //alert("when the app is active");
-            //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
+            dl_alert('success', data.additionalData.message, false);
         } else {
             //alert("when the app is not active");
-            localStorage.setItem("push_notification", 'true');
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
     });
@@ -66,7 +65,6 @@ $(document).ready(function() {
     check_unread();
     check_alert();
     fullscreen(false);
-    check_push_notification();
     get_book_list_for_search();
 });
 
@@ -253,14 +251,6 @@ function check_alert() {
     }
 }
 
-function check_push_notification() {
-    var check = localStorage.getItem("push_notification");
-    if(check !== null && check !== '') {
-        localStorage.setItem("push_notification", "");
-        window.location.href="follow.html";
-    }
-}
-
 function move_to_top() {
     $("html, body").animate({ scrollTop: 0 }, 500);
     return true;
@@ -277,6 +267,19 @@ function orientation() {
         screen.orientation.lock('landscape');
     } else {
         screen.orientation.lock('portrait');
+    }
+
+    var wid = $('#content').width();
+    if(wid > 1200) {
+        wid = 1010;
+    }
+    var head_style = $('head').find('style');
+    if(head_style.length == 0) {
+        $('head').append('<style>ul.ui-autocomplete.ui-front{ width:'+(wid-30)+'px !important;}</style>');
+    }else {
+        if (head_style.length == 1) {
+            $('head').find('style').html('ul.ui-autocomplete.ui-front{ width:' + (wid - 30) + 'px !important;}');
+        }
     }
 }
 

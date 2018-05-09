@@ -545,6 +545,9 @@ class Apiv1Controller extends Controller
             if($setting_model->get_setting('cron_running') != '') {
                 $options['Cron'] = 'running';
             }
+
+            $options['Số báo lỗi'] = Report::find()->count();
+            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
         }
         return array(
             'success' => true,
