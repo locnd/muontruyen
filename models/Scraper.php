@@ -118,7 +118,7 @@ class Scraper
             echo '---- ' . $slug . "\n";
 
         $image_src = $html_base->find($server->image_key)[0]->src;
-        $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$server->slug.'/'.$slug;
+        $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.'/'.$slug;
 
         $image = $this->save_image($image_src, $image_dir);
 
@@ -221,7 +221,7 @@ class Scraper
         if($this->echo)
             echo '-------- ' . $chapter->name;
 
-        $dir = Yii::$app->params['app'].'/web/uploads/books/'.$chapter->book->server->slug.'/'.$chapter->book->slug.'/chap'.$chapter->id;
+        $dir = Yii::$app->params['app'].'/web/uploads/books/'.$chapter->book->slug.'/chap'.$chapter->id;
 
         $image_urls = array();
         $html_base = $this->get_html_base($chapter->url, true);
@@ -407,7 +407,7 @@ class Scraper
             $slug = $new_slug;
 
             $image_src = $html_base->find($server->image_key)[0]->src;
-            $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$server->slug.'/'.$slug;
+            $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
 
             $image = $this->save_image($image_src, $image_dir);
 

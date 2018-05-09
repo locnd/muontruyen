@@ -191,7 +191,7 @@ function send_api(method, url, params, callback) {
         },
         error: function( xhr ) {
             $('#loading-btn').hide();
-            dl_alert('danger', 'Không thể lấy dữ liệu từ server: '+API_URL + '' + url, false);
+            dl_alert('danger', 'Không thể lấy dữ liệu từ server', false);
         }
     });
 }
@@ -268,19 +268,30 @@ function orientation() {
     } else {
         screen.orientation.lock('portrait');
     }
-
-    var wid = $('#content').width();
-    if(wid > 1200) {
-        wid = 1010;
-    }
-    var head_style = $('head').find('style');
-    if(head_style.length == 0) {
-        $('head').append('<style>ul.ui-autocomplete.ui-front{ width:'+(wid-30)+'px !important;}</style>');
-    }else {
-        if (head_style.length == 1) {
-            $('head').find('style').html('ul.ui-autocomplete.ui-front{ width:' + (wid - 30) + 'px !important;}');
+    setTimeout(function() {
+        var wid = $('#content').width();
+        if(wid > 1200) {
+            wid = 1010;
         }
-    }
+        $('head').find('style').html('ul.ui-autocomplete.ui-front{ width:' + (wid-30) + 'px !important;}');
+
+        var screen = localStorage.getItem("screen");
+        if (screen !== null && screen !== '') {} else {
+            screen = 'normal';
+        }
+        wid = $('#content').width();
+        var mg_r = 0;
+        if(wid > 1200) {
+            mg_r = (wid - 1010)/2;
+        }
+        if(screen == 'fullscreen') {
+            mg_r = 15 + mg_r;
+            $('.btn-fullscreen').css('right', mg_r+'px');
+        } else {
+            mg_r = 155 + mg_r;
+            $('.btn-fullscreen').css('right', mg_r+'px');
+        }
+    }, 1500);
 }
 
 function fullscreen(change) {

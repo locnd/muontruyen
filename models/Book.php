@@ -63,7 +63,7 @@ class Book extends ModelCommon
 
     public function get_image() {
         if(empty($this->image)) {
-            return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/default.jpg';
+            $this->image = 'default.jpg';
         }
         if($this->image == 'default.jpg') {
             if(\Yii::$app->params['use_image_source']) {

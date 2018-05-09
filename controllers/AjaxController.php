@@ -11,6 +11,7 @@ use yii\web\Response;
 use app\models\Book;
 use app\models\Chapter;
 use app\models\Image;
+use yii\web\UploadedFile;
 
 class AjaxController extends Controller
 {
@@ -43,12 +44,40 @@ class AjaxController extends Controller
             );
         }
         $key = Yii::$app->request->post('key','');
-        $value = Yii::$app->request->post('value','');
-        if($key === '' || $value === '') {
-            return array(
-                'success' => false,
-                'message' => 'Chưa điền thông tin'
-            );
+        if($key == 'image') {
+            $image = UploadedFile::getInstanceByName("value");
+            if (!empty($image)) {
+                $ext = pathinfo($image , PATHINFO_EXTENSION);
+                $fileName = "cover." . $ext;
+                $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
+
+                $dir_array = explode('/', $dir);
+                $tmp_dir = '';
+                foreach ($dir_array as $i => $folder) {
+                    $tmp_dir .= '/'.$folder;
+                    if($i > 3 && !file_exists($tmp_dir)) {
+                        mkdir($tmp_dir, 0777);
+                    }
+                }
+
+                if ($image->saveAs($dir . '/' . $fileName)) {
+                    $value = $fileName;
+                }
+            }
+            if (empty($value)) {
+                return array(
+                    'success' => false,
+                    'message' => 'Không thể upload ảnh'
+                );
+            }
+        } else {
+            $value = Yii::$app->request->post('value', '');
+            if ($key === '' || $value === '') {
+                return array(
+                    'success' => false,
+                    'message' => 'Chưa điền thông tin'
+                );
+            }
         }
         $book->$key = $value;
         $book->save();

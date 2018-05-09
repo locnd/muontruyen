@@ -15,7 +15,7 @@ class Image extends ModelCommon
     }
     public function get_image() {
         if(empty($this->image)) {
-            return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/error.jpg';
+            $this->image = 'error.jpg';
         }
         if($this->image == 'error.jpg') {
             if(\Yii::$app->params['use_image_source']) {
@@ -23,6 +23,6 @@ class Image extends ModelCommon
             }
             return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->image;
         }
-        return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->slug.'/chap'.$this->chapter->id.'/'.$this->image;
+        return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->book->slug.'/chap'.$this->chapter->id.'/'.$this->image;
     }
 }

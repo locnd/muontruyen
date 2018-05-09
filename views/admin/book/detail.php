@@ -30,11 +30,15 @@
                             <td><?php echo $book->id;?></td>
                         </tr>
                         <tr class="highlight">
-                            <td class="field"><?php echo 'Image'; ?></td>
+                            <td class="field"><?php echo 'Image'; ?><br>
+                                <a onclick="open_edit('image')" style="padding: 3px 7px;" href="javascript:;" title="<?php echo 'Edit'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-pencil"></i></a>
+                            </td>
                             <td>
-                                <div class="profile-image" style="width: 200px;">
+                                <div id="cur_image" class="profile-image" style="width: 200px;">
                                     <img id="show_profile_image" class="show_profile_image editable" src="<?php echo $book->get_image(); ?>">
                                 </div>
+                                <input type="file" class="form-control" id="new_image" style="display: none">
+                                <button onclick="save('image')" id="btn_image" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
                             </td>
                         </tr>
                         <tr class="highlight">
@@ -164,12 +168,35 @@
         $('#btn_'+attr).toggle();
     }
     function save(attr) {
+        var url = '/ajax/editbook';
+        if(attr == 'image') {
+            var data = new FormData();
+            data.append('book_id', $('#book_id').val());
+            data.append('key', attr);
+            data.append('value', $('#new_image')[0].files[0]);
+            data.append('_csrf', $('#crsf_token').val());
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: data,
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            }).done(function(result) {
+                if(result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            });
+            return true;
+        }
         var params = {};
         params['book_id'] = $('#book_id').val();
         params['key'] = attr;
         params['value'] = $('#new_'+attr).val();
         params['_csrf'] = $('#crsf_token').val();
-        var url = '/ajax/editbook';
         $.ajax({
             url: url,
             type: 'POST',
