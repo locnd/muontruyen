@@ -130,6 +130,25 @@ class Scraper
             $tags[] = ucfirst(strtolower(trim(html_entity_decode($tag->plaintext))));
         }
 
+        $author = $html_base->find($server->list_authors_key)[0];
+        $author_str = ucfirst(strtolower(trim(html_entity_decode($author->plaintext))));
+        if($author_str != 'Đang cập nhật') {
+            $authors = $author->find('a');
+            foreach ($authors as $author) {
+                $tags[] = 'Tác giả: '.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+            }
+        }
+
+        $status = $html_base->find($server->status_key)[0];
+        $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
+        if($status_str == 'Hoàn thành') {
+            $tags[] = $status_str;
+        }
+
+        if(in_array('One shot', $tags) && !in_array('Hoàn thành', $tags)) {
+            $tags[] = 'Hoàn thành';
+        }
+
         $html_base->clear();
         unset($html_base);
 
@@ -188,11 +207,15 @@ class Scraper
                 continue;
             }
             if(empty($db_chapter)) {
-                $dem++;
                 $name = strtolower(html_entity_decode($chapter->plaintext));
                 $name = str_replace('chapter','chương',$name);
                 $name = str_replace('chap','chương',$name);
                 $name = trim(str_replace('chuong','chương',$name));
+
+                if (strpos($name, 'raw') !== false) {
+                    continue;
+                }
+                $dem++;
 
                 $db_chapter = new Chapter();
                 $db_chapter->book_id = $book->id;
@@ -384,6 +407,7 @@ class Scraper
         }
         return $image;
     }
+
     public function reload_book($book) {
         if($this->echo) {
             echo '---- ' . $book->slug . "\n";
@@ -417,6 +441,25 @@ class Scraper
             $tags = array();
             foreach ($tags_arr as $tag) {
                 $tags[] = ucfirst(strtolower(trim(html_entity_decode($tag->plaintext))));
+            }
+
+            $author = $html_base->find($server->list_authors_key)[0];
+            $author_str = ucfirst(strtolower(trim(html_entity_decode($author->plaintext))));
+            if($author_str != 'Đang cập nhật') {
+                $authors = $author->find('a');
+                foreach ($authors as $author) {
+                    $tags[] = 'Tác giả: '.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+                }
+            }
+
+            $status = $html_base->find($server->status_key)[0];
+            $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
+            if($status_str == 'Hoàn thành') {
+                $tags[] = $status_str;
+            }
+
+            if(in_array('One shot', $tags) && !in_array('Hoàn thành', $tags)) {
+                $tags[] = 'Hoàn thành';
             }
 
             $html_base->clear();

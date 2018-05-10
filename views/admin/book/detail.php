@@ -117,7 +117,7 @@
             </div>
         </div>
         <div class="row">
-            <h4 style="float: left;margin-left: 10px;"><?php echo count($chapters); ?> chương</h4>
+            <h4 style="float: left;margin-left: 10px;"><?php echo $total; ?> chương</h4>
             <a onclick="sort_chapters()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-sort"></i></a>
             <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
             <input placeholder="remove string" type="text" class="form-control" id="tmp_name" style="width:200px;float:right;margin-right:10px;">
@@ -157,6 +157,15 @@
                     <?php } ?>
                     </tbody>
                 </table>
+            </div>
+            <div class="row">
+                <?php echo \Yii::$app->view->render('/layouts/partials/pagging', array(
+                    'url' => '/admin/book/detail/'.$book->id,
+                    'total' => $total,
+                    'page' => $page,
+                    'filters' => array(),
+                    'limit' => $limit
+                )); ?>
             </div>
         </div>
     </div>

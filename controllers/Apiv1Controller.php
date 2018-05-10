@@ -132,7 +132,7 @@ class Apiv1Controller extends Controller
             }
             $chapters[] = $tmp_data;
         }
-        $tags = Tag::find()->where(array('status' => Tag::ACTIVE))->all();
+        $tags = Tag::find()->where(array('status' => Tag::ACTIVE))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
         $tag_data = array();
         foreach ($tags as $tag) {
             $tmp = $tag->to_array();
@@ -496,7 +496,7 @@ class Apiv1Controller extends Controller
         );
     }
     public function actionTags() {
-        $tags = Tag::find()->where(array('status'=>Tag::ACTIVE))->orderBy(array('slug' => SORT_ASC, 'id' => SORT_DESC))->all();
+        $tags = Tag::find()->where(array('status'=>Tag::ACTIVE))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
         $data = array();
         foreach ($tags as $tag) {
             $tmp = $tag->to_array();

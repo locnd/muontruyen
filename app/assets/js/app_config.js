@@ -17,11 +17,12 @@ function onDeviceReady() {
     push.on('notification', function(data) {
         if ( data.additionalData.foreground ){
             //alert("when the app is active");
-            dl_alert('success', data.additionalData.message, false);
+            dl_alert('success', data.message, false);
         } else {
             //alert("when the app is not active");
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
+        check_unread();
     });
 
     push.on('error', function(e) {

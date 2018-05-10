@@ -76,9 +76,25 @@ class BookController extends Controller
         if(empty($book)) {
             throw new \yii\base\Exception( "Book not found" );
         }
+
+        $chapters = Chapter::find()->where(array('book_id'=>$book->id));
+        $total = $chapters->count();
+
+        $limit = get_limit();
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $chapters->limit($limit)->offset($offset)->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC]);
+        $chapters = $chapters->all();
+
         return $this->render('/admin/book/detail', array(
             'book' => $book,
-            'chapters' => Chapter::find()->where(array('book_id'=>$book->id))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all()
+            'chapters' => $chapters,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit
         ));
     }
     public function actionChapter($id) {
@@ -87,9 +103,9 @@ class BookController extends Controller
         if(empty($chapter)) {
             throw new \yii\base\Exception( "Chapter not found" );
         }
-        return $this->render('/admin/book/chapter', array(
+        return $this->render('/admin/chapter/detail', array(
             'chapter' => $chapter,
-            'images' => Image::find()->where(array('chapter_id'=>$chapter->id))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all()
+            'images' => Image::find()->where(array('chapter_id'=>$chapter->id))->orderBy(['stt' => SORT_ASC, 'id' => SORT_DESC])->all()
         ));
     }
 }

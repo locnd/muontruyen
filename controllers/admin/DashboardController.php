@@ -2,8 +2,12 @@
 
 namespace app\controllers\admin;
 
+use app\models\Scraper;
 use yii\web\Controller;
 use app\models\User;
+use app\models\Book;
+use app\models\Chapter;
+use app\models\Image;
 use Yii;
 
 class DashboardController extends Controller
@@ -20,7 +24,24 @@ class DashboardController extends Controller
         } else {
             return $this->redirect('/admin/login');
         }
-        return $this->render('index');
+
+        $data = array();
+        $data['count_users'] = User::find()->count();
+        $data['count_books'] = Book::find()->count();
+        $data['count_chapters'] = Chapter::find()->count();
+        $data['count_images'] = Image::find()->count();
+
+        $data['users'] = User::find()->all();
+        if (Yii::$app->request->post()){
+            $user_id = Yii::$app->request->post('user_id');
+            $message = Yii::$app->request->post('message');
+            if(!empty($user_id) && !empty($message)) {
+                $scraper = new Scraper();
+                $scraper->send_push_notification($user_id, $message);
+            }
+        }
+
+        return $this->render('index', $data);
     }
 
     public function actionLogin() {

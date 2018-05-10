@@ -73,6 +73,9 @@ function echo_input($option = array(), $select_options = array(), $default = '')
     if($option['type'] == 'select') {
         $html_tag = '<select ';
     }
+    if($option['type'] == 'textarea') {
+        $html_tag = '<textarea ';
+    }
     foreach ($option as $key => $value) {
         if(in_array($key, array('required', 'checked'))) {
             if($value) {
@@ -92,6 +95,10 @@ function echo_input($option = array(), $select_options = array(), $default = '')
             }
         }
         $html_tag .= '</select>';
+    }
+    if($option['type'] == 'textarea') {
+        $html_tag .= $default;
+        $html_tag .= '</textarea>';
     }
     echo $html_tag;
 }
