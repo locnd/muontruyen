@@ -589,7 +589,8 @@ function login() {
     var params = {
         username: $.trim($('#username').val()),
         password: $('#password').val(),
-        device_id: localStorage.getItem("device_id", '')
+        device_id: localStorage.getItem("device_id", ''),
+        app_version: APP_VERSION
     };
     send_api('POST', '/login', params, function(res) {
         $('#loading-btn').hide();
@@ -623,7 +624,8 @@ function register() {
         email: $.trim($('#email').val()),
         password: $('#password').val(),
         password2: $('#password2').val(),
-        device_id: localStorage.getItem("device_id", '')
+        device_id: localStorage.getItem("device_id", ''),
+        app_version: APP_VERSION
     };
     send_api('POST', '/register', params, function(res) {
         $('#loading-btn').hide();
