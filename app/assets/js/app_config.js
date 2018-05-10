@@ -290,7 +290,7 @@ function orientation() {
             mg_r = 15 + mg_r;
             $('.btn-fullscreen').css('right', mg_r+'px');
         } else {
-            mg_r = 155 + mg_r;
+            mg_r = 150 + mg_r;
             $('.btn-fullscreen').css('right', mg_r+'px');
         }
     }, 1500);
@@ -322,7 +322,7 @@ function fullscreen(change) {
         $('#content').css('padding-bottom', '0');
         $('#content .container .col-md-12').css('padding', '0 5px');
     } else {
-        mg_r = 155 + mg_r;
+        mg_r = 150 + mg_r;
         $('#header').show();
         $('#footer-copyright').show();
         $('.btn-fullscreen').css('right', mg_r+'px');

@@ -57,10 +57,7 @@ function display_a_book(book) {
     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
     html += '<div class="a-description">';
-    if(book.description.length > 300) {
-        book.description = book.description.substr(0, 300) + '...';
-    }
-    html += '<span>'+book.description+'</span>';
+    html += '<span>'+get_mini_description(book.description, 100)+'</span>';
     html += '</div>';
     html += '<div class="clear5"></div>';
     html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
@@ -178,7 +175,7 @@ function display_book_info(book, is_following, tags) {
     if(tag_html == '') {
         html += '<div style="margin-bottom:10px">* Truyện chưa ngắn thẻ tag</div>';
     } else {
-        html += '<div style="float:left;">Tags:</div>';
+        html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
         html += tag_html;
     }
     html += '<div class="clear10" style="height:0"></div>';
@@ -549,10 +546,7 @@ function show_follow(tab, is_first) {
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
                     html += '<div class="a-description" style="width:calc(100% - 92px)">';
-                    if(book.description.length > 300) {
-                        book.description = book.description.substr(0, 300) + '...';
-                    }
-                    html += '<span>'+book.description+'</span>';
+                    html += '<span>'+get_mini_description(book.description, 100)+'</span>';
                     html += '<div class="clear5"></div>';
                     html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
                     html += '</div>';
@@ -579,6 +573,18 @@ function show_follow(tab, is_first) {
             dl_alert('danger', res.message, false);
         }
     });
+}
+
+function get_mini_description(description, count) {
+    var description_arr = description.split(' ');
+    if(description_arr.length > count) {
+        description = '';
+        for(var j=0;j<count;j++) {
+            description += description_arr[j]+' ';
+        }
+        description = $.trim(description) + '...';
+    }
+    return description;
 }
 
 function login() {

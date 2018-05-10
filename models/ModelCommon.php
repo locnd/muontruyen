@@ -65,12 +65,8 @@ class ModelCommon extends \yii\db\ActiveRecord
         $tmp_data = array();
         foreach ($this as $k => $v) {
             $tmp_data[$k] = $v;
-            if($k == 'image' && ($v == 'default.jpg' || $v == 'error.jpg')) {
-                if(Yii::$app->params['use_image_source']) {
-                    $tmp_data['image'] = $this->image_source;
-                } else {
-                    $tmp_data['image'] = Url::home(true).'uploads/books/'.$this->image;
-                }
+            if($k == 'image') {
+                $tmp_data['image'] = $this->get_image();
             }
             if($k == 'release_date') {
                 $tmp_data['release_date'] = date('d-m-Y H:i',strtotime($this->release_date));

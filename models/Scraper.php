@@ -185,7 +185,15 @@ class Scraper
         if(empty($html_base)) {
             return 0;
         }
-        $chapters = $html_base->find($book->server->list_chapters_key);
+        $server = $book->server;
+
+        $status = $html_base->find($server->status_key)[0];
+        $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
+        if($status_str == 'Hoàn thành') {
+            $book->add_tag($status_str);
+        }
+
+        $chapters = $html_base->find($server->list_chapters_key);
         if(count($chapters) == 0) {
             $html_base->clear();
             unset($html_base);
@@ -195,7 +203,7 @@ class Scraper
         $dem = 0;
         $chap_skip = 0;
         foreach ($chapters as $num => $chapter) {
-            $url = $this->get_full_href($book->server, $chapter->href);
+            $url = $this->get_full_href($server, $chapter->href);
             $db_chapter = Chapter::find()->where(array('url' => $url))->one();
             if(!empty($db_chapter) &&
                 ($db_chapter->status == Chapter::INACTIVE || $db_chapter->will_reload == 1)) {
@@ -244,12 +252,15 @@ class Scraper
         if($this->echo)
             echo '-------- ' . $chapter->name;
 
-        $dir = Yii::$app->params['app'].'/web/uploads/books/'.$chapter->book->slug.'/chap'.$chapter->id;
+        $book = $chapter->book;
+        $server = $book->server;
+
+        $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/chap'.$chapter->id;
 
         $image_urls = array();
         $html_base = $this->get_html_base($chapter->url, true);
         if(!empty($html_base)) {
-            $images = $html_base->find($chapter->book->server->images_key);
+            $images = $html_base->find($server->images_key);
             foreach ($images as $id=>$image) {
                 $image_src = $image->src;
                 if(empty($image_src)) {
@@ -469,18 +480,15 @@ class Scraper
                 $book->add_tag($tag);
             }
 
-            $book->status = Book::ACTIVE;
             $book->image_source = $image_src;
             $book->image = $image;
             $book->name = $title;
             $book->slug = $slug;
             $book->description = $description;
-            $book->release_date = date('Y-m-d H:i:s');
-            $book->save();
         }
-        if($book->status == Book::INACTIVE) {
-            return true;
-        }
+        $book->release_date = date('Y-m-d H:i:s');
+        $book->status = Book::ACTIVE;
+        $book->save();
         $this->get_chapters($book, false);
     }
     public function reload_chapter($chapter) {

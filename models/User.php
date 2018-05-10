@@ -93,29 +93,31 @@ class User extends ModelCommon implements IdentityInterface
                 $user->token = $this->randomToken();
             }
         }
-        if(!empty($data['device_id'])) {
-            $user->set_device($data);
-        }
+        $user->set_device($data);
         $user->last_login = date('Y-m-d H:i:s');
         $user->save();
         return $user;
     }
 
     private function set_device($device) {
-        $device = Device::find()->where(array('user_id'=>$this->id))->one();
-        if(empty($device)) {
-            $device = new Device();
-            $device->user_id = $this->id;
+        $db_device = Device::find()->where(array('user_id'=>$this->id))->one();
+        if(empty($db_device)) {
+            $db_device = new Device();
+            $db_device->user_id = $this->id;
         }
-        $device->device_id = $device['device_id'];
+        if(!empty($device['device_id'])) {
+            $db_device->device_id = $device['device_id'];
+        }
         if(!empty($device['app_version'])) {
-            $device->app_version = $device['app_version'];
+            $db_device->app_version = $device['app_version'];
         }
-        $device->save();
-        $db_devices = Device::find()->where(array('device_id'=>$device['device_id']))->orWhere(array('user_id'=>$this->id))->all();
-        foreach ($db_devices as $db_device) {
-            if($db_device->id != $device->id) {
-                $db_device->delete();
+        $db_device->save();
+        if(!empty($device['device_id'])) {
+            $db_devices = Device::find()->where(array('device_id' => $device['device_id']))->orWhere(array('user_id' => $this->id))->all();
+            foreach ($db_devices as $in_db_device) {
+                if ($in_db_device->id != $db_device->id) {
+                    $in_db_device->delete();
+                }
             }
         }
     }
@@ -178,9 +180,7 @@ class User extends ModelCommon implements IdentityInterface
             $user->token = $this->randomToken();
         }
         $user->save();
-        if(!empty($data['device_id'])) {
-            $user->set_device($data);
-        }
+        $user->set_device($data);
         return $user;
     }
 
