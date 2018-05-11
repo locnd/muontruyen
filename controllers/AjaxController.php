@@ -295,4 +295,39 @@ class AjaxController extends Controller
             'success' => true
         );
     }
+    public function actionIgnorebook() {
+        $book_id = (int) Yii::$app->request->post('book_id',0);
+        $book = Book::find()->where(array('id'=>$book_id))->one();
+        if(empty($book)) {
+            return array(
+                'success' => false,
+                'message' => 'Book not found'
+            );
+        }
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+        foreach ($chapters as $stt =>$chapter) {
+            Yii::$app->db->createCommand("
+                DELETE FROM dl_images 
+                WHERE chapter_id = '$chapter->id'
+            ")->execute();
+        }
+        Yii::$app->db->createCommand("
+                DELETE FROM dl_chapters 
+                WHERE book_id = '$book_id'
+            ")->execute();
+
+        $book->status = Book::INACTIVE;
+        $book->will_reload = 0;
+        if($book->image != 'default.jpg') {
+            $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/'.$book->image;
+            if(file_exists($dir)) {
+                unlink($dir);
+            }
+            $book->image = 'default.jpg';
+        }
+        $book->save();
+        return array(
+            'success' => true
+        );
+    }
 }

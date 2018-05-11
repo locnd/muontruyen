@@ -20,6 +20,7 @@
             <li <?php echo (in_array($page_id, array('chapter_list','chapter_detail')))?'class="active"':'';?>><a href="/admin/chapter"><i class="fa fa-file"></i> <span><?php echo 'Chapters'; ?></span></a></li>
             <li <?php echo $page_id=='cron'?'class="active"':'';?>><a href="/admin/cron"><i class="fa fa-exchange"></i> <span><?php echo 'Cron'; ?></span></a></li>
             <li <?php echo $page_id=='report'?'class="active"':'';?>><a href="/admin/report"><i class="fa fa-bug"></i> <span><?php echo 'Reports'; ?></span></a></li>
+            <li <?php echo $page_id=='device'?'class="active"':'';?>><a href="/admin/device"><i class="fa fa-tablet"></i> <span><?php echo 'Devices'; ?></span></a></li>
             <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
         </ul>
     </div>

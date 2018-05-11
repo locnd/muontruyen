@@ -118,8 +118,9 @@
         </div>
         <div class="row">
             <h4 style="float: left;margin-left: 10px;"><?php echo $total; ?> chương</h4>
+            <a onclick="ignore_book()" style="padding: 3px 7px;float: right;margin-right: 10px;" class="btn btn-danger"><i class="fa fa-trash"></i></a>
             <a onclick="sort_chapters()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-sort"></i></a>
-            <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
+            <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Reset'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
             <input placeholder="remove string" type="text" class="form-control" id="tmp_name" style="width:200px;float:right;margin-right:10px;">
             <div class="col-sm-12">
                 <table class="table table-striped table-bordered data-table admin-table">
@@ -328,6 +329,30 @@
             params['chapter_id'] = chapter_id;
             params['_csrf'] = $('#crsf_token').val();
             var url = '/ajax/reloadchapter';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+    function ignore_book() {
+        if(confirm('Bạn có chắc là xoá truyện không?')) {
+            var params = {};
+            params['book_id'] = $('#book_id').val();
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/ignorebook';
             $.ajax({
                 url: url,
                 type: 'POST',
