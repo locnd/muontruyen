@@ -335,6 +335,9 @@ function fullscreen(change) {
 }
 
 function get_cache(key) {
+    if(is_admin()) {
+        return '';
+    }
     var json = localStorage.getItem(key);
     var time = localStorage.getItem(key+"_time");
     if(json !== null && json !== '' && time !== null && time !== '') {

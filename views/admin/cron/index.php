@@ -64,9 +64,9 @@
                                     <tr id="item-<?php echo $log->id; ?>">
                                         <td><?php echo $log->id; ?></td>
                                         <td><?php echo $log->type; ?></td>
-                                        <td><?php echo $log->number_servers; ?></td>
-                                        <td><?php echo $log->number_books; ?></td>
-                                        <td><?php echo $log->number_chapters; ?></td>
+                                        <td><?php echo show_number($log->number_servers); ?></td>
+                                        <td><?php echo show_number($log->number_books); ?></td>
+                                        <td><?php echo show_number($log->number_chapters); ?></td>
                                         <td><?php echo date('d-m-Y H:i:s',strtotime($log->updated_at)); ?></td>
                                         <td><?php echo date('d-m-Y H:i:s',strtotime($log->created_at)); ?></td>
                                     </tr>

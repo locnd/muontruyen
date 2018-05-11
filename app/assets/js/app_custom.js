@@ -476,7 +476,7 @@ function show_chapter(id) {
             html+='<div class="clear10"></div>';
             html+='</div>';
             var paging_html = '';
-            paging_html+='<select id="chapter_selecter" class="select-chap" onchange="change_chapter()">';
+            paging_html+='<select class="select-chap" onchange="change_chapter(this)">';
             for(var i=0;i<chapters.length;i++) {
                 var a_chapter = chapters[i];
                 if(a_chapter.id == chapter.id) {
@@ -521,9 +521,9 @@ function show_chapter(id) {
     });
 }
 
-function change_chapter() {
-    var chapter = $("#chapter_selecter").val();
-    window.location.href = 'chapter.html?id='+chapter;
+function change_chapter(ele) {
+    var chapter_id = $(ele).val();
+    window.location.href = 'chapter.html?id='+chapter_id;
 }
 
 function show_follow(tab, is_first) {
@@ -787,7 +787,7 @@ function show_profile() {
             html += '<span>'+res.data.email+'</span>';
             html += '</div>';
             html += '<div class="a-profile">';
-            html += '<span><input id="open_form_btn" class="dl-btn-default" type="button" value="Đổi mật khẩu" onclick="show_change_password()"></span>';
+            html += '<span><input style="border:1px solid lightgrey" id="open_form_btn" class="dl-btn-default" type="button" value="Đổi mật khẩu" onclick="show_change_password()"></span>';
             html += '</div>';
 
             html += '<div id="change-password-form" style="display:none">';

@@ -10,7 +10,7 @@ if(!isset($sort)) {
 } ?>
 <div class="col-sm-12">
     <div class="dataTables_info">
-        <?php echo 'Hiiển thị từ '.max($from, 0).' đến '.$to.' trong tổng số '.number_format ( $total , 0 , "," , "." ).' kết quả'; ?>
+        <?php echo 'Hiiển thị từ '.show_number(max($from, 0)).' đến '.show_number($to).' trong tổng số '.show_number($total).' kết quả'; ?>
     </div>
 </div>
 <?php if ($total > $limit) { ?>
@@ -31,7 +31,7 @@ if(!isset($sort)) {
                 <?php } else { ?>
                 <li class="paginate_button">
                 <?php } ?>
-                    <a href="<?php echo make_page_url($url, $filters, $sort, $i); ?>"><?php echo $i; ?></a>
+                    <a href="<?php echo make_page_url($url, $filters, $sort, $i); ?>"><?php echo show_number($i); ?></a>
                 </li>
                 <?php }
                 if ($page == $total_page) { ?>

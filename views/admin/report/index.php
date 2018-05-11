@@ -29,9 +29,13 @@
                                     <?php foreach ($reports as $report) { ?>
                                         <tr id="item-<?php echo $report->id; ?>">
                                             <td><?php echo $report->id; ?></td>
-                                            <td><?php echo $report->user->name; ?></td>
+                                            <td>
+                                                <?php if(!empty($report->user)) { ?>
+                                                    <a href="/admin/user/detail/<?php echo $report->user->id; ?>"><?php echo $report->user->name; ?></a>
+                                                <?php } ?>
+                                            </td>
                                             <td><a href="/admin/book/detail/<?php echo $report->book->id ?>"><?php echo $report->book->name; ?></a></td>
-                                            <td><?php if(!empty($report->chapter)) { ?><a href="/admin/book/chapter/<?php echo $report->chapter->id ?>" target="_blank"><?php echo $report->chapter->name; ?></a><?php } ?></td>
+                                            <td><?php if(!empty($report->chapter)) { ?><a href="/admin/book/chapter/<?php echo $report->chapter->id ?>"><?php echo $report->chapter->name; ?></a><?php } ?></td>
                                             <td><?php echo nl2br($report->content); ?></td>
                                             <td><?php echo $report->status == \app\models\Report::STATUS_FIXED ? 'Fixed' : 'New'; ?></td>
                                             <td><?php echo date('d-m-Y H:i:s',strtotime($report->created_at)); ?></td>

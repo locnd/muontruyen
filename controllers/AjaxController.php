@@ -323,8 +323,8 @@ class AjaxController extends Controller
             if(file_exists($dir)) {
                 unlink($dir);
             }
-            $book->image = 'default.jpg';
         }
+        $book->image = 'default.jpg';
         $book->save();
         return array(
             'success' => true

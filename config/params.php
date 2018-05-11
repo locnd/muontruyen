@@ -26,6 +26,10 @@ function getParam($key, $default='', $method='get') {
     return '';
 }
 
+function show_number($num, $dec=0) {
+    return number_format($num, $dec, ',','.');
+}
+
 function get_limit($key='backend_limit') {
     $setting_model = new app\models\Setting();
     $limit = $setting_model->get_setting('mobile_limit');
