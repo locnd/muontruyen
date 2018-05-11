@@ -14,6 +14,10 @@ class Book extends ModelCommon
     {
         return $this->hasMany(Chapter::className(), ['book_id' => 'id'])->where(array('status'=>Chapter::ACTIVE))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC]);
     }
+    public function getLastChapter()
+    {
+        return $this->hasOne(Chapter::className(), ['book_id' => 'id'])->where(array('status'=>Chapter::ACTIVE))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC]);
+    }
     public function getServer()
     {
         return $this->hasOne(Server::className(), ['id' => 'server_id']);

@@ -12,4 +12,14 @@ class Device extends ModelCommon
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
+
+    public function add_device($device_id, $app_version) {
+        $device = Device::find()->where(array('device_id' => $device_id))->count();
+        if($device == 0) {
+            $device = new Device();
+            $device->device_id = $device_id;
+            $device->app_version = $app_version;
+            $device->save();
+        }
+    }
 }

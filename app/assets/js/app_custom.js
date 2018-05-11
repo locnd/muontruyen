@@ -1,33 +1,44 @@
 
 function show_home(page) {
+    var res = get_cache('home_'+page);
+    if(res != '') {
+        show_home_content(res, page);
+        return true;
+    }
     var params = {
-        page: page
+        page: page,
+        device_id: localStorage.getItem("device_id", ''),
+        app_version: APP_VERSION
     };
     send_api('GET', '/home', params, function(res) {
         if (res.success) {
-            for(var i=0;i<res.data.length;i++) {
-                display_a_book(res.data[i]);
-            }
-            if(res.count_pages > 1) {
-                var pages = [];
-                for (var i=1;i<=res.count_pages;i++) {
-                    if (res.count_pages > 3) {
-                        if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
-                            pages.push(i);
-                            continue;
-                        }
-                        if (i < page - 1 || i > page + 1) {
-                            continue;
-                        }
-                    }
-                    pages.push(i);
-                }
-                display_paging('index.html?page=',pages, page, res.count_pages);
-            }
+            set_cache('home_'+page, res);
+            show_home_content(res, page);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
+}
+function show_home_content(res,page) {
+    for(var i=0;i<res.data.length;i++) {
+        display_a_book(res.data[i]);
+    }
+    if(res.count_pages > 1) {
+        var pages = [];
+        for (var i=1;i<=res.count_pages;i++) {
+            if (res.count_pages > 3) {
+                if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                    pages.push(i);
+                    continue;
+                }
+                if (i < page - 1 || i > page + 1) {
+                    continue;
+                }
+            }
+            pages.push(i);
+        }
+        display_paging('index.html?page=',pages, page, res.count_pages);
+    }
 }
 function display_paging(url,pages, current_page, total_page) {
     var html = '<ul class="a-pagging">';
@@ -465,7 +476,7 @@ function show_chapter(id) {
             html+='<div class="clear10"></div>';
             html+='</div>';
             var paging_html = '';
-            paging_html+='<select id="chapter_selecter" class="select-chap" onchange="change_chapter('+book.id+')">';
+            paging_html+='<select id="chapter_selecter" class="select-chap" onchange="change_chapter()">';
             for(var i=0;i<chapters.length;i++) {
                 var a_chapter = chapters[i];
                 if(a_chapter.id == chapter.id) {
@@ -510,7 +521,7 @@ function show_chapter(id) {
     });
 }
 
-function change_chapter(id) {
+function change_chapter() {
     var chapter = $("#chapter_selecter").val();
     window.location.href = 'chapter.html?id='+chapter;
 }
@@ -863,50 +874,34 @@ function change_password() {
 }
 
 function show_tags() {
+    var res = get_cache('tags_list');
+    if(res != '') {
+        show_tags_list(res);
+        return true;
+    }
     send_api('GET', '/tags', {}, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Danh sách <b>thẻ tag</b> ('+res.total+' kết quả)');
-            $('h3.page-title').show();
-            if(res.total > 0) {
-                for (var i = 0; i < res.data.length; i++) {
-                    display_a_tag(res.data[i]);
-                }
-            }
+            set_cache('tags_list');
+            show_tags_list(res);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
+function show_tags_list(res) {
+    $('h3.page-title').html('Danh sách <b>thẻ tag</b> ('+res.total+' kết quả)');
+    $('h3.page-title').show();
+    if(res.total > 0) {
+        for (var i = 0; i < res.data.length; i++) {
+            display_a_tag(res.data[i]);
+        }
+    }
+    $('#list-books .a-book').show();
+}
 
 function show_number(num) {
     num = ''+num;
     return num.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
-}
-function scraper() {
-    if(!is_logined()) {
-        dl_alert('danger', 'Vui lòng đăng nhập', false);
-        return true;
-    }
-    if(!is_admin()) {
-        dl_alert('danger', 'Không có quyền thực hiện', false);
-        return true;
-    }
-    if($('#loading-btn').is(":visible")) {
-        return true;
-    }
-    if(confirm('Bạn có chắc là muốn lấy thêm truyện không ?')) {
-        $('#loading-btn').show();
-        $('#scraper-btn').hide();
-        send_api('POST', '/scraper', {}, function (res) {
-            $('#loading-btn').hide();
-            $('#scraper-btn').show();
-            if (res.success) {
-                window.location.reload();
-            } else {
-                dl_alert('danger', res.message, false);
-            }
-        });
-    }
 }
 function edit_name(chapter_id) {
     $('#chapter_id').val(chapter_id);
@@ -992,7 +987,30 @@ function save_data() {
         });
     }
 }
+function convertToSlug(str)
+{
+    str = str.replace(/^\s+|\s+$/g, ''); // trim
+    str = str.toLowerCase();
+
+    // remove accents, swap ñ for n, etc
+    var from = "áăạäặâàấãåčçćďéěëèêẽĕȇíìîïňñóöòôõøðřŕšťúůüùûýÿžþÞđßÆa·/_,:;";
+    var to   = "aaaaaaaaaacccdeeeeeeeeiiiinnooooooorrstuuuuuyyzbbdbaa------";
+    for (var i=0, l=from.length ; i<l ; i++) {
+        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+    }
+
+    str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+        .replace(/\s+/g, '-') // collapse whitespace and replace by -
+        .replace(/-+/g, '-'); // collapse dashes
+
+    return str.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-');
+}
 function show_search(keyword, page) {
+    var res = get_cache(convertToSlug(keyword)+'_'+page);
+    if(res != '') {
+        show_search_result(res, keyword, page);
+        return true;
+    }
     var params = {
         keyword: keyword,
         page: page
@@ -1001,66 +1019,79 @@ function show_search(keyword, page) {
     $('h3.page-title').show();
     send_api('GET', '/search', params, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Tìm kiếm "<b>'+keyword+'</b>" ('+res.total+' kết quả)');
-            $('h3.page-title').show();
-            if(res.total > 0) {
-                for(var i=0;i<res.data.length;i++) {
-                    display_a_book(res.data[i]);
-                }
-            }
-            if(res.count_pages > 1) {
-                var pages = [];
-                for (var i=1;i<=res.count_pages;i++) {
-                    if (res.count_pages > 3) {
-                        if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
-                            pages.push(i);
-                            continue;
-                        }
-                        if (i < page - 1 || i > page + 1) {
-                            continue;
-                        }
-                    }
-                    pages.push(i);
-                }
-                display_paging('search.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
-            }
+            set_cache(convertToSlug(keyword)+'_'+page, res)
+            show_search_result(res, keyword, page);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
+function show_search_result(res, keyword, page) {
+    $('h3.page-title').html('Tìm kiếm "<b>'+keyword+'</b>" ('+res.total+' kết quả)');
+    $('h3.page-title').show();
+    if(res.total > 0) {
+        for(var i=0;i<res.data.length;i++) {
+            display_a_book(res.data[i]);
+        }
+    }
+    if(res.count_pages > 1) {
+        var pages = [];
+        for (var i=1;i<=res.count_pages;i++) {
+            if (res.count_pages > 3) {
+                if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                    pages.push(i);
+                    continue;
+                }
+                if (i < page - 1 || i > page + 1) {
+                    continue;
+                }
+            }
+            pages.push(i);
+        }
+        display_paging('search.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
+    }
+}
 function show_tag(tag_id, page) {
+    var res = get_cache('tag_'+tag_id+'_'+page);
+    if(res != '') {
+        show_tag_result(res, page);
+        return true;
+    }
     var params = {
         tag_id: tag_id,
         page: page
     };
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Thẻ tag "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
-            $('h3.page-title').show();
-            if(res.total > 0) {
-                for (var i = 0; i < res.data.length; i++) {
-                    display_a_book(res.data[i]);
-                }
-            }
-            if(res.count_pages > 1) {
-                var pages = [];
-                for (var i=1;i<=res.count_pages;i++) {
-                    if (res.count_pages > 3) {
-                        if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
-                            pages.push(i);
-                            continue;
-                        }
-                        if (i < page - 1 || i > page + 1) {
-                            continue;
-                        }
-                    }
-                    pages.push(i);
-                }
-                display_paging('tag.html?id='+tag_id+'&page=',pages, page, res.count_pages);
-            }
+            set_cache('tag_'+tag_id+'_'+page, res);
+            show_tag_result(res, page);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
+}
+function show_tag_result(res, page) {
+    $('h3.page-title').html('Thẻ tag "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
+    $('h3.page-title').show();
+    if(res.total > 0) {
+        for (var i = 0; i < res.data.length; i++) {
+            display_a_book(res.data[i]);
+        }
+    }
+    if(res.count_pages > 1) {
+        var pages = [];
+        for (var i=1;i<=res.count_pages;i++) {
+            if (res.count_pages > 3) {
+                if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                    pages.push(i);
+                    continue;
+                }
+                if (i < page - 1 || i > page + 1) {
+                    continue;
+                }
+            }
+            pages.push(i);
+        }
+        display_paging('tag.html?id='+tag_id+'&page=',pages, page, res.count_pages);
+    }
 }

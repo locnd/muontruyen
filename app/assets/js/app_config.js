@@ -20,6 +20,7 @@ function onDeviceReady() {
             dl_alert('success', data.message, false);
         } else {
             //alert("when the app is not active");
+            window.location.reload();
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
         check_unread();
@@ -29,7 +30,7 @@ function onDeviceReady() {
         dl_alert('danger', e.message, false);
     });
 }
-var APP_VERSION = '1.0.1';
+var APP_VERSION = '1.0.2';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -106,7 +107,7 @@ $(document).ready(function() {
 });
 
 function checkLogin(is_need_login) {
-    if(is_need_login == 0) { // home, search, book, chapter, tag
+    if(is_need_login == 0) { // index, search, book, chapter, tag, tags
         return true;
     }
     if(is_need_login == 1 && !is_logined()) { // profile, follow
@@ -331,4 +332,22 @@ function fullscreen(change) {
         $('#content .container .col-md-12').css('padding', '0 15px');
     }
     localStorage.setItem("screen", screen);
+}
+
+function get_cache(key) {
+    var json = localStorage.getItem(key);
+    var time = localStorage.getItem(key+"_time");
+    if(json !== null && json !== '' && time !== null && time !== '') {
+        if($.now() < parseInt(time) + 900000) {
+            return JSON.parse(json);
+        }else{
+            localStorage.setItem(key, '');
+            localStorage.setItem(key+"_time", '');
+        }
+    }
+    return '';
+}
+function set_cache(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key+"_time", $.now());
 }

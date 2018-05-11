@@ -21,6 +21,7 @@ use app\models\ScraperLog;
 use app\models\Setting;
 use app\models\Tag;
 use app\models\BookTag;
+use app\models\Device;
 
 class Apiv1Controller extends Controller
 {
@@ -48,6 +49,13 @@ class Apiv1Controller extends Controller
     }
     public function actionHome()
     {
+        $device_id = Yii::$app->request->get('device_id','');
+        $app_version = Yii::$app->request->get('app_version','');
+        if(!empty($device_id) && !empty($app_version)) {
+            $device_model = new Device();
+            $device_model->add_device($device_id, $app_version);
+        }
+
         $books = Book::find()->where(array('status'=>Book::ACTIVE));
         $total = $books->count();
 
@@ -63,8 +71,8 @@ class Apiv1Controller extends Controller
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
-            if(!empty($book->chapters[0])) {
-                $tmp['name'] .= ' - '.$book->chapters[0]->name;
+            if(!empty($book->lastChapter)) {
+                $tmp['name'] .= ' - '.$book->lastChapter->name;
             }
             $data[] = $tmp;
         }
@@ -377,8 +385,8 @@ class Apiv1Controller extends Controller
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
-            if(!empty($book->chapters[0])) {
-                $tmp['name'] .= ' - '.$book->chapters[0]->name;
+            if(!empty($book->lastChapter)) {
+                $tmp['name'] .= ' - '.$book->lastChapter->name;
             }
             $data[] = $tmp;
         }
@@ -939,8 +947,8 @@ class Apiv1Controller extends Controller
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
-            if(!empty($book->chapters[0])) {
-                $tmp['name'] .= ' - '.$book->chapters[0]->name;
+            if(!empty($book->lastChapter)) {
+                $tmp['name'] .= ' - '.$book->lastChapter->name;
             }
             $data[] = $tmp;
         }
@@ -1001,8 +1009,8 @@ class Apiv1Controller extends Controller
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
-            if(!empty($book->chapters[0])) {
-                $tmp['name'] .= ' - '.$book->chapters[0]->name;
+            if(!empty($book->lastChapter)) {
+                $tmp['name'] .= ' - '.$book->lastChapter->name;
             }
             $data[] = $tmp;
         }
