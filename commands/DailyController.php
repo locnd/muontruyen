@@ -47,6 +47,10 @@ class DailyController extends Controller
             $page++;
         }
 
+        if($page > 30) {
+            return ExitCode::OK;
+        }
+
         $scraper = new Scraper();
         $scraper->echo = false;
 

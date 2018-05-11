@@ -57,7 +57,7 @@ function display_a_book(book) {
     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
     html += '<div class="a-description">';
-    html += '<span>'+get_mini_description(book.description, 100)+'</span>';
+    html += '<span>'+get_mini_description(book.description, 60)+'</span>';
     html += '</div>';
     html += '<div class="clear5"></div>';
     html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
@@ -546,10 +546,10 @@ function show_follow(tab, is_first) {
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
                     html += '<div class="a-description" style="width:calc(100% - 92px)">';
-                    html += '<span>'+get_mini_description(book.description, 100)+'</span>';
+                    html += '<span>'+get_mini_description(book.description, 30)+'</span>';
+                    html += '</div>';
                     html += '<div class="clear5"></div>';
                     html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
-                    html += '</div>';
                     html += '<div class="clear5"></div>';
                     html += '</div>';
                 }
@@ -569,6 +569,10 @@ function show_follow(tab, is_first) {
             }
             $('.a-book.active').removeClass('active');
             $('#group'+tab).addClass('active');
+            if(groups.length == 0) {
+                $('#list_groups').hide();
+                $('#list_follows').css('width','100%');
+            }
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1025,9 +1029,10 @@ function show_search(keyword, page) {
         }
     });
 }
-function show_tag(tag_id) {
+function show_tag(tag_id, page) {
     var params = {
-        tag_id: tag_id
+        tag_id: tag_id,
+        page: page
     };
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
@@ -1037,6 +1042,22 @@ function show_tag(tag_id) {
                 for (var i = 0; i < res.data.length; i++) {
                     display_a_book(res.data[i]);
                 }
+            }
+            if(res.count_pages > 1) {
+                var pages = [];
+                for (var i=1;i<=res.count_pages;i++) {
+                    if (res.count_pages > 3) {
+                        if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                            pages.push(i);
+                            continue;
+                        }
+                        if (i < page - 1 || i > page + 1) {
+                            continue;
+                        }
+                    }
+                    pages.push(i);
+                }
+                display_paging('tag.html?id='+tag_id+'&page=',pages, page, res.count_pages);
             }
         } else {
             dl_alert('danger', res.message, false);

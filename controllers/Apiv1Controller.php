@@ -977,7 +977,27 @@ class Apiv1Controller extends Controller
                 $book_ids[] = $book_tag->book_id;
             }
         }
-        $books = Book::find()->where(array('id'=>$book_ids, 'status'=>Book::ACTIVE))->orderBy(array('release_date' => SORT_DESC, 'id' => SORT_DESC))->all();
+        $books = Book::find()->where(array('id'=>$book_ids, 'status'=>Book::ACTIVE));
+
+        $total = $books->count();
+
+        $setting_model = new Setting();
+        $limit = $setting_model->get_setting('mobile_limit');
+        if($limit != '') {
+            $limit = (int) $limit;
+        } else {
+            $limit = Yii::$app->params['limit'];
+            $setting_model->get_setting('mobile_limit', $limit);
+        }
+
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+        $books = $books->all();
+
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array();
@@ -986,6 +1006,7 @@ class Apiv1Controller extends Controller
             }
             $data[] = $tmp;
         }
+
         if(empty($data)) {
             return array(
                 'success' => true,
@@ -997,7 +1018,8 @@ class Apiv1Controller extends Controller
             'success' => true,
             'data' => $data,
             'tag' => $tag,
-            'total' => count($data)
+            'total' => $total,
+            'count_pages' => $total_page
         );
     }
 }

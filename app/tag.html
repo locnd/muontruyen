@@ -35,6 +35,10 @@
             dl_alert('danger', 'Không có tag tìm kiếm', true);
             window.location.href="index.html";
         }
+        var param_page = getParam('page');
+        if (param_page == '') {
+            param_page = 1;
+        }
     </script>
     <script src="cordova.js"></script>
 </head>
@@ -89,7 +93,9 @@
                         <h3 class="page-title"></h3>
                         <div id="list-books">
                         </div>
-                        <div class="clear5"></div>
+                        <div class="clear5" style="height:1px"></div>
+                        <div class="section-container" id="paging" style="margin-bottom: 20px;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +120,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_tag(param_id);
+            show_tag(param_id, parseInt(param_page));
         });
     </script>
 </body>
