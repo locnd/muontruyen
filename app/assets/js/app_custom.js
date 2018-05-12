@@ -8,6 +8,7 @@ function show_home(page) {
     var params = {
         page: page,
         device_id: localStorage.getItem("device_id", ''),
+        device_type: localStorage.getItem("device_type", ''),
         app_version: APP_VERSION
     };
     send_api('GET', '/home', params, function(res) {
@@ -513,6 +514,7 @@ function show_chapter(id) {
             html+='<a class="btn-back" href="book.html?id='+book.id+'">Quay về</a>';
             html+='<div class="clear10"></div>';
             $('#chapter-page').html(html);
+            $('#chapter-page').show();
             $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
         } else {
             dl_alert('danger', res.message, true);
@@ -611,6 +613,7 @@ function login() {
         username: $.trim($('#username').val()),
         password: $('#password').val(),
         device_id: localStorage.getItem("device_id", ''),
+        device_type: localStorage.getItem("device_type", ''),
         app_version: APP_VERSION
     };
     send_api('POST', '/login', params, function(res) {
@@ -646,6 +649,7 @@ function register() {
         password: $('#password').val(),
         password2: $('#password2').val(),
         device_id: localStorage.getItem("device_id", ''),
+        device_type: localStorage.getItem("device_type", ''),
         app_version: APP_VERSION
     };
     send_api('POST', '/register', params, function(res) {

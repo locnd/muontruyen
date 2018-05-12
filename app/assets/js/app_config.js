@@ -20,7 +20,6 @@ function onDeviceReady() {
             dl_alert('success', data.message, false);
         } else {
             //alert("when the app is not active");
-            window.location.reload();
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
         check_unread();
@@ -69,6 +68,7 @@ $(document).ready(function() {
     check_alert();
     fullscreen(false);
     get_book_list_for_search();
+    check_device_type();
 });
 
 var mouseY = 0;
@@ -353,4 +353,18 @@ function get_cache(key) {
 function set_cache(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
     localStorage.setItem(key+"_time", $.now());
+}
+
+function check_device_type() {
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    if (/windows phone/i.test(userAgent)) {
+        localStorage.setItem('device_type', "Windows Phone"); return true;
+    }
+    if (/android/i.test(userAgent)) {
+        localStorage.setItem('device_type', "Android"); return true;
+    }
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        localStorage.setItem('device_type', "iOS"); return true;
+    }
+    localStorage.setItem('device_type', "Unknown");
 }

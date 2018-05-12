@@ -20,6 +20,7 @@
                                         <th><?php echo 'ID';?></th>
                                         <th><?php echo 'User';?></th>
                                         <th><?php echo 'App Version';?></th>
+                                        <th><?php echo 'Device Type';?></th>
                                         <th><?php echo 'Device ID';?></th>
                                         <th><?php echo 'Created date';?></th>
                                     </tr>
@@ -34,6 +35,7 @@
                                                 <?php } ?>
                                             </td>
                                             <td><?php echo $device->app_version; ?></td>
+                                            <td><?php echo $device->type; ?></td>
                                             <td><?php echo $device->device_id; ?></td>
                                             <td><?php echo date('d-m-Y H:i:s',strtotime($device->created_at)); ?></td>
                                         </tr>

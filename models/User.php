@@ -108,6 +108,9 @@ class User extends ModelCommon implements IdentityInterface
         if(!empty($device['device_id'])) {
             $db_device->device_id = $device['device_id'];
         }
+        if(!empty($device['device_type'])) {
+            $db_device->type = $device['device_type'];
+        }
         if(!empty($device['app_version'])) {
             $db_device->app_version = $device['app_version'];
         }

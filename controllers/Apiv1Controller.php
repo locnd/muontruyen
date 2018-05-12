@@ -51,9 +51,10 @@ class Apiv1Controller extends Controller
     {
         $device_id = Yii::$app->request->get('device_id','');
         $app_version = Yii::$app->request->get('app_version','');
-        if(!empty($device_id) && !empty($app_version)) {
+        $device_type = Yii::$app->request->get('device_type','');
+        if(!empty($device_id)) {
             $device_model = new Device();
-            $device_model->add_device($device_id, $app_version);
+            $device_model->add_device($device_id, $app_version, $device_type);
         }
 
         $books = Book::find()->where(array('status'=>Book::ACTIVE));
