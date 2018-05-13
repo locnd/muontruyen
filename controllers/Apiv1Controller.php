@@ -49,6 +49,7 @@ class Apiv1Controller extends Controller
     }
     public function actionHome()
     {
+        ini_set('memory_limit', '-1');
         $device_id = Yii::$app->request->get('device_id','');
         $app_version = Yii::$app->request->get('app_version','');
         $device_type = Yii::$app->request->get('device_type','');
@@ -92,6 +93,7 @@ class Apiv1Controller extends Controller
     }
     public function actionBook()
     {
+        ini_set('memory_limit', '-1');
         $id = (int) Yii::$app->request->get('id',0);
         $book = Book::find()->where(array('id'=>$id, 'status'=>Book::ACTIVE))->one();
         if(empty($book)) {
@@ -165,6 +167,7 @@ class Apiv1Controller extends Controller
     }
     public function actionChapter()
     {
+        ini_set('memory_limit', '-1');
         $id = (int) Yii::$app->request->get('id',0);
         $chapter = Chapter::find()->where(array('id'=>$id, 'status'=>Chapter::ACTIVE))->one();
         if(empty($chapter)) {
@@ -357,6 +360,7 @@ class Apiv1Controller extends Controller
         );
     }
     public function actionFollow() {
+        ini_set('memory_limit', '-1');
         $user = $this->check_user();
         if(!empty($user['error'])) {
             return array(
@@ -651,6 +655,7 @@ class Apiv1Controller extends Controller
     }
     public function actionMovechapter()
     {
+        ini_set('memory_limit', '-1');
         $user = $this->check_user();
         if (!empty($user['error'])) {
             return array(
@@ -773,6 +778,7 @@ class Apiv1Controller extends Controller
     }
     public function actionMoveimage()
     {
+        ini_set('memory_limit', '-1');
         $user = $this->check_user();
         if (!empty($user['error'])) {
             return array(
@@ -920,6 +926,7 @@ class Apiv1Controller extends Controller
     }
 
     public function actionSearch() {
+        ini_set('memory_limit', '-1');
         $keyword = Yii::$app->request->get('keyword','');
         $books = Book::find()->where(array('status'=>Book::ACTIVE))->andFilterWhere([
             'or',
@@ -970,6 +977,7 @@ class Apiv1Controller extends Controller
     }
 
     public function actionTag() {
+        ini_set('memory_limit', '-1');
         $tag_id = (int) Yii::$app->request->get('tag_id',0);
         $tag = Tag::find()->where(array(
             'id' => $tag_id, 'status' => Tag::ACTIVE
@@ -1033,6 +1041,7 @@ class Apiv1Controller extends Controller
     }
 
     public function actionSavebook() {
+        ini_set('max_execution_time', 24*60*60);
         ini_set('memory_limit', '-1');
         $user = $this->check_user();
         if(!empty($user['error'])) {

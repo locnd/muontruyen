@@ -27,20 +27,33 @@ function onDeviceReady() {
         dl_alert('danger', e.message, false);
     });
 }
-var db;
+var db1;
+var db2;
 document.addEventListener("DOMContentLoaded", function(){
     if("indexedDB" in window) {
-        var openRequest = indexedDB.open("muontruyen",1);
+        var openRequest = indexedDB.open("offline_books",1);
         openRequest.onupgradeneeded = function(e) {
-            var thisDB = e.target.result;
-            if(!thisDB.objectStoreNames.contains("offline_books")) {
-                thisDB.createObjectStore("offline_books");
+            var thisDB1 = e.target.result;
+            if(!thisDB1.objectStoreNames.contains("offline_books")) {
+                thisDB1.createObjectStore("offline_books");
             }
         };
         openRequest.onsuccess = function(e) {
-            db = e.target.result;
+            db1 = e.target.result;
         };
         openRequest.onerror = function(e) {
+        };
+        var openRequest2 = indexedDB.open("home_books",1);
+        openRequest2.onupgradeneeded = function(e) {
+            var thisDB2 = e.target.result;
+            if(!thisDB2.objectStoreNames.contains("home_books")) {
+                thisDB2.createObjectStore("home_books");
+            }
+        };
+        openRequest2.onsuccess = function(e) {
+            db2 = e.target.result;
+        };
+        openRequest2.onerror = function(e) {
         };
     }
 },false);
@@ -209,7 +222,7 @@ function show_book_list_for_search(data) {
     $('#search_book_select').html(html);
     $('#search_book_select').combobox();
 }
-
+var first_error = true;
 function send_api(method, url, params, callback) {
     var token = localStorage.getItem("token");
     if(token !== null && token !== '') {
@@ -226,10 +239,8 @@ function send_api(method, url, params, callback) {
         },
         error: function( xhr ) {
             $('#loading-btn').hide();
-            var time_notify = localStorage.getItem("time_notify");
-            if (time_notify !== null && time_notify !== '' && $.now() < parseInt(time_notify) + 900000) {
-            } else {
-                localStorage.setItem("time_notify", $.now());
+            if(first_error) {
+                first_error = false;
                 if (confirm('Không thể lấy dữ liệu từ server. \nBạn có muốn chuyển sang chế độ Offline không?')) {
                     window.location.href = 'offline.html';
                 }
@@ -387,7 +398,7 @@ function check_device_type() {
     localStorage.setItem('device_type', "Unknown");
 }
 function save_offline_book(book, noti){
-    var transaction = db.transaction(["offline_books"],"readwrite");
+    var transaction = db1.transaction(["offline_books"],"readwrite");
     var offline_books = transaction.objectStore("offline_books");
 
     var req = offline_books.get(Number(book.id));
@@ -407,7 +418,7 @@ function save_offline_book(book, noti){
     };
 }
 function get_offline_book(book_id, callback) {
-    var transaction = db.transaction(["offline_books"],"readonly");
+    var transaction = db1.transaction(["offline_books"],"readonly");
     var offline_books = transaction.objectStore("offline_books");
     var request = offline_books.get(Number(book_id));
     request.onsuccess = function(e) {
@@ -415,7 +426,7 @@ function get_offline_book(book_id, callback) {
     }
 }
 function get_all_offline_books(callback) {
-    var transaction = db.transaction(["offline_books"],"readonly");
+    var transaction = db1.transaction(["offline_books"],"readonly");
     var offline_books = transaction.objectStore("offline_books");
     var cursor = offline_books.openCursor();
 
@@ -425,5 +436,26 @@ function get_all_offline_books(callback) {
             callback(res.value);
             res.continue();
         }
+    }
+}
+function get_all_home_books(callback) {
+    var transaction = db2.transaction(["home_books"],"readonly");
+    var home_books = transaction.objectStore("home_books");
+    var cursor = home_books.openCursor();
+
+    cursor.onsuccess = function(e) {
+        var res = e.target.result;
+        if(res) {
+            callback(res.value);
+            res.continue();
+        }
+    }
+}
+function save_cache_home_books(res) {
+    var transaction = db2.transaction(["home_books"], "readwrite");
+    var home_books = transaction.objectStore("home_books");
+    for(var i=0;i<res.length;i++) {
+        var id=i+1;
+        home_books.put(res[i], id);
     }
 }

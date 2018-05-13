@@ -1,18 +1,62 @@
 
 function show_home(page) {
+    if(page == 1) {
+        var time_cache = localStorage.getItem("time_cache_home");
+        if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 900000) {
+            get_cache_home();
+            return true;
+        }
+    }
+
     var params = {
         page: page,
-        device_id: localStorage.getItem("device_id", ''),
-        device_type: localStorage.getItem("device_type", ''),
+        device_id: localStorage.getItem("device_id"),
+        device_type: localStorage.getItem("device_type"),
         app_version: APP_VERSION
     };
     send_api('GET', '/home', params, function(res) {
         if (res.success) {
+            if(page == 1) {
+                localStorage.setItem("time_cache_home", $.now());
+                localStorage.setItem("count_pages", res.count_pages);
+                save_cache_home_books(res.data);
+            }
             show_home_content(res, page);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
+}
+function get_cache_home() {
+    $('#paging').hide();
+    var count_pages = localStorage.getItem("count_pages");
+    if(count_pages === null || count_pages === '') {
+        count_pages = 1;
+    }
+    count_pages = parseInt(count_pages);
+    if(count_pages > 1) {
+        var page = 1;
+        var pages = [];
+        for (var i=1;i<=count_pages;i++) {
+            if (count_pages > 3) {
+                if((page == 1 && i==3) || (page == count_pages && i==count_pages-2)) {
+                    pages.push(i);
+                    continue;
+                }
+                if (i < page - 1 || i > page + 1) {
+                    continue;
+                }
+            }
+            pages.push(i);
+        }
+        display_paging('index.html?page=',pages, page, count_pages);
+    }
+    setTimeout(function(){
+        get_all_home_books(function(data){
+            display_a_book(data);
+            $('#paging').show();
+        });
+    }, 500);
 }
 function show_home_content(res,page) {
     for(var i=0;i<res.data.length;i++) {
@@ -1086,7 +1130,7 @@ function save_to_offline(noti) {
     var params = {
         id: $('#book_id').val()
     };
-    $('#save-btn').html('<i class="fa fa-download"></i> Đang lưu Offline...');
+    $('#save-btn').html('<i class="fa fa-spinner fa-spin"></i> Đang lưu Offline...');
     $('#save-btn').css('width','177px');
     send_api('GET', '/savebook', params, function(res) {
         if (res.success) {
@@ -1135,7 +1179,7 @@ function show_offline() {
         get_all_offline_books(function(data) {
             display_offline_book(data);
         });
-    },100);
+    },500);
 }
 function display_offline_book(book) {
     if(typeof(book) == 'undefined' || book == '') {
@@ -1211,7 +1255,7 @@ function show_offline_book(id) {
             $('#chapters-list').html(html);
             $('#chapters-list').show();
         });
-    },100);
+    },500);
 }
 function show_offline_chapter(book_id, chapter_id) {
     setTimeout(function(){
@@ -1303,7 +1347,7 @@ function show_offline_chapter(book_id, chapter_id) {
             $('#chapter-page').html(html);
             $('#chapter-page').show();
         });
-    },100);
+    },500);
 }
 
 function change_offline_chapter(ele, book_id) {
