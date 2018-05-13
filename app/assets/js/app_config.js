@@ -3,9 +3,7 @@ function onDeviceReady() {
     window.open = cordova.InAppBrowser.open;
 
     var push = PushNotification.init({
-        "android": {
-            "senderID": "154739668435"
-        },
+        "android": {"senderID": "154739668435"},
         "ios": {"alert": "true", "badge": "true", "sound": "true", "clearBadge": "true" },
         "windows": {}
     });
@@ -29,7 +27,7 @@ function onDeviceReady() {
         dl_alert('danger', e.message, false);
     });
 }
-var APP_VERSION = '1.0.2';
+var APP_VERSION = '1.0.3';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -64,11 +62,15 @@ $(document).ready(function() {
     });
 
     show_elements();
-    check_unread();
     check_alert();
     fullscreen(false);
-    get_book_list_for_search();
     check_device_type();
+    if($('#is_offline').length == 0) {
+        check_unread();
+        get_book_list_for_search();
+    } else {
+        mark_reads();
+    }
 });
 
 var mouseY = 0;
@@ -137,6 +139,17 @@ function check_unread() {
     });
 }
 
+function mark_reads() {
+    if(!is_logined()) {
+        return true;
+    }
+    var mark_reads = get_cache('mark_reads');
+    if(mark_reads == '') {
+        return true;
+    }
+    send_api('GET', '/markread', {chapter_ids:mark_reads}, function(data){});
+}
+
 function show_unread(unread) {
     if(parseInt(unread) > 0) {
         $('.dl-notify').html(unread);
@@ -194,7 +207,9 @@ function send_api(method, url, params, callback) {
         },
         error: function( xhr ) {
             $('#loading-btn').hide();
-            dl_alert('danger', 'Không thể lấy dữ liệu từ server', false);
+            if(confirm('Không thể lấy dữ liệu từ server. \nBạn có muốn chuyển sang chế độ Offline không?')) {
+                window.location.href = 'offline.html';
+            }
         }
     });
 }
@@ -335,10 +350,16 @@ function fullscreen(change) {
 }
 
 function get_cache(key) {
+    var json = localStorage.getItem(key);
+    if(key.indexOf('offline_') > -1 ) {
+        if(json !== null && json !== '') {
+            return JSON.parse(json);
+        }
+        return '';
+    }
     if(is_admin()) {
         return '';
     }
-    var json = localStorage.getItem(key);
     var time = localStorage.getItem(key+"_time");
     if(json !== null && json !== '' && time !== null && time !== '') {
         if($.now() < parseInt(time) + 900000) {
@@ -352,7 +373,9 @@ function get_cache(key) {
 }
 function set_cache(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
-    localStorage.setItem(key+"_time", $.now());
+    if(key.indexOf('offline_') === -1 ) {
+        localStorage.setItem(key + "_time", $.now());
+    }
 }
 
 function check_device_type() {

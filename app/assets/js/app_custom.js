@@ -167,6 +167,12 @@ function display_book_info(book, is_following, tags) {
     html += '<div class="book-cover">';
     html += '<img src="'+book.image+'">';
     html += '</div>';
+    var offline_book = get_cache('offline_book_'+book.id);
+    if(offline_book != '') {
+        html += '<div id="save-btn" class="btn-save-to-offline" style="width:142px"><i class="fa fa-check"></i> Đã lưu offline</div>';
+    } else {
+        html += '<div id="save-btn" onclick="save_to_offline(true)" class="btn-save-to-offline"><i class="fa fa-download"></i> Lưu đọc offline</div>';
+    }
     html += '<div class="clear10"></div>';
     html += '<div class="book-description">'+book.description+'</div>';
     html += '<div class="clear10"></div>';
@@ -193,6 +199,9 @@ function display_book_info(book, is_following, tags) {
     html += '<div class="clear10" style="height:0"></div>';
     $('#book-info').html(html);
     $('#book-info').show();
+    if(offline_book != '') {
+        save_to_offline(false);
+    }
 }
 
 function display_list_chapters(chapters) {
@@ -1098,4 +1107,285 @@ function show_tag_result(res, page) {
         }
         display_paging('tag.html?id='+tag_id+'&page=',pages, page, res.count_pages);
     }
+}
+function save_to_offline(noti) {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    $('#save-btn').removeAttr('onclick');
+    if(noti) {
+        dl_alert('success', 'Vui lòng đợi lưu truyện offline..', false);
+    }
+    var params = {
+        id: $('#book_id').val()
+    };
+    send_api('GET', '/savebook', params, function(res) {
+        if (res.success) {
+            $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu offline');
+            $('#save-btn').css('width','142px');
+            save_cache_book(res);
+            if(noti) {
+                dl_alert('success', 'Lưu truyện offline thành công', false);
+            }
+        } else {
+            $('#save-btn').html('<i class="fa fa-download"></i> Lưu đọc offline');
+            $('#save-btn').css('width','155px');
+            $('#save-btn').attr('onclick','save_to_offline()');
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+function save_cache_book(res) {
+    var key = 'offline_book_'+res.data.id;
+    var value = {};
+    value.id = res.data.id;
+    value.name = res.data.name;
+    value.last_chapter_name = res.data.last_chapter_name;
+    value.count_views = res.data.count_views;
+    value.description = res.data.description;
+    value.release_date = res.data.release_date;
+    value.slug = res.data.slug;
+    get_image_base64(res.data.image, function(base64_code) {
+        value.image = base64_code;
+    });
+    value.chapters= [];
+    for(var i=0;i<res.chapters.length;i++) {
+        var chapter = res.chapters[i];
+        var tmp_chapter = {};
+        tmp_chapter.id = chapter.id;
+        tmp_chapter.name = chapter.name;
+        tmp_chapter.release_date = chapter.release_date;
+        tmp_chapter.stt = chapter.stt;
+        tmp_chapter.read = chapter.read;
+        tmp_chapter.images = [];
+        for(var j=0;j<chapter.images.length;j++) {
+            get_image_base64(chapter.images[j], function(base64_code) {
+                tmp_chapter.images.push(base64_code);
+            });
+        }
+        value.chapters.push(tmp_chapter);
+    }
+    value.tags = [];
+    for(var i=0;i<res.tags.length;i++) {
+        value.tags.push(res.tags[i].name);
+    }
+    set_cache(key, value);
+    var offline_books = get_cache('offline_books');
+    if(offline_books == '') {
+        offline_books = [];
+    }
+    if($.inArray(key,offline_books) == -1) {
+        offline_books.push(key);
+    }
+    set_cache('offline_books', offline_books);
+}
+function delete_offline_book(key) {
+    set_cache(key, '');
+    var offline_books = get_cache('offline_books');
+    if(offline_books == '') {
+        return true;
+    }
+    var new_offline_books = [];
+    for(var i=0;i<offline_books.length;i++) {
+        if(offline_books[i] != key) {
+            new_offline_books.push(offline_books[i]);
+        }
+    }
+    set_cache('offline_books', new_offline_books);
+}
+function get_image_base64(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+            callback(reader.result);
+        };
+        reader.readAsDataURL(xhr.response);
+    };
+    xhr.open('GET', url, false);
+    xhr.responseType = 'blob';
+    xhr.send();
+}
+function show_offline() {
+    var book_list = get_cache('offline_books');
+    if(book_list == '') {
+        dl_alert('danger', 'Không có truyện Offline', true);
+        window.location.href="index.html";
+    }
+    for(var i=0;i<book_list.length;i++) {
+        display_offline_book(book_list[i]);
+    }
+}
+function display_offline_book(key) {
+    var book = get_cache(key);
+    if(book == '') {
+        return true;
+    }
+    var html = '<div class="section-container a-book">';
+    html += '<div class="a-title"><a href="offline_book.html?cache=' + key + '">' + book.name + ' - ' + book.last_chapter_name +'</a></div>';
+    html += '<div class="a-cover">';
+    html += '<a href="offline_book.html?cache=' + key + '"><img width="100%" src="' + book.image + '" alt="" /></a>';
+    html += '</div>';
+    html += '<div class="a-description">';
+    html += '<span>' + get_mini_description(book.description, 60) + '</span>';
+    html += '</div>';
+    html += '<div class="clear5"></div>';
+    html += '<div class="a-date">Cập nhật: ' + book.release_date + '</div>';
+    html += '</div>';
+    $('#list-books').append(html);
+}
+function show_offline_book(key) {
+    var book = get_cache(key);
+    if(book == '') {
+        dl_alert('danger', 'Truyện không khả dụng', true);
+        window.location.href = "offline.html";
+    }
+    var html = '';
+    html += '<div class="book-title">'+book.name+'</div>';
+    html += '<div class="clear10"></div>';
+    html += '<div class="book-cover">';
+    html += '<img src="'+book.image+'">';
+    html += '</div>';
+    html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline" style="width: 125px"><i class="fa fa-globe"></i> Xem Online</a>';
+    html += '<div class="clear10"></div>';
+    html += '<div class="clear10"></div>';
+    html += '<div class="book-description">'+book.description+'</div>';
+    html += '</div>';
+    html += '<div class="clear10"></div>';
+
+    var tag_html = '';
+    for (var i = 0; i < book.tags.length; i++) {
+        tag_html += '<a href="javascript:;" class="available_tag">' + book.tags[i] + '</a>';
+    }
+    if(tag_html == '') {
+        html += '<div style="margin-bottom:10px">* Truyện chưa ngắn thẻ tag</div>';
+    } else {
+        html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
+        html += tag_html;
+    }
+    html += '<div class="clear10" style="height:0"></div>';
+    $('#book-info').html(html);
+    $('#book-info').show();
+
+    var html = '';
+    var chapters = book.chapters;
+    if(chapters.length == 0) {
+        html += '<div class="book-chapter-list">Không có chương nào</div>';
+    } else {
+        html += '<div class="book-chapter-list">Danh sách chương ('+chapters.length+' chương)<a href="javascript:;" onclick="move_to_bottom()" class="right-btn">Đến chương đầu</a></div>';
+        html += '<div class="clear10"></div>';
+        for(var i=0;i<chapters.length;i++) {
+            var chapter = chapters[i];
+            html += '<div class="a-chapter">';
+            html += '<div style="width: calc(100% - 150px);float:left">';
+            if(chapter.read) {
+                html += ' <a style="color:darkgoldenrod" href="offline_chapter.html?cache='+key+'&id=' + chapter.id + '">' +chapter.name + '</a>';
+            } else {
+                html += ' <a href="offline_chapter.html?cache='+key+'&id='+ chapter.id + '">' +chapter.name + '</a>';
+            }
+            html += '</div>';
+            html += '<div style="width: 135px;float:right">';
+            html += chapter.release_date;
+            html += '</div>';
+            html += '<div class="clear10"></div>';
+            html += '</div>';
+        }
+    }
+    $('#chapters-list').html(html);
+    $('#chapters-list').show();
+}
+function show_offline_chapter(key, id) {
+    var book = get_cache(key);
+    if (book == '') {
+        dl_alert('danger', 'Truyện không khả dụng', true);
+        window.location.href = "offline.html";
+    }
+    var chapter = '';
+    for(var i=0;i<book.chapters.length;i++) {
+        if(id == book.chapters[i].id) {
+            chapter = book.chapters[i];
+            images = chapter.images;
+            if(!book.chapters[i].read) {
+                var mark_reads = get_cache('mark_reads');
+                if(mark_reads.indexOf(','+book.chapters[i]+',') == -1){
+                    mark_reads += ','+book.chapters[i]+',';
+                    set_cache('mark_reads', mark_reads);
+                }
+                book.chapters[i].read = true;
+                set_cache(key, book);
+            }
+            break;
+        }
+    }
+    if (chapter == '') {
+        dl_alert('danger', 'Truyện không khả dụng', true);
+        window.location.href = "offline_book.html?cache="+key;
+    }
+    var images = chapter.images;
+    var chapters = book.chapters;
+    for(var i=0;i<chapters.length;i++) {
+        if(i==0 && chapter.stt == chapters[i].stt) {
+            chapter.point = 'last';
+        }
+        if(i==chapters.length-1 && chapter.stt == chapters[i].stt) {
+            chapter.point = 'first';
+        }
+        if(chapter.id == chapters[i].id) {
+            if(i > 0) {
+                chapter.next = chapters[i-1].id;
+            }
+            if(i < chapters.length-1) {
+                chapter.prev = chapters[i+1].id;
+            }
+        }
+    }
+    if(chapters.length == 1) {
+        chapter.point = 'only';
+    }
+
+    var html = '<div class="clear10"></div>';
+    html+='<a class="book-title" href="offline_book.html?cache='+key+'">'+book.name+'</a>';
+    html+='<div class="clear10"></div>';
+    html+='<div id="report">';
+    html+='</div>';
+    var paging_html = '';
+    paging_html+='<select class="select-chap" onchange="change_offline_chapter(this, \''+key+'\')">';
+    for(var i=0;i<chapters.length;i++) {
+        var a_chapter = chapters[i];
+        if(a_chapter.id == chapter.id) {
+            paging_html+='<option selected value="'+a_chapter.id+'">'+a_chapter.name+'</option>';
+        } else {
+            paging_html+='<option value="'+a_chapter.id+'">'+a_chapter.name+'</option>';
+        }
+    }
+    paging_html+='</select>';
+    paging_html+='<div class="clear5"></div>';
+    paging_html+='<div class="clear10"></div>';
+    if(chapter.point != 'first' && chapter.point != 'only') {
+        paging_html+='<a class="btn-prev" href="offline_chapter.html?cache='+key+'&id='+chapter.prev+'"><i class="fa fa-angle-double-left"></i> Trước</a>';
+    }
+    if(chapter.point != 'last' && chapter.point != 'only') {
+        paging_html+='<a class="btn-next" href="offline_chapter.html?cache='+key+'&id='+chapter.next+'">Sau <i class="fa fa-angle-double-right"></i></a>';
+    }
+    html+=paging_html;
+    html+='<div class="clear10"></div>';
+    html+='<div id="images_list">';
+    for(var i=0;i<images.length;i++) {
+        html+='<img style="width: 100%;margin:5px 0;" src="'+images[i]+'">';
+    }
+    html+='</div>';
+    html+='<div class="clear10"></div>';
+    html+=paging_html;
+    html+='<div class="clear10"></div>';
+    html+='<div class="clear10"></div>';
+    html+='<a class="btn-back" href="offline_book.html?cache='+key+'&id='+book.id+'">Quay về</a>';
+    html+='<div class="clear10"></div>';
+    $('#chapter-page').html(html);
+    $('#chapter-page').show();
+}
+
+function change_offline_chapter(ele, cache) {
+    var chapter_id = $(ele).val();
+    window.location.href = 'offline_chapter.html?cache='+cache+'&id='+chapter_id;
 }

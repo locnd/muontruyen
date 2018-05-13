@@ -14,13 +14,20 @@ class Device extends ModelCommon
     }
 
     public function add_device($device_id, $app_version, $device_type) {
-        $device = Device::find()->where(array('device_id' => $device_id))->count();
-        if($device == 0) {
+        $device = Device::find()->where(array('device_id' => $device_id))->one();
+        if(empty($device)) {
             $device = new Device();
             $device->device_id = $device_id;
-            $device->type = $device_type;
-            $device->app_version = $app_version;
-            $device->save();
+        }
+        $device->type = $device_type;
+        $device->app_version = $app_version;
+        $device->save();
+
+        $db_devices = Device::find()->where(array('device_id' => $device_id))->all();
+        foreach ($db_devices as $db_device) {
+            if ($db_device->id != $device->id) {
+                $db_device->delete();
+            }
         }
     }
 }

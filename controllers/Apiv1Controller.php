@@ -1031,4 +1031,78 @@ class Apiv1Controller extends Controller
             'count_pages' => $total_page
         );
     }
+
+    public function actionSavebook() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        $id = (int) Yii::$app->request->get('id',0);
+        $book = Book::find()->where(array('id'=>$id, 'status'=>Book::ACTIVE))->one();
+        if(empty($book)) {
+            return array(
+                'success' => false,
+                'message' => 'Truyện này không khả dụng'
+            );
+        }
+        $book_data = $book->to_array();
+        $book_data['last_chapter_name']=$book->lastChapter->name;
+        $chapters = array();
+        foreach ($book->chapters as $chapter) {
+            $tmp_data = $chapter->to_array();
+            $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
+            $tmp_data['images'] = array();
+            foreach($chapter->images as $img) {
+                $tmp_data['images'][] = $img->get_image();
+            }
+            $tmp_data['read'] = false;
+            if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() > 0) {
+                $tmp_data['read'] = true;
+            }
+            $chapters[] = $tmp_data;
+        }
+        $book_tags = BookTag::find()->where(array('book_id' => $book->id))->all();
+        $tag_data = array();
+        foreach ($book_tags as $book_tag) {
+            $tmp = $book_tag->tag->to_array();
+            if($tmp['status'] == Tag::INACTIVE) {
+                continue;
+            }
+            if(!empty($tmp['vn_name'])) {
+                $tmp['name'] = $tmp['vn_name'];
+            }
+            $tag_data[] = $tmp;
+        }
+        return array(
+            'success' => true,
+            'data' => $book_data,
+            'chapters' => $chapters,
+            'tags' => $tag_data
+        );
+    }
+    public function actionMarkread() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        $chapter_ids = Yii::$app->request->get('chapter_ids','');
+        $chapter_ids_arr = explode(',', $chapter_ids);
+        foreach ($chapter_ids_arr as $chapter_id) {
+            if(!empty($chapter_id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter_id))->count() == 0) {
+                $read = new Read();
+                $read->user_id = $user->id;
+                $read->chapter_id = $chapter_id;
+                $read->save();
+            }
+        }
+        return array(
+            'success' => true
+        );
+    }
 }
