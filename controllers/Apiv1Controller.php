@@ -1061,27 +1061,21 @@ class Apiv1Controller extends Controller
         $book_data = $book->to_array();
         if(empty($book->image_blob)) {
             $book->image_blob = get_image_blob($book_data['image']);
-            if(!empty($book->image_blob)) {
-                $book_data['image'] = 'data:image/jpg;base64,'.$book->image_blob;
-                $book->save();
-            }
+            $book->save();
         }
+        $book_data['image'] = 'data:image/jpg;base64,'.$book->image_blob;
         $book_data['last_chapter_name']=$book->lastChapter->name;
         $chapters = array();
         foreach ($book->chapters as $chapter) {
             $tmp_data = $chapter->to_array();
             $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             $tmp_data['images'] = array();
-            foreach($chapter->images as $img) {
-                $image = $img->get_image();
-                if(empty($img->image_blob)) {
-                    $img->image_blob = get_image_blob($image);
-                    if(!empty($img->image_blob)) {
-                        $image = 'data:image/jpg;base64,'.$img->image_blob;
-                        $img->save();
-                    }
+            foreach($chapter->images as $image) {
+                if(empty($image->image_blob)) {
+                    $image->image_blob = get_image_blob($image->get_image());
+                    $image->save();
                 }
-                $tmp_data['images'][] = $image;
+                $tmp_data['images'][] = 'data:image/jpg;base64,'.$image->image_blob;
             }
             $tmp_data['read'] = false;
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() > 0) {

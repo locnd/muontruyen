@@ -66,9 +66,6 @@ class Book extends ModelCommon
     }
 
     public function get_image() {
-        if(!empty($this->image_blob)) {
-            return 'data:image/jpg;base64,'.$this->image_blob;
-        }
         if(empty($this->image)) {
             $this->image = 'default.jpg';
             $this->save();
@@ -82,13 +79,6 @@ class Book extends ModelCommon
         } else {
             $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;
         }
-        try {
-            $this->image_blob = get_image_blob($image);
-            if(!empty($this->image_blob)) {
-                $image = 'data:image/jpg;base64,'.$this->image_blob;
-                $this->save();
-            }
-        } catch (Exception $e) {}
         return $image;
     }
 }
