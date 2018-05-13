@@ -119,7 +119,9 @@ class Scraper
 
         $image_src = $html_base->find($server->image_key)[0]->src;
         $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.'/'.$slug;
-
+        if(substr($image_src, 0, 2) == '//') {
+            $image_src = 'http:'.$image_src;
+        }
         $image = $this->save_image($image_src, $image_dir);
 
         $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
@@ -280,6 +282,9 @@ class Scraper
         unset($current_images);
         $dem = 0;
         foreach ($image_urls as $id=>$image_src) {
+            if(substr($image_src, 0, 2) == '//') {
+                $image_src = 'http:'.$image_src;
+            }
             $image_name = $this->save_image($image_src, $dir, $id+1);
             $new_image = Image::find()->where(array('chapter_id'=>$chapter->id, 'image_source' => $image_src))->one();
             if(empty($new_image)) {
@@ -442,8 +447,10 @@ class Scraper
             $slug = $new_slug;
 
             $image_src = $html_base->find($server->image_key)[0]->src;
+            if(substr($image_src, 0, 2) == '//') {
+                $image_src = 'http:'.$image_src;
+            }
             $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
-
             $image = $this->save_image($image_src, $image_dir);
 
             $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));

@@ -47,7 +47,7 @@ class DailyController extends Controller
             $page++;
         }
 
-        if($page > 30) {
+        if($page > 50) {
             return ExitCode::OK;
         }
 

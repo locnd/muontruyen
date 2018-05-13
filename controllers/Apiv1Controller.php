@@ -1033,6 +1033,7 @@ class Apiv1Controller extends Controller
     }
 
     public function actionSavebook() {
+        ini_set('memory_limit', '-1');
         $user = $this->check_user();
         if(!empty($user['error'])) {
             return array(
@@ -1056,7 +1057,17 @@ class Apiv1Controller extends Controller
             $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             $tmp_data['images'] = array();
             foreach($chapter->images as $img) {
-                $tmp_data['images'][] = $img->get_image();
+                $image = $img->get_image();
+                if(empty($img->image_blob)) {
+                    try {
+                        $b64image = base64_encode(file_get_contents($image));
+                        $img->image_blob = $image = $b64image;
+                        $img->save();
+                    } catch (Exception $e) {
+                        $image = $image->get_image();
+                    }
+                }
+                $tmp_data['images'][] = $image;
             }
             $tmp_data['read'] = false;
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() > 0) {

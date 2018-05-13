@@ -14,15 +14,22 @@ class Image extends ModelCommon
         return $this->hasOne(Chapter::className(), ['id' => 'chapter_id']);
     }
     public function get_image() {
+        if(!empty($this->image_blob)) {
+            return 'data:image/jpg;base64,'.$this->image_blob;
+        }
         if(empty($this->image)) {
             $this->image = 'error.jpg';
+            $this->save();
         }
         if($this->image == 'error.jpg') {
             if(\Yii::$app->params['use_image_source']) {
-                return $this->image_source;
+                $image = $this->image_source;
+            } else {
+                $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->image;
             }
-            return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->image;
+        } else {
+            $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->book->slug.'/chap'.$this->chapter->id.'/'.$this->image;
         }
-        return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->book->slug.'/chap'.$this->chapter->id.'/'.$this->image;
+        return $image;
     }
 }

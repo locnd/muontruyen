@@ -66,15 +66,27 @@ class Book extends ModelCommon
     }
 
     public function get_image() {
+        if(!empty($this->image_blob)) {
+            return 'data:image/jpg;base64,'.$this->image_blob;
+        }
         if(empty($this->image)) {
             $this->image = 'default.jpg';
+            $this->save();
         }
         if($this->image == 'default.jpg') {
             if(\Yii::$app->params['use_image_source']) {
-                return $this->image_source;
+                $image = $this->image_source;
+            } else {
+                $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->image;
             }
-            return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->image;
+        } else {
+            $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;
         }
-        return \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->slug.'/'.$this->image;
+        try {
+            $this->image_blob = base64_encode(file_get_contents($image));
+            $this->save();
+            return 'data:image/jpg;base64,'.$this->image_blob;
+        } catch (Exception $e) {}
+        return $image;
     }
 }
