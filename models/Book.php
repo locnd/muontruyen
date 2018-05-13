@@ -83,9 +83,11 @@ class Book extends ModelCommon
             $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;
         }
         try {
-            $this->image_blob = base64_encode(file_get_contents($image));
-            $this->save();
-            return 'data:image/jpg;base64,'.$this->image_blob;
+            $this->image_blob = get_image_blob($image);
+            if(!empty($this->image_blob)) {
+                $image = 'data:image/jpg;base64,'.$this->image_blob;
+                $this->save();
+            }
         } catch (Exception $e) {}
         return $image;
     }

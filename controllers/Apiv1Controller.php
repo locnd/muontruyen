@@ -1050,6 +1050,13 @@ class Apiv1Controller extends Controller
             );
         }
         $book_data = $book->to_array();
+        if(empty($book->image_blob)) {
+            $book->image_blob = get_image_blob($book_data['image']);
+            if(!empty($book->image_blob)) {
+                $book_data['image'] = 'data:image/jpg;base64,'.$book->image_blob;
+                $book->save();
+            }
+        }
         $book_data['last_chapter_name']=$book->lastChapter->name;
         $chapters = array();
         foreach ($book->chapters as $chapter) {
@@ -1059,12 +1066,10 @@ class Apiv1Controller extends Controller
             foreach($chapter->images as $img) {
                 $image = $img->get_image();
                 if(empty($img->image_blob)) {
-                    try {
-                        $b64image = base64_encode(file_get_contents($image));
-                        $img->image_blob = $image = $b64image;
+                    $img->image_blob = get_image_blob($image);
+                    if(!empty($img->image_blob)) {
+                        $image = 'data:image/jpg;base64,'.$img->image_blob;
                         $img->save();
-                    } catch (Exception $e) {
-                        $image = $image->get_image();
                     }
                 }
                 $tmp_data['images'][] = $image;

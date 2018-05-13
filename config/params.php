@@ -167,4 +167,18 @@ function show_date($date, $is_time=true, $has_second = true) {
     return date($format, strtotime($date));
 }
 
+function get_image_blob($url) {
+    try {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        $image = base64_encode($data);
+    } catch (Exception $e) {
+        $image = '';
+    }
+    return $image;
+}
+
 return $params;
