@@ -1,10 +1,5 @@
 
 function show_home(page) {
-    var res = get_cache('home_'+page);
-    if(res != '') {
-        show_home_content(res, page);
-        return true;
-    }
     var params = {
         page: page,
         device_id: localStorage.getItem("device_id", ''),
@@ -13,7 +8,6 @@ function show_home(page) {
     };
     send_api('GET', '/home', params, function(res) {
         if (res.success) {
-            set_cache('home_'+page, res);
             show_home_content(res, page);
         } else {
             dl_alert('danger', res.message, false);
@@ -879,14 +873,8 @@ function change_password() {
 }
 
 function show_tags() {
-    var res = get_cache('tags_list');
-    if(res != '') {
-        show_tags_list(res);
-        return true;
-    }
     send_api('GET', '/tags', {}, function(res) {
         if (res.success) {
-            set_cache('tags_list');
             show_tags_list(res);
         } else {
             dl_alert('danger', res.message, false);
@@ -1011,11 +999,6 @@ function convertToSlug(str)
     return str.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-');
 }
 function show_search(keyword, page) {
-    var res = get_cache(convertToSlug(keyword)+'_'+page);
-    if(res != '') {
-        show_search_result(res, keyword, page);
-        return true;
-    }
     var params = {
         keyword: keyword,
         page: page
@@ -1024,7 +1007,6 @@ function show_search(keyword, page) {
     $('h3.page-title').show();
     send_api('GET', '/search', params, function(res) {
         if (res.success) {
-            set_cache(convertToSlug(keyword)+'_'+page, res)
             show_search_result(res, keyword, page);
         } else {
             dl_alert('danger', res.message, false);
@@ -1057,18 +1039,12 @@ function show_search_result(res, keyword, page) {
     }
 }
 function show_tag(tag_id, page) {
-    var res = get_cache('tag_'+tag_id+'_'+page);
-    if(res != '') {
-        show_tag_result(res, page);
-        return true;
-    }
     var params = {
         tag_id: tag_id,
         page: page
     };
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
-            set_cache('tag_'+tag_id+'_'+page, res);
             show_tag_result(res, page);
         } else {
             dl_alert('danger', res.message, false);
@@ -1246,11 +1222,15 @@ function show_offline_chapter(book_id, chapter_id) {
                     chapter = book.chapters[i];
                     images = chapter.images;
                     if(!book.chapters[i].read) {
-                        var mark_reads = get_cache('mark_reads');
-                        if(mark_reads.indexOf(','+book.chapters[i]+',') == -1){
-                            mark_reads += ','+book.chapters[i]+',';
-                            set_cache('mark_reads', mark_reads);
+                        var mark_reads = localStorage.getItem("mark_reads");
+                        if(mark_reads !== null && mark_reads !== '') {
+                            if (mark_reads.indexOf(',' + book.chapters[i] + ',') == -1) {
+                                mark_reads += ',' + book.chapters[i] + ',';
+                            }
+                        } else {
+                            mark_reads = ',' + book.chapters[i] + ',';
                         }
+                        localStorage.setItem("mark_reads", mark_reads);
                         book.chapters[i].read = true;
                         save_offline_book(book, false);
                     }

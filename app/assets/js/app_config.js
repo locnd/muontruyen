@@ -161,13 +161,12 @@ function mark_reads() {
     if(!is_logined()) {
         return true;
     }
-    var mark_reads = get_cache('mark_reads');
-    if(mark_reads == '') {
-        return true;
+    var mark_reads = localStorage.getItem("mark_reads");
+    if(mark_reads !== null && mark_reads !== '') {
+        send_api('GET', '/markread', {chapter_ids: mark_reads}, function (data) {
+            localStorage.setItem("mark_reads", '');
+        });
     }
-    send_api('GET', '/markread', {chapter_ids:mark_reads}, function(data){
-        set_cache('mark_reads', '');
-    });
 }
 
 function show_unread(unread) {
@@ -227,8 +226,13 @@ function send_api(method, url, params, callback) {
         },
         error: function( xhr ) {
             $('#loading-btn').hide();
-            if(confirm('Không thể lấy dữ liệu từ server. \nBạn có muốn chuyển sang chế độ Offline không?')) {
-                window.location.href = 'offline.html';
+            var time_notify = localStorage.getItem("time_notify");
+            if (time_notify !== null && time_notify !== '' && $.now() < parseInt(time_notify) + 900000) {
+            } else {
+                localStorage.setItem("time_notify", $.now());
+                if (confirm('Không thể lấy dữ liệu từ server. \nBạn có muốn chuyển sang chế độ Offline không?')) {
+                    window.location.href = 'offline.html';
+                }
             }
         }
     });
@@ -367,27 +371,6 @@ function fullscreen(change) {
         $('#content .container .col-md-12').css('padding', '0 15px');
     }
     localStorage.setItem("screen", screen);
-}
-
-function get_cache(key) {
-    if(is_admin()) {
-        return '';
-    }
-    var json = localStorage.getItem(key);
-    var time = localStorage.getItem(key+"_time");
-    if(json !== null && json !== '' && time !== null && time !== '') {
-        if($.now() < parseInt(time) + 900000) {
-            return JSON.parse(json);
-        }else{
-            localStorage.setItem(key, '');
-            localStorage.setItem(key+"_time", '');
-        }
-    }
-    return '';
-}
-function set_cache(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-    localStorage.setItem(key + "_time", $.now());
 }
 
 function check_device_type() {
