@@ -400,21 +400,22 @@ function check_device_type() {
 function save_offline_book(book, noti){
     var transaction = db1.transaction(["offline_books"],"readwrite");
     var offline_books = transaction.objectStore("offline_books");
-
-    var req = offline_books.get(Number(book.id));
+    var req = offline_books.put(book, Number(book.id));
     req.onsuccess = function(e) {
-        offline_books.put(book,book.id);
         if(noti) {
             $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu Offline');
             $('#save-btn').css('width', '145px');
             dl_alert('success', 'Đã lưu truyện Offline', false);
         }
     };
-    req.onerror = function(e) {
-        offline_books.add(book,book.id);
-        $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu Offline');
-        $('#save-btn').css('width','145px');
-        dl_alert('success', 'Đã lưu truyện Offline', false);
+}
+function delete_offline_book(book_id, callback){
+    var transaction = db1.transaction(["offline_books"],"readwrite");
+    var offline_books = transaction.objectStore("offline_books");
+
+    var req = offline_books.delete(Number(book_id));
+    req.onsuccess = function(e) {
+        callback();
     };
 }
 function get_offline_book(book_id, callback) {

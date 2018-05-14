@@ -1059,11 +1059,6 @@ class Apiv1Controller extends Controller
             );
         }
         $book_data = $book->to_array();
-        if(empty($book->image_blob)) {
-            $book->image_blob = get_image_blob($book_data['image']);
-            $book->save();
-        }
-        $book_data['image'] = 'data:image/jpg;base64,'.$book->image_blob;
         $book_data['last_chapter_name']=$book->lastChapter->name;
         $chapters = array();
         foreach ($book->chapters as $chapter) {
@@ -1071,11 +1066,7 @@ class Apiv1Controller extends Controller
             $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             $tmp_data['images'] = array();
             foreach($chapter->images as $image) {
-                if(empty($image->image_blob)) {
-                    $image->image_blob = get_image_blob($image->get_image());
-                    $image->save();
-                }
-                $tmp_data['images'][] = 'data:image/jpg;base64,'.$image->image_blob;
+                $tmp_data['images'][] = $image->get_image();
             }
             $tmp_data['read'] = false;
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() > 0) {

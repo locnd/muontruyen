@@ -68,17 +68,38 @@ class Book extends ModelCommon
     public function get_image() {
         if(empty($this->image)) {
             $this->image = 'default.jpg';
-            $this->save();
         }
         if($this->image == 'default.jpg') {
-            if(\Yii::$app->params['use_image_source']) {
-                $image = $this->image_source;
-            } else {
-                $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->image;
+            $image_source = $this->image_source;
+            $array = explode('?', $image_source);
+            $tmp_extension = $array[0];
+            $array = explode('.', $tmp_extension);
+            $extension = trim(strtolower(end($array)));
+            if($extension != 'png') {
+                $extension = 'jpg';
             }
-        } else {
-            $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;
+            $image = 'cover.'.$extension;
+            $image_dir = \Yii::$app->params['app'].'/web/uploads/books/'.$this->slug;
+            $dir_array = explode('/', $image_dir);
+            $tmp_dir = '';
+            foreach ($dir_array as $i => $folder) {
+                $tmp_dir .= '/'.$folder;
+                if($i > 3 && !file_exists($tmp_dir)) {
+                    mkdir($tmp_dir, 0777);
+                }
+            }
+            $image_dir = $image_dir.'/'.$image;
+
+            $ch = curl_init($image_source);
+            $fp = fopen($image_dir, 'wb');
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_exec($ch);
+            curl_close($ch);
+            fclose($fp);
+            $this->image = $image;
+            $this->save();
         }
-        return $image;
+        return \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;
     }
 }

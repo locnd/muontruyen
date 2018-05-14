@@ -16,7 +16,6 @@ class Image extends ModelCommon
     public function get_image() {
         if(empty($this->image)) {
             $this->image = 'error.jpg';
-            $this->save();
         }
         if($this->image == 'error.jpg') {
             if(\Yii::$app->params['use_image_source']) {

@@ -1,6 +1,6 @@
 
 function show_home(page) {
-    if(page == 1) {
+    if(page == 1 && !is_admin()) {
         var time_cache = localStorage.getItem("time_cache_home");
         if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 900000) {
             get_cache_home();
@@ -16,7 +16,7 @@ function show_home(page) {
     };
     send_api('GET', '/home', params, function(res) {
         if (res.success) {
-            if(page == 1) {
+            if(page == 1 && !is_admin()) {
                 localStorage.setItem("time_cache_home", $.now());
                 localStorage.setItem("count_pages", res.count_pages);
                 save_cache_home_books(res.data);
@@ -1130,8 +1130,8 @@ function save_to_offline(noti) {
     var params = {
         id: $('#book_id').val()
     };
-    $('#save-btn').html('<i class="fa fa-spinner fa-spin"></i> Đang lưu Offline...');
-    $('#save-btn').css('width','177px');
+    $('#save-btn').html('<span class="saving-bar"></span><i class="fa fa-spinner fa-spin"></i> Đang lưu Offline...');
+    $('#save-btn').css('width','180px');
     send_api('GET', '/savebook', params, function(res) {
         if (res.success) {
             save_cache_book(res);
@@ -1143,18 +1143,48 @@ function save_to_offline(noti) {
         }
     });
 }
+function convertImgToBase64URL(url, callback){
+    var url_arr = url.split('_dl_');
+    var id = 0;
+    if(url_arr.length == 2) {
+        id = url_arr[0];
+        url = url_arr[1];
+    }
+    var canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d'), dataURL;
+    var img = new Image();
+    img.crossOrigin = '';
+    img.onload = function(){
+        canvas.height = img.height;
+        canvas.width = img.width;
+        ctx.drawImage(img, 0, 0);
+        dataURL = canvas.toDataURL('image/jpg');
+        callback(id, dataURL);
+        canvas = null;
+    };
+    img.src = url;
+    img.onerror = function(){
+        callback(id, 'assets/img/default.jpg');
+    };
+}
+var tmp_book_save = {};
+var count_image = 0;
+var running_image = 0;
 function save_cache_book(res) {
-    var value = {};
-    value.id = res.data.id;
-    value.name = res.data.name;
-    value.last_chapter_name = res.data.last_chapter_name;
-    value.count_views = res.data.count_views;
-    value.description = res.data.description;
-    value.release_date = res.data.release_date;
-    value.slug = res.data.slug;
-    value.image = res.data.image;
-    value.chapters= [];
-    for(var i=0;i<res.chapters.length;i++) {
+    count_image = 0;
+    running_image = 0;
+    tmp_book_save = {};
+    tmp_book_save.id = res.data.id;
+    tmp_book_save.name = res.data.name;
+    tmp_book_save.last_chapter_name = res.data.last_chapter_name;
+    tmp_book_save.count_views = res.data.count_views;
+    tmp_book_save.description = res.data.description;
+    tmp_book_save.release_date = res.data.release_date;
+    tmp_book_save.slug = res.data.slug;
+    tmp_book_save.chapters = [];
+    tmp_book_save.image = '';
+    count_image++;
+    for (var i = 0; i < res.chapters.length; i++) {
         var chapter = res.chapters[i];
         var tmp_chapter = {};
         tmp_chapter.id = chapter.id;
@@ -1163,16 +1193,65 @@ function save_cache_book(res) {
         tmp_chapter.stt = chapter.stt;
         tmp_chapter.read = chapter.read;
         tmp_chapter.images = [];
-        for(var j=0;j<chapter.images.length;j++) {
-            tmp_chapter.images.push(chapter.images[j]);
+        count_image = count_image + chapter.images.length;
+        tmp_book_save.chapters.push(tmp_chapter);
+    }
+    tmp_book_save.tags = [];
+    for (var i = 0; i < res.tags.length; i++) {
+        tmp_book_save.tags.push(res.tags[i].name);
+    }
+    convert_images_to_base64(res);
+}
+function convert_images_to_base64(res) {
+    convertImgToBase64URL(res.data.image, function(id, encode64){
+        tmp_book_save.image = encode64;
+        running_image++;
+        loading_bar(running_image, count_image);
+        if(running_image == count_image) {
+            save_offline_book_images();
         }
-        value.chapters.push(tmp_chapter);
+    });
+    for(var i=0;i<res.chapters.length;i++) {
+        var chapter = res.chapters[i];
+        for(var j=0;j<chapter.images.length;j++) {
+            var url = i+'_'+j+'_dl_'+chapter.images[j];
+            convertImgToBase64URL(url, function(id, encode64){
+                running_image++;
+                loading_bar(running_image, count_image);
+                var tmp_id = id.split('_');
+                var data = tmp_id[1] + '_dl_' + encode64;
+                tmp_book_save.chapters[parseInt(tmp_id[0])].images.push(data);
+                if(running_image == count_image) {
+                    save_offline_book_images();
+                }
+            });
+        }
     }
-    value.tags = [];
-    for(var i=0;i<res.tags.length;i++) {
-        value.tags.push(res.tags[i].name);
+}
+
+function save_offline_book_images() {
+    var tmp_book_saved = tmp_book_save;
+    for(var i=0;i<tmp_book_save.chapters.length;i++) {
+        var chapter = tmp_book_save.chapters[i];
+        var tmp_images = [];
+        for(var stt=0;stt<chapter.images.length;stt++) {
+            for (var k = 0; k < chapter.images.length; k++) {
+                var tmp_image = chapter.images[k].split('_dl_');
+                if (parseInt(tmp_image[0]) == stt) {
+                    tmp_images.push(tmp_image[1]);
+                    break;
+                }
+            }
+        }
+        tmp_book_saved.chapters[i].images = tmp_images;
     }
-    save_offline_book(value, true);
+    save_offline_book(tmp_book_saved, true);
+}
+
+function loading_bar(running_image, count_image) {
+    var tyle = running_image/count_image;
+    var width = tyle * 180;
+    $('span.saving-bar').css('width', width+'px');
 }
 function show_offline() {
     setTimeout(function(){
@@ -1180,6 +1259,12 @@ function show_offline() {
             display_offline_book(data);
         });
     },500);
+}
+function delete_offline(book_id) {
+    delete_offline_book(book_id, function(){
+        dl_alert('success', 'Đã xoá truyện xem offline', true);
+        window.location.href="offline.html";
+    });
 }
 function display_offline_book(book) {
     if(typeof(book) == 'undefined' || book == '') {
@@ -1208,7 +1293,8 @@ function show_offline_book(id) {
             html += '<img src="'+book.image+'">';
             html += '</div>';
             html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline" style="width: 125px"><i class="fa fa-globe"></i> Xem Online</a>';
-            html += '<div class="clear10"></div>';
+            html += '<div class="clear0"></div>';
+            html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline" style="width: 155px"><i class="fa fa-trash"></i> Xoá xem Offline</a>';
             html += '<div class="clear10"></div>';
             html += '<div class="book-description">'+book.description+'</div>';
             html += '</div>';

@@ -542,7 +542,16 @@ a.disable_a {
     padding-right: 8px;
     width: 155px;
     margin-top: 10px;
+    position: relative;
 }
 .btn-save-to-offline i.fa-download {
     color: cadetblue;
+}
+span.saving-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: green;
+    opacity: 0.5;
 }
