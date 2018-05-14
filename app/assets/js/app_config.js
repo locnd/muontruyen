@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.3';
+var APP_VERSION = '1.0.4';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -404,7 +404,7 @@ function save_offline_book(book, noti){
     req.onsuccess = function(e) {
         if(noti) {
             $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu Offline');
-            $('#save-btn').css('width', '145px');
+            $('#save-btn').css('width', '150px');
             dl_alert('success', 'Đã lưu truyện Offline', false);
         }
     };
