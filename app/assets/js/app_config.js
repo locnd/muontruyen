@@ -241,9 +241,7 @@ function send_api(method, url, params, callback) {
             $('#loading-btn').hide();
             if(first_error) {
                 first_error = false;
-                if (confirm('Không thể lấy dữ liệu từ server. \nBạn có muốn chuyển sang chế độ Offline không?')) {
-                    window.location.href = 'offline.html';
-                }
+                dl_alert('danger', 'Không thể lấy dữ liệu từ server', false);
             }
         }
     });
@@ -424,33 +422,48 @@ function get_offline_book(book_id, callback) {
     var request = offline_books.get(Number(book_id));
     request.onsuccess = function(e) {
         callback(e.target.result);
-    }
+    };
+    request.onerror = function(e) {
+        dl_alert('danger', 'Truyện lưu Offline không khả dụng', true);
+        window.location.href = "offline.html";
+    };
 }
 function get_all_offline_books(callback) {
     var transaction = db1.transaction(["offline_books"],"readonly");
     var offline_books = transaction.objectStore("offline_books");
     var cursor = offline_books.openCursor();
 
+    var has_book = false;
     cursor.onsuccess = function(e) {
         var res = e.target.result;
         if(res) {
+            has_book = true;
             callback(res.value);
             res.continue();
         }
-    }
+        if(!has_book) {
+            $('#image-refresh').hide();
+            dl_alert('danger', 'Không có truyện lưu Offline', false);
+        }
+    };
 }
 function get_all_home_books(callback) {
     var transaction = db2.transaction(["home_books"],"readonly");
     var home_books = transaction.objectStore("home_books");
     var cursor = home_books.openCursor();
 
+    var has_book = false;
     cursor.onsuccess = function(e) {
         var res = e.target.result;
         if(res) {
+            has_book = true;
             callback(res.value);
             res.continue();
         }
-    }
+        if(!has_book) {
+            dl_alert('danger', 'Không có truyện', false);
+        }
+    };
 }
 function save_cache_home_books(res) {
     var transaction = db2.transaction(["home_books"], "readwrite");

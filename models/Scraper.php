@@ -94,6 +94,7 @@ class Scraper
             }
             if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
                 $book->will_reload = 1;
+                $book->status = Book::INACTIVE;
                 $book->save();
             }
             return $number_chapters;
@@ -177,6 +178,7 @@ class Scraper
         }
         if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
             $book->will_reload = 1;
+            $book->status = Book::INACTIVE;
             $book->save();
         }
         return $number_chapters;
@@ -243,6 +245,7 @@ class Scraper
             $this->parse_chapter($db_chapter);
             if(Image::find()->where(array('chapter_id'=>$db_chapter->id))->count() == 0) {
                 $db_chapter->will_reload = 1;
+                $db_chapter->status = Chapter::INACTIVE;
                 $db_chapter->save();
             }
         }
@@ -494,9 +497,14 @@ class Scraper
             $book->description = $description;
         }
         $book->release_date = date('Y-m-d H:i:s');
+        $book->will_reload = 0;
         $book->status = Book::ACTIVE;
-        $book->save();
         $this->get_chapters($book, false);
+        if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
+            $book->will_reload = 1;
+            $book->status = Book::INACTIVE;
+        }
+        $book->save();
     }
     public function reload_chapter($chapter) {
         if($this->echo) {
@@ -511,7 +519,13 @@ class Scraper
             }
             $chapter->save();
         }
+        $chapter->will_reload = 0;
         $this->parse_chapter($chapter);
+        if(Image::find()->where(array('chapter_id'=>$chapter->id))->count() == 0) {
+            $chapter->will_reload = 1;
+            $chapter->status = Chapter::INACTIVE;
+        }
+        $chapter->save();
     }
 
     private function parse_url_by_phantom($url) {

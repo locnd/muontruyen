@@ -33,6 +33,7 @@ class ChapterController extends Controller
             'url' => trim(getParam('url')),
             'book_id' => trim(getParam('book_id')),
             'status' => trim(getParam('status')),
+            'will_reload' => trim(getParam('will_reload')),
             'from_date' => trim(getParam('from_date')),
             'to_date' => trim(getParam('to_date', date('d-m-Y')))
         );
@@ -48,6 +49,9 @@ class ChapterController extends Controller
         }
         if($filters['status'] != '') {
             $chapters->andWhere(['=', 'status', $filters['status']]);
+        }
+        if($filters['will_reload'] != '') {
+            $chapters->andWhere(['=', 'will_reload', $filters['will_reload']]);
         }
         if($filters['from_date'] != '') {
             $chapters->andWhere(['>=', 'created_at', convert_to_mysql_time($filters['from_date'].' 00:00:00')]);

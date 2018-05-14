@@ -1250,6 +1250,9 @@ function save_offline_book_images() {
         tmp_book_saved.chapters[i].images = tmp_images;
     }
     save_offline_book(tmp_book_saved, true);
+    count_image = 0;
+    running_image = 0;
+    tmp_book_save = {};
 }
 
 function loading_bar(running_image, count_image) {
@@ -1263,6 +1266,7 @@ function show_offline() {
             clearInterval(interval);
             get_all_offline_books(function(data) {
                 display_offline_book(data);
+                $('#image-refresh').hide();
             });
         }
     },1);
@@ -1349,6 +1353,7 @@ function show_offline_book(id) {
                 }
                 $('#chapters-list').html(html);
                 $('#chapters-list').show();
+                $('#image-refresh').hide();
             });
         }
     },1);
@@ -1444,6 +1449,7 @@ function show_offline_chapter(book_id, chapter_id) {
                 html+='<div class="clear10"></div>';
                 $('#chapter-page').html(html);
                 $('#chapter-page').show();
+                $('#image-refresh').hide();
             });
         }
     },1);

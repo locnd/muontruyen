@@ -56,8 +56,6 @@ class ReloadController extends Controller
             $log->number_books++;
             $log->save();
             $scraper->reload_book($book);
-            $book->will_reload = 0;
-            $book->save();
         }
 
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
@@ -65,8 +63,6 @@ class ReloadController extends Controller
             $log->number_chapters++;
             $log->save();
             $scraper->reload_chapter($chapter);
-            $chapter->will_reload = 0;
-            $chapter->save();
         }
 
         $setting_model->set_setting('cron_running', '');

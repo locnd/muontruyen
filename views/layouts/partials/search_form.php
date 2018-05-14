@@ -44,6 +44,18 @@ foreach ($filters as $key => $value) { ?>
                     '1'=>'Active'
                 );
                 echo_input($option_status, $status_arr, $value==='' ? '' : $value);
+            } elseif ($key == 'will_reload') {
+                $option_will_reload = array(
+                    'name' => $key,
+                    'type' => 'select',
+                    'class' => 'form-control'
+                );
+                $will_reload_arr = array(
+                    ''=>'Please select',
+                    '0'=>'False',
+                    '1'=>'True'
+                );
+                echo_input($option_will_reload, $will_reload_arr, $value==='' ? '' : $value);
             } elseif ($key == 'book_id') {
                 $option_book = array(
                     'name' => $key,
