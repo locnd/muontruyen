@@ -61,9 +61,12 @@ class ModelCommon extends \yii\db\ActiveRecord
         return $data;
     }
 
-    public function to_array() {
+    public function to_array($fields=array()) {
         $tmp_data = array();
         foreach ($this as $k => $v) {
+            if(is_null($v) || (!empty($fields) && !in_array($k, $fields))) {
+                continue;
+            }
             $tmp_data[$k] = $v;
             if($k == 'image') {
                 $tmp_data['image'] = $this->get_image();

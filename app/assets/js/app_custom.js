@@ -142,7 +142,8 @@ function display_a_book(book) {
 function display_a_tag(tag) {
     var html='<div class="a-tag">';
     html += '<a href="tag.html?id='+tag.id+'">';
-    html += '<img src="assets/img/tag.png">'+tag.name + ' ('+tag.count+')';
+    var tag_name = tag.name.replace('Tác giả', 'TG');
+    html += '<img src="assets/img/tag.png">'+tag_name + ' ('+tag.count+')';
     html += '</a>';
     html += '</div>';
     $('#list-books .a-book').append(html);
@@ -244,11 +245,12 @@ function display_book_info(book, is_following, tags) {
     var tag_html = '';
     for (var i = 0; i < tags.length; i++) {
         if (tags[i].is_checked) {
-            tag_html += '<a href="tag.html?id=' + tags[i].id + '" class="available_tag">' + tags[i].name + '</a>';
+            var tag_name = tags[i].name.replace('Tác giả', 'TG');
+            tag_html += '<a href="tag.html?id=' + tags[i].id + '" class="available_tag">' + tag_name + '</a>';
         }
     }
     if(tag_html == '') {
-        html += '<div style="margin-bottom:10px">* Truyện chưa ngắn thẻ tag</div>';
+        html += '<div style="margin-bottom:10px">* Truyện chưa gắn thẻ tag</div>';
     } else {
         html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
         html += tag_html;
@@ -970,6 +972,8 @@ function show_tags_list(res) {
     $('h3.page-title').html('Danh sách <b>thẻ tag</b> ('+res.total+' kết quả)');
     $('h3.page-title').show();
     if(res.total > 0) {
+
+
         for (var i = 0; i < res.data.length; i++) {
             display_a_tag(res.data[i]);
         }
@@ -1355,7 +1359,7 @@ function show_offline_book(id) {
                     tag_html += '<a href="javascript:;" class="available_tag">' + book.tags[i] + '</a>';
                 }
                 if(tag_html == '') {
-                    html += '<div style="margin-bottom:10px">* Truyện chưa ngắn thẻ tag</div>';
+                    html += '<div style="margin-bottom:10px">* Truyện chưa gắn thẻ tag</div>';
                 } else {
                     html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
                     html += tag_html;
@@ -1568,5 +1572,17 @@ function show_bookmark_result(res, page) {
             pages.push(i);
         }
         display_paging('bookmark.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
+    }
+}
+function filter_tag() {
+    var keyword = $.trim($('#filter_tag').val()).toLowerCase();
+    var tags = $('.a-tag');
+    for(var i=0;i<tags.length;i++) {
+        var tag_name = $(tags[i]).text().toLowerCase();
+        if(tag_name.indexOf(keyword) > -1) {
+            $(tags[i]).show();
+        } else {
+            $(tags[i]).hide();
+        }
     }
 }
