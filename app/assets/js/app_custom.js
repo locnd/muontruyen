@@ -571,9 +571,10 @@ function change_chapter(ele) {
     window.location.href = 'chapter.html?id='+chapter_id;
 }
 
-function show_follow(tab, is_first) {
+function show_follow(tab, page, is_first) {
     var params = {
-        tab: tab
+        tab: tab,
+        page: page
     };
     send_api('GET', '/follow', params, function(res) {
         if (res.success) {
@@ -582,7 +583,7 @@ function show_follow(tab, is_first) {
             if(is_first) {
                 var html = '';
                 for (var i = 0; i < groups.length; i++) {
-                    html += '<div id="group' + groups[i].id + '" onclick="show_follow(' + groups[i].id + ', false)" class="section-container a-book">';
+                    html += '<div id="group' + groups[i].id + '" onclick="show_follow(' + groups[i].id + ',1, false)" class="section-container a-book">';
                     html += '<div>' + groups[i].name + ' (' + groups[i].count + ')</div>';
                     html += '</div>';
                 }
@@ -611,24 +612,31 @@ function show_follow(tab, is_first) {
                 }
             }
             $('#list_follows').html(html);
+            if(groups.length == 0) {
+                $('#list_groups').hide();
+                $('#list_follows').css('width','100%');
+                return true;
+            }
             if(tab == 0) {
                 show_unread(books.length);
                 if (books.length > 0) {
                     $('#group0').show();
                 } else {
                     $('#group0').hide();
+                    if(page > 1) {
+                        show_follow(0, (page - 1), false);
+                        return true;
+                    }
                     if (groups.length > 0) {
-                        show_follow(groups[0].id, false);
+                        show_follow(groups[0].id, 1, false);
                         return true;
                     }
                 }
             }
             $('.a-book.active').removeClass('active');
             $('#group'+tab).addClass('active');
-            if(groups.length == 0) {
-                $('#list_groups').hide();
-                $('#list_follows').css('width','100%');
-            }
+            $('html, body').animate({scrollTop: 0}, 1);
+            display_follow_paging(tab, page, res.count_pages);
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1458,4 +1466,16 @@ function show_offline_chapter(book_id, chapter_id) {
 function change_offline_chapter(ele, book_id) {
     var chapter_id = $(ele).val();
     window.location.href = 'offline_chapter.html?id='+book_id+'&c_id='+chapter_id;
+}
+
+function display_follow_paging(tab, current_page, total_page) {
+    var html = '<ul class="a-pagging">';
+    if(current_page > 1) {
+        html += '<li style="float:left;margin:0"><a onclick="show_follow('+tab+','+(current_page-1)+',false)">Trước</a></li>';
+    }
+    if(current_page < total_page) {
+        html += '<li style="float:right;margin:0"><a onclick="show_follow('+tab+','+(current_page+1)+',false)">Sau</a></li>';
+    }
+    html += '</ul>';
+    $('#paging').html(html);
 }

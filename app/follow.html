@@ -85,7 +85,11 @@
                                 <div>Chưa đọc (<span class="dl-notify"></span>)</div>
                             </div>
                         </div>
-                        <div class="dl-content" id="list_follows">
+                        <div class="dl-content">
+                            <div id="list_follows"></div>
+                            <div class="clear5" style="height:1px"></div>
+                            <div class="section-container" id="paging" style="margin-bottom: 20px;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -111,7 +115,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_follow(0, true);
+            show_follow(0, 1, true);
         });
     </script>
 </body>

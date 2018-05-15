@@ -198,6 +198,7 @@ class Apiv1Controller extends Controller
         );
     }
     public function actionBookforsearch() {
+        ini_set('memory_limit', '-1');
         $books = Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->all();
         return array(
             'success' => true,
@@ -381,8 +382,17 @@ class Apiv1Controller extends Controller
             }
         }
         $books = array();
+        $total_page = 1;
+        $limit = get_limit('mobile_limit');
+        $page = max((int) getParam('page', 1),1);
         if(!empty($books_ids)) {
-            $books = Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->orderBy(['release_date' => SORT_DESC])->all();
+            $books = Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE));
+            $total = $books->count();
+            $total_page = ceil($total / $limit);
+            $page = min($page, $total_page);
+            $offset = ($page - 1) * $limit;
+            $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+            $books = $books->all();
         }
         $data = array();
         foreach ($books as $book) {
@@ -409,7 +419,8 @@ class Apiv1Controller extends Controller
         return array(
             'success' => true,
             'data' => $data,
-            'groups' => $groups
+            'groups' => $groups,
+            'count_pages' => $total_page
         );
     }
     public function actionDisable()

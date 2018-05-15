@@ -32,12 +32,12 @@ function show_number($num, $dec=0) {
 
 function get_limit($key='backend_limit') {
     $setting_model = new app\models\Setting();
-    $limit = $setting_model->get_setting('mobile_limit');
+    $limit = $setting_model->get_setting($key);
     if($limit != '') {
         $limit = (int) $limit;
     } else {
         $limit = Yii::$app->params['limit'];
-        $setting_model->set_setting('mobile_limit', $limit);
+        $setting_model->set_setting($key, $limit);
     }
     return $limit;
 }
