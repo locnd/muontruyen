@@ -1021,11 +1021,25 @@ class Apiv1Controller extends Controller
     public function actionSearch() {
         ini_set('memory_limit', '-1');
         $keyword = Yii::$app->request->get('keyword','');
-        $books = Book::find()->where(array('status'=>Book::ACTIVE))->andFilterWhere([
+
+        $fields = array('id','name','description', 'image', 'release_date', 'slug');
+        $books = Book::find()->select($fields)->where(array('status'=>Book::ACTIVE))->andFilterWhere([
             'or',
             ['like', 'name', $keyword],
             ['like', 'slug', $keyword],
         ]);
+
+        $is_full = (int) Yii::$app->request->get('is_full',0);
+        if($is_full == 1) {
+            $tag = Tag::find()->select(array('id'))->where(array('slug'=>'hoan-thanh'))->one();
+            $book_tags = BookTag::find()->select(array('book_id'))->where(array('tag_id'=>$tag->id))->all();
+            $book_ids = array();
+            foreach($book_tags as $book_tag) {
+                $book_ids[] = $book_tag->book_id;
+            }
+            $books->andWhere(array('id'=>$book_ids));
+        }
+
         $total = $books->count();
 
         $setting_model = new Setting();
@@ -1164,7 +1178,7 @@ class Apiv1Controller extends Controller
         $book_data['last_chapter_name']=$book->lastChapter->name;
         $chapters = array();
         foreach ($book->chapters as $chapter) {
-            $tmp_data = $chapter->to_array(array('id','name'));
+            $tmp_data = $chapter->to_array(array('id','name','stt'));
             $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             $tmp_data['images'] = array();
             foreach($chapter->images as $image) {

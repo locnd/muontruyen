@@ -582,3 +582,19 @@ span.saving-bar {
     padding: 5px 10px;
     margin-bottom: 10px;
 }
+div#header-navbar {
+    max-height: inherit;
+}
+#full_book {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    line-height: 22px;
+    display: none;
+}
+#check_full_book {
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    float: left;
+}

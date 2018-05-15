@@ -518,10 +518,10 @@ function show_chapter(id) {
             var images = res.images;
             var chapters = res.chapters;
             for(var i=0;i<chapters.length;i++) {
-                if(i==0 && chapter.stt == chapters[i].stt) {
+                if(i==0 && chapter.id == chapters[i].id) {
                     chapter.point = 'last';
                 }
-                if(i==chapters.length-1 && chapter.stt == chapters[i].stt) {
+                if(i==chapters.length-1 && chapter.id == chapters[i].id) {
                     chapter.point = 'first';
                 }
                 if(chapter.id == chapters[i].id) {
@@ -668,6 +668,7 @@ function show_follow(tab, page, is_first) {
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
             display_follow_paging(tab, page, res.count_pages);
+            check_unread(true);
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -756,6 +757,7 @@ function register() {
 function logout() {
     localStorage.setItem("token", '');
     localStorage.setItem("is_admin", '');
+    localStorage.setItem("unread", '');
     window.location.href = 'index.html';
 }
 
@@ -1087,13 +1089,19 @@ function convertToSlug(str)
 
     return str.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-');
 }
-function show_search(keyword, page) {
+function show_search(keyword, page, check_full) {
     var params = {
         keyword: keyword,
-        page: page
+        page: page,
+        is_full: check_full
     };
     $('h3.page-title').html('Tìm kiếm "<b>'+keyword+'</b>"');
     $('h3.page-title').show();
+    if(check_full == 1) {
+        $('#check_full_book').attr('checked','checked');
+    }
+    $('#check_full_book').attr('onchange','search_again("'+keyword+'")');
+    $('#full_book').show();
     send_api('GET', '/search', params, function(res) {
         if (res.success) {
             show_search_result(res, keyword, page);
@@ -1110,6 +1118,10 @@ function show_search_result(res, keyword, page) {
             display_a_book(res.data[i]);
         }
     }
+    var check_full = 0;
+    if($('#check_full_book').is(":checked")) {
+        check_full = 1;
+    }
     if(res.count_pages > 1) {
         var pages = [];
         for (var i=1;i<=res.count_pages;i++) {
@@ -1124,8 +1136,15 @@ function show_search_result(res, keyword, page) {
             }
             pages.push(i);
         }
-        display_paging('search.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
+        display_paging('search.html?keyword='+keyword+'&is_full='+check_full+'&page=',pages, page, res.count_pages);
     }
+}
+function search_again(keyword) {
+    var check_full = 0;
+    if($('#check_full_book').is(":checked")) {
+        check_full = 1;
+    }
+    window.location.href = 'search.html?keyword='+keyword+'&is_full='+check_full;
 }
 function show_tag(tag_id, page) {
     var params = {
@@ -1235,7 +1254,6 @@ function save_cache_book(res) {
         tmp_chapter.id = chapter.id;
         tmp_chapter.name = chapter.name;
         tmp_chapter.release_date = chapter.release_date;
-        tmp_chapter.stt = chapter.stt;
         tmp_chapter.read = chapter.read;
         tmp_chapter.images = [];
         count_image = count_image + chapter.images.length;
@@ -1432,10 +1450,10 @@ function show_offline_chapter(book_id, chapter_id) {
                 var images = chapter.images;
                 var chapters = book.chapters;
                 for(var i=0;i<chapters.length;i++) {
-                    if(i==0 && chapter.stt == chapters[i].stt) {
+                    if(i==0 && chapter.id == chapters[i].id) {
                         chapter.point = 'last';
                     }
-                    if(i==chapters.length-1 && chapter.stt == chapters[i].stt) {
+                    if(i==chapters.length-1 && chapter.id == chapters[i].id) {
                         chapter.point = 'first';
                     }
                     if(chapter.id == chapters[i].id) {
