@@ -70,11 +70,6 @@ class AjaxController extends Controller
                     'message' => 'Không thể upload ảnh'
                 );
             }
-            $image_dir = \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $book->slug .'/'.$value;
-            $image_blob = get_image_blob($image_dir);
-            if(!empty($image_blob)) {
-                $book->image_blob = $image_blob;
-            }
         } else {
             $value = Yii::$app->request->post('value', '');
             if ($key === '' || $value === '') {

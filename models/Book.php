@@ -69,7 +69,8 @@ class Book extends ModelCommon
         if(empty($this->image)) {
             $this->image = 'default.jpg';
         }
-        if($this->image == 'default.jpg') {
+        $image_dir = \Yii::$app->params['app'].'/web/uploads/books/'.$this->slug;
+        if($this->image == 'default.jpg' || !file_exists($image_dir.'/'.$this->image)) {
             $image_source = $this->image_source;
             $array = explode('?', $image_source);
             $tmp_extension = $array[0];
@@ -79,7 +80,6 @@ class Book extends ModelCommon
                 $extension = 'jpg';
             }
             $image = 'cover.'.$extension;
-            $image_dir = \Yii::$app->params['app'].'/web/uploads/books/'.$this->slug;
             $dir_array = explode('/', $image_dir);
             $tmp_dir = '';
             foreach ($dir_array as $i => $folder) {

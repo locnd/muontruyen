@@ -563,6 +563,7 @@ class Apiv1Controller extends Controller
             if($setting_model->get_setting('cron_running') != '') {
                 $options['Cron'] = 'running';
             }
+            $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
             $options['Số báo lỗi'] = Report::find()->count();
             $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();

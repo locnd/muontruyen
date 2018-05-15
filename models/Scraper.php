@@ -191,6 +191,16 @@ class Scraper
         }
         $server = $book->server;
 
+        $chapters = $html_base->find($server->list_chapters_key);
+        if(count($chapters) == 0) {
+            $html_base->clear();
+            unset($html_base);
+            $html_base = $this->get_html_base($book->url, false, 'phantom');
+            if(empty($html_base)) {
+                return 0;
+            }
+        }
+
         $status = $html_base->find($server->status_key)[0];
         $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
         if($status_str == 'Hoàn thành') {
@@ -601,17 +611,30 @@ page.open("%s", function (status) {
         curl_close($ch);
     }
 
-    private function get_html_base($url, $show_way=false) {
-        $html = $this->curl_getcontent($url);
-        $html_base = HtmlDomParser::str_get_html($html);
-        unset($html);
-        $way = 'curl';
-        if(empty($html_base)) {
+    private function get_html_base($url, $show_way=false, $way='curl') {
+        if($way == 'phantom') {
             $file_html = $this->parse_url_by_phantom($url);
-            $way = 'phantom';
             if($file_html != '') {
                 $html_base = HtmlDomParser::str_get_html($file_html);
                 unset($file_html);
+            }
+            if (empty($html_base)) {
+                $way='curl';
+                $html = $this->curl_getcontent($url);
+                $html_base = HtmlDomParser::str_get_html($html);
+                unset($html);
+            }
+        } else {
+            $html = $this->curl_getcontent($url);
+            $html_base = HtmlDomParser::str_get_html($html);
+            unset($html);
+            if (empty($html_base)) {
+                $way = 'phantom';
+                $file_html = $this->parse_url_by_phantom($url);
+                if ($file_html != '') {
+                    $html_base = HtmlDomParser::str_get_html($file_html);
+                    unset($file_html);
+                }
             }
         }
         if($show_way && $this->echo) {
