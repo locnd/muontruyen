@@ -1150,21 +1150,27 @@ class Apiv1Controller extends Controller
             );
         }
         $id = (int) Yii::$app->request->get('id',0);
-        $book = Book::find()->where(array('id'=>$id, 'status'=>Book::ACTIVE))->one();
+        $fields = array(
+            'id','name','description', 'image', 'release_date', 'slug'
+        );
+        $book = Book::find()->select($fields)->where(array('id'=>$id, 'status'=>Book::ACTIVE))->one();
         if(empty($book)) {
             return array(
                 'success' => false,
                 'message' => 'Truyện này không khả dụng'
             );
         }
-        $book_data = $book->to_array();
+        $book_data = $book->to_array(array('id','name','description', 'image', 'release_date'));
         $book_data['last_chapter_name']=$book->lastChapter->name;
         $chapters = array();
         foreach ($book->chapters as $chapter) {
-            $tmp_data = $chapter->to_array();
+            $tmp_data = $chapter->to_array(array('id','name'));
             $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
             $tmp_data['images'] = array();
             foreach($chapter->images as $image) {
+                if($image->status == Image::INACTIVE) {
+                    continue;
+                }
                 $tmp_data['images'][] = $image->get_image();
             }
             $tmp_data['read'] = false;
@@ -1176,12 +1182,12 @@ class Apiv1Controller extends Controller
         $book_tags = BookTag::find()->where(array('book_id' => $book->id))->all();
         $tag_data = array();
         foreach ($book_tags as $book_tag) {
-            $tmp = $book_tag->tag->to_array();
-            if($tmp['status'] == Tag::INACTIVE) {
+            if($book_tag->tag->status == Tag::INACTIVE) {
                 continue;
             }
-            if(!empty($tmp['vn_name'])) {
-                $tmp['name'] = $tmp['vn_name'];
+            $tmp = $book_tag->tag->to_array(array('name'));
+            if(!empty($book_tag->tag->vn_name)) {
+                $tmp['name'] = $book_tag->tag->vn_name;
             }
             $tag_data[] = $tmp;
         }
