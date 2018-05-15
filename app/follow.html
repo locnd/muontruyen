@@ -30,6 +30,14 @@
         } else {
             dl_alert('danger', 'Bộ nhớ không hoạt động', false);
         }
+        window.addEventListener( "pageshow", function ( event ) {
+            var historyTraversal = event.persisted ||
+                ( typeof window.performance != "undefined" &&
+                    window.performance.navigation.type === 2 );
+            if ( historyTraversal ) {
+                window.location.reload();
+            }
+        });
     </script>
     <script src="cordova.js"></script>
 </head>

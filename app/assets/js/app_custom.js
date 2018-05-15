@@ -627,10 +627,10 @@ function show_follow(tab, page, is_first) {
             } else {
                 for (var i = 0; i < books.length; i++) {
                     var book = books[i];
-                    html += '<div id="tab'+tab+'_'+book.id+'" class="section-container a-book">';
-                    html += '<div class="a-title"><a onclick="$(\'#tab0_'+book.id+'\').remove()" href="book.html?id='+book.id+'">'+book.name+'</a></div>';
+                    html += '<div class="section-container a-book">';
+                    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
                     html += '<div class="a-cover" style="width: 90px">';
-                    html += '<a onclick="$(\'#tab0_'+book.id+'\').remove()" href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
+                    html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
                     html += '<div class="a-description" style="width:calc(100% - 92px)">';
                     html += '<span>'+get_mini_description(book.description, 30)+'</span>';
