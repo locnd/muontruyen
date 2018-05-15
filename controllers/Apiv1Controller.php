@@ -151,9 +151,6 @@ class Apiv1Controller extends Controller
             if(BookTag::find()->where(array('tag_id' => $tag->id, 'book_id'=>$book->id))->count() > 0) {
                 $tmp['is_checked'] = true;
             }
-            if(!empty($tag->vn_name)) {
-                $tmp['name'] = $tag->vn_name;
-            }
             $tag_data[] = $tmp;
         }
         return array(
@@ -514,9 +511,6 @@ class Apiv1Controller extends Controller
         foreach ($tags as $tag) {
             $tmp = $tag->to_array();
             $tmp['count'] = BookTag::find()->where(array('tag_id'=>$tag->id))->count();
-            if(!empty($tag->vn_name)) {
-                $tmp['name'] = $tag->vn_name;
-            }
             $data[] = $tmp;
         }
         if(empty($data)) {
@@ -1034,7 +1028,7 @@ class Apiv1Controller extends Controller
         return array(
             'success' => true,
             'data' => $data,
-            'tag' => $tag,
+            'tag' => $tag->to_array(),
             'total' => $total,
             'count_pages' => $total_page
         );

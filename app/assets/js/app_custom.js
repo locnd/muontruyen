@@ -1121,7 +1121,7 @@ function show_tag_result(res, page) {
             }
             pages.push(i);
         }
-        display_paging('tag.html?id='+tag_id+'&page=',pages, page, res.count_pages);
+        display_paging('tag.html?id='+res.tag.id+'&page=',pages, page, res.count_pages);
     }
 }
 function save_to_offline(noti) {

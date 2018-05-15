@@ -71,6 +71,9 @@ class ModelCommon extends \yii\db\ActiveRecord
             if($k == 'release_date') {
                 $tmp_data['release_date'] = date('d-m-Y H:i',strtotime($this->release_date));
             }
+            if($k == 'name' && !empty($this->vn_name)) {
+                $tmp_data['name'] = $this->vn_name;
+            }
         }
         return $tmp_data;
     }
