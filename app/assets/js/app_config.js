@@ -20,7 +20,7 @@ function onDeviceReady() {
             //alert("when the app is not active");
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
-        check_unread();
+        check_unread(false);
     });
 
     push.on('error', function(e) {
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.4';
+var APP_VERSION = '1.0.5';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -97,7 +97,7 @@ $(document).ready(function() {
     fullscreen(false);
     check_device_type();
     if($('#is_offline').length == 0) {
-        check_unread();
+        check_unread(true);
         get_book_list_for_search();
     } else {
         mark_reads();
@@ -161,12 +161,23 @@ function show_elements() {
     }
 }
 
-function check_unread() {
+function check_unread(check_cache) {
     if(!is_logined()) {
         return true;
     }
+    if(check_cache) {
+        var unread_time = localStorage.getItem("unread_time");
+        var unread = localStorage.getItem("unread");
+        if (unread !== null && unread !== ''
+            && unread_time !== null && unread_time !== '') {
+            if ($.now() < parseInt(unread_time) + 3600000) {
+                show_unread(unread, false);
+                return true;
+            }
+        }
+    }
     send_api('GET', '/unread', {}, function(data){
-        show_unread(data.data);
+        show_unread(data.data, true);
     });
 }
 
@@ -182,7 +193,11 @@ function mark_reads() {
     }
 }
 
-function show_unread(unread) {
+function show_unread(unread, set_cache) {
+    if(set_cache) {
+        localStorage.setItem("unread_time", $.now());
+        localStorage.setItem("unread", unread);
+    }
     if(parseInt(unread) > 0) {
         $('.dl-notify').html(unread);
         $('#btn-more-menu i.dl-notify').removeClass('hidden');

@@ -154,7 +154,7 @@ function show_book(id) {
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
             if(res.options.make_read) {
-                show_unread(res.options.unread);
+                show_unread(res.options.unread, true);
             }
         } else {
             dl_alert('danger', res.message, true);
@@ -618,7 +618,7 @@ function show_follow(tab, page, is_first) {
                 return true;
             }
             if(tab == 0) {
-                show_unread(books.length);
+                show_unread(books.length, true);
                 if (books.length > 0) {
                     $('#group0').show();
                 } else {
