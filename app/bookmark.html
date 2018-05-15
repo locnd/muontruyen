@@ -26,14 +26,13 @@
     <script src="assets/js/app_config.js"></script>
     <script>
         if (typeof (Storage) !== "undefined") {
-            checkLogin(0);
+            checkLogin(1);
         } else {
             dl_alert('danger', 'Bộ nhớ không hoạt động', false);
         }
-        var param_id = getParam('id');
-        if (param_id == '') {
-            dl_alert('danger', 'Truyện này không tồn tại', true);
-            window.location.href="index.html";
+        var param_page = getParam('page');
+        if (param_page == '') {
+            param_page = 1;
         }
     </script>
     <script src="cordova.js"></script>
@@ -85,31 +84,12 @@
                     <div id="image-refresh">
                         <i class="fa fa-refresh fa-spin"></i>
                     </div>
-                    <div class="post-detail section-container for-admin">
-                        <input type="hidden" id="book_id">
-                        <img id="loading-btn" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                        <div id="reload-btn" class="admin-btn">Lấy lại truyện</div>
-                        <div id="edit-title-btn" class="admin-btn">Sửa tên truyện</div>
-                        <div id="edit-description-btn" class="admin-btn">Sửa giới thiệu truyện</div>
-                        <div id="disable-btn" class="admin-btn">Ẩn truyện</div>
-                        <div id="moving-manage-btn" class="admin-btn">Sắp xếp chương</div>
-                        <div id="tag-btn" class="admin-btn">Sửa tags</div>
-                        <div class="clear10"></div>
-                        <div class="input-admin">
-                            <input type="hidden" id="action">
-                            <textarea id="input-textarea" style="width: 100%;padding: 6px 10px;"></textarea>
-                            <div class="clear10"></div>
-                            <div onclick="save_data()" class="admin-btn">Lưu lại</div>
-                            <div onclick="$('.input-admin').hide()" class="admin-btn" style="background:lightgrey">Huỷ bỏ</div>
-                            <div class="clear10"></div>
-                        </div>
-                    </div>
                     <div class="post-detail section-container">
-                        <div id="book-info" class="section-container a-book hide-before-load">
+                        <h3 class="page-title"></h3>
+                        <div id="list-books">
                         </div>
-                        <div id="chapters-list" class="section-container a-book hide-before-load">
-                        </div>
-                        <div id="list_group" class="section-container dl-modal a-book hide-before-load">
+                        <div class="clear5" style="height:1px"></div>
+                        <div class="section-container" id="paging" style="margin-bottom: 20px;">
                         </div>
                     </div>
                 </div>
@@ -117,35 +97,6 @@
         </div>
     </div>
     <a class="btn-fullscreen" onclick="fullscreen(true)"><i class="fa fa-arrows-alt"></i></a>
-    <div class="dl-modal" id="tag-modal">
-        <div class="modal_header">Gắn tag truyện</div>
-        <div class="dl_hr"></div>
-        <div class="modal_content">
-            <ul id="tags-list">
-            </ul>
-            <div class="clear10"></div>
-            <input placeholder="Tên tag mới" id="tag_name" type="text">
-            <div onclick="create_tag()" class="admin-btn" style="margin: 0 0 0 20px">Thêm</div>
-            <div class="clear5"></div>
-        </div>
-        <div class="modal_footer">
-            <div class="admin-btn" onclick="save_tags()">Lưu</div>
-            <div class="admin-btn" onclick="close_modal('tag-modal')" style="background:lightgrey">Huỷ bỏ</div>
-        </div>
-    </div>
-    <div class="dl-modal" id="report-modal">
-        <div class="modal_header">Báo lỗi truyện</div>
-        <div class="dl_hr"></div>
-        <div class="modal_content">
-            <textarea placeholder="Nội dung lỗi..." id="report_content" class="form-control"></textarea>
-            <div class="clear5"></div>
-        </div>
-        <div class="modal_footer">
-            <div id="send-report-btn" class="admin-btn" onclick="send_report()">Lưu</div>
-            <div class="admin-btn" onclick="close_modal('report-modal')" style="background:lightgrey">Huỷ bỏ</div>
-        </div>
-    </div>
-
     <div id="footer-copyright" class="footer-copyright">
     </div>
 
@@ -164,7 +115,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_book(param_id);
+            show_bookmark(parseInt(param_page));
         });
     </script>
 </body>

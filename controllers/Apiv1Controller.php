@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Bookmark;
 use app\models\Report;
 use Yii;
 use yii\web\Controller;
@@ -189,12 +190,18 @@ class Apiv1Controller extends Controller
         }
         $book->count_views = $book->count_views + 1;
         $book->save();
+        $check_bookmark = 0;
+        if(!empty($user->id)) {
+            $check_bookmark = Bookmark::find()->where(array(
+                'user_id' => $user->id, 'chapter_id' => $chapter->id, 'status' => 1))->count();
+        }
         return array(
             'success' => true,
             'data' => $chapter,
             'chapters' => $book->chapters,
             'book' => $book_data,
-            'images' => $images
+            'images' => $images,
+            'is_bookmark' => $check_bookmark > 0 ? true : false
         );
     }
     public function actionBookforsearch() {
@@ -287,6 +294,54 @@ class Apiv1Controller extends Controller
         return array(
             'success' => true,
             'data' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
+        );
+    }
+    public function actionMakebookmark() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        $book_id = (int) Yii::$app->request->post('book_id',0);
+        $chapter_id = (int) Yii::$app->request->post('chapter_id',0);
+        $check_book = Book::find()->where(array('status'=>Book::ACTIVE, 'id'=>$book_id))->count();
+        if($check_book == 0) {
+            return array(
+                'success' => false,
+                'message' => 'Truyện không khả dụng'
+            );
+        }
+        $check_chapter = Chapter::find()->where(array('status'=>Chapter::ACTIVE, 'id'=>$chapter_id))->count();
+        if($check_chapter == 0) {
+            return array(
+                'success' => false,
+                'message' => 'Truyện không khả dụng'
+            );
+        }
+        $bookmark = Bookmark::find()->where(array('book_id'=>$book_id, 'chapter_id'=>$chapter_id))->one();
+        if(empty($bookmark)) {
+            $bookmark = new Bookmark();
+            $bookmark->user_id = $user->id;
+            $bookmark->book_id = $book_id;
+            $bookmark->chapter_id = $chapter_id;
+            $bookmark->status = 1;
+            $bookmark->save();
+            $is_bookmark = true;
+        } else {
+            if($bookmark->status == 1) {
+                $bookmark->status = 0;
+                $is_bookmark = false;
+            } else {
+                $bookmark->status = 1;
+                $is_bookmark = true;
+            }
+            $bookmark->save();
+        }
+        return array(
+            'success' => true,
+            'data' => $is_bookmark
         );
     }
     public function actionMakefollow() {
@@ -1119,6 +1174,81 @@ class Apiv1Controller extends Controller
         }
         return array(
             'success' => true
+        );
+    }
+    public function actionBookmark() {
+        ini_set('memory_limit', '-1');
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        $books_ids = array();
+        $chapter_ids = array();
+        foreach ($user->bookmarks as $bookmark) {
+            if($bookmark->status == 0) {
+                continue;
+            }
+            $books_ids[] = $bookmark->book_id;
+            if(empty($chapter_ids[$bookmark->book_id])) {
+                $chapter_ids[$bookmark->book_id] = array();
+            }
+            $chapter_ids[$bookmark->book_id][] = $bookmark->chapter_id;
+        }
+        $books = Book::find()->where(array('status'=>Book::ACTIVE, 'id' => $books_ids));
+        $total = $books->count();
+
+        $setting_model = new Setting();
+        $limit = $setting_model->get_setting('mobile_limit');
+        if($limit != '') {
+            $limit = (int) $limit;
+        } else {
+            $limit = Yii::$app->params['limit'];
+            $setting_model->get_setting('mobile_limit', $limit);
+        }
+
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+        $books = $books->all();
+
+        $data = array();
+        foreach ($books as $book) {
+            if(empty($chapter_ids[$book->id])) {
+                continue;
+            }
+            $tmp = $book->to_array();
+            if(!empty($book->lastChapter)) {
+                $tmp['name'] .= ' - '.$book->lastChapter->name;
+            }
+            $chapters = Chapter::find()->where(array('status'=>Chapter::ACTIVE, 'id' => $chapter_ids[$book->id]))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all();
+            $tmp['$chapters'] = array();
+            foreach ($chapters as $chapter) {
+                $tmp_data = $chapter->to_array();
+                $tmp_data['read'] = true;
+                $tmp_data['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
+                $tmp['chapters'][] = $tmp_data;
+            }
+            $data[] = $tmp;
+        }
+        if(empty($data)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có truyện',
+                'total' => 0,
+                'count_pages' => 0
+            );
+        }
+        return array(
+            'success' => true,
+            'data' => $data,
+            'total' => $total,
+            'count_pages' => $total_page
         );
     }
 }

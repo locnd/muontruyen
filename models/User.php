@@ -23,6 +23,10 @@ class User extends ModelCommon implements IdentityInterface
     {
         return $this->hasMany(Follow::className(), ['user_id' => 'id']);
     }
+    public function getBookmarks()
+    {
+        return $this->hasMany(Bookmark::className(), ['user_id' => 'id']);
+    }
     public function getReads()
     {
         return $this->hasMany(Read::className(), ['user_id' => 'id']);

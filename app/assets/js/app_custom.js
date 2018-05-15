@@ -115,6 +115,26 @@ function display_a_book(book) {
     html += '</div>';
     html += '<div class="clear5"></div>';
     html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
+
+    if(typeof(book.chapters) == 'object' && book.chapters.length > 0) {
+        html += '<div class="clear10"></div>';
+        for(var i=0;i<book.chapters.length;i++) {
+            var chapter = book.chapters[i];
+            html += '<div class="a-chapter">';
+            html += '<div style="width: calc(100% - 150px);float:left">';
+            if(chapter.read) {
+                html += '<a style="color:darkgoldenrod" href="chapter.html?id=' + chapter.id + '">' +chapter.name + '</a>';
+            } else {
+                html += '<a href="chapter.html?id='+ chapter.id + '">' +chapter.name + '</a>';
+            }
+            html += '</div>';
+            html += '<div style="width: 135px;float:right">';
+            html += chapter.release_date;
+            html += '</div>';
+            html += '<div class="clear5"></div>';
+            html += '</div>';
+        }
+    }
     html += '</div>';
     $('#list-books').append(html);
 }
@@ -234,6 +254,9 @@ function display_book_info(book, is_following, tags) {
         html += tag_html;
     }
     html += '<div class="clear10" style="height:0"></div>';
+    html += '<div style="text-align:right">Số lượt xem: '+book.count_views+'</div>';
+    html += '<div class="clear10" style="height:0"></div>';
+
     $('#book-info').html(html);
     $('#book-info').show();
 }
@@ -440,7 +463,7 @@ function send_follow(book_id, is_following) {
             }
             $('#follow-btn').attr('onclick', 'follow('+is_following+','+book_id+')');
         } else {
-            dl_alert('danger', res.message, true);
+            dl_alert('danger', res.message, false);
         }
     });
 }
@@ -516,6 +539,11 @@ function show_chapter(id) {
             html+='<a class="book-title" href="book.html?id='+book.id+'">'+book.name+'</a>';
             html+='<div class="clear10"></div>';
             html+='<div id="report">';
+            if(res.is_bookmark) {
+                html+='<a onclick="bookmark()" id="unbookmark-btn" class="btn-unbookmark-chap"><i class="fa fa-star"></i> Bỏ đánh dấu</a>';
+            } else {
+                html+='<a onclick="bookmark()" id="bookmark-btn" class="btn-bookmark-chap"><i class="fa fa-star"></i> Đánh dấu</a>';
+            }
             html+='<a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>';
             html+='<div class="clear10"></div>';
             html+='</div>';
@@ -559,6 +587,8 @@ function show_chapter(id) {
             $('#chapter-page').html(html);
             $('#chapter-page').show();
             $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
+            $('#book_id').val(book.id);
+            $('#chapter_id').val(res.data.id);
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "book.html?id="+id;
@@ -597,10 +627,10 @@ function show_follow(tab, page, is_first) {
             } else {
                 for (var i = 0; i < books.length; i++) {
                     var book = books[i];
-                    html += '<div class="section-container a-book">';
-                    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
+                    html += '<div id="tab'+tab+'_'+book.id+'" class="section-container a-book">';
+                    html += '<div class="a-title"><a onclick="$(\'#tab0_'+book.id+'\').remove()" href="book.html?id='+book.id+'">'+book.name+'</a></div>';
                     html += '<div class="a-cover" style="width: 90px">';
-                    html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
+                    html += '<a onclick="$(\'#tab0_'+book.id+'\').remove()" href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
                     html += '<div class="a-description" style="width:calc(100% - 92px)">';
                     html += '<span>'+get_mini_description(book.description, 30)+'</span>';
@@ -618,7 +648,6 @@ function show_follow(tab, page, is_first) {
                 return true;
             }
             if(tab == 0) {
-                show_unread(books.length, true);
                 if (books.length > 0) {
                     $('#group0').show();
                 } else {
@@ -1478,4 +1507,66 @@ function display_follow_paging(tab, current_page, total_page) {
     }
     html += '</ul>';
     $('#paging').html(html);
+}
+
+function bookmark() {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    var params = {
+        book_id: $('#book_id').val(),
+        chapter_id: $('#chapter_id').val()
+    };
+    send_api('POST', '/make-bookmark', params, function(res) {
+        if (res.success) {
+            if(res.data) {
+                dl_alert('success', 'Đã đánh dấu', false);
+                $('#bookmark-btn').html('<icon class="fa fa-star"> Bỏ đánh dấu');
+                $('#bookmark-btn').removeClass('btn-bookmark-chap').addClass('btn-unbookmark-chap');
+            } else {
+                dl_alert('success', 'Đã bỏ đánh dấu', false);
+                $('#bookmark-btn').html('<icon class="fa fa-star"> Đánh dấu');
+                $('#bookmark-btn').removeClass('btn-unbookmark-chap').addClass('btn-bookmark-chap');
+            }
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+
+function show_bookmark(page) {
+    var params = {
+        page: page
+    };
+    $('h3.page-title').html('Truyện được đánh dấu');
+    $('h3.page-title').show();
+    send_api('GET', '/bookmark', params, function(res) {
+        if (res.success) {
+            show_bookmark_result(res, page);
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+function show_bookmark_result(res, page) {
+    for(var i=0;i<res.data.length;i++) {
+        display_a_book(res.data[i]);
+    }
+    if(res.count_pages > 1) {
+        var pages = [];
+        for (var i=1;i<=res.count_pages;i++) {
+            if (res.count_pages > 3) {
+                if((page == 1 && i==3) || (page == res.count_pages && i==res.count_pages-2)) {
+                    pages.push(i);
+                    continue;
+                }
+                if (i < page - 1 || i > page + 1) {
+                    continue;
+                }
+            }
+            pages.push(i);
+        }
+        display_paging('bookmark.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
+    }
 }

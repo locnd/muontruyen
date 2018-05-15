@@ -213,6 +213,23 @@ ul.social-media-list li a {
     font-weight: 600;
     padding-right: 8px;
 }
+.btn-bookmark-chap, .btn-unbookmark-chap {
+    float: left;
+    text-align: center;
+    height: 33px;
+    line-height: 33px;
+    border: 1px solid lightblue;
+    font-weight: 600;
+    padding-right: 8px;
+}
+.btn-bookmark-chap {
+    width: 125px;
+}
+.btn-unbookmark-chap {
+    width: 135px;
+    border-color: lightgrey;
+    color: black;
+}
 .btn-bookmark {
     width: 165px;
     background: url(../img/bookmark.png) center left no-repeat;
