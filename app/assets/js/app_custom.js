@@ -635,6 +635,10 @@ function show_chapter(id) {
             $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
             $('#book_id').val(book.id);
             $('#chapter_id').val(res.data.id);
+
+            if(book.make_read) {
+                check_unread(false);
+            }
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "book.html?id="+id;
@@ -674,7 +678,6 @@ function show_follow(tab, page, is_first) {
                 for (var i = 0; i < books.length; i++) {
                     var book = books[i];
                     html += '<div class="section-container a-book">';
-                    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
                     html += '<div class="a-cover" style="width: 90px">';
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';

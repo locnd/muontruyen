@@ -227,6 +227,15 @@ class Apiv1Controller extends Controller
             $read->chapter_id = $chapter->id;
             $read->save();
         }
+        $book_data['make_read'] = false;
+        if(!empty($user->id)) {
+            $follow = Follow::find()->where(array('book_id'=>$book->id,'user_id'=>$user->id))->one();
+            if(!empty($follow)) {
+                $follow->status = Follow::READ;
+                $follow->save();
+                $book_data['make_read'] = true;
+            }
+        }
         $images = array();
         foreach ($chapter->images as $image) {
             $images[] = $image->to_array(array('id', 'image'));
