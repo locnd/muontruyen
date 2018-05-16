@@ -678,10 +678,10 @@ function show_follow(tab, page, is_first) {
                 for (var i = 0; i < books.length; i++) {
                     var book = books[i];
                     html += '<div class="section-container a-book">';
-                    html += '<div class="a-cover" style="width: 90px">';
+                    html += '<div class="a-cover-new">';
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
-                    html += '<div class="a-description" style="width:calc(100% - 92px)">';
+                    html += '<div class="a-description-new">';
                     html += '<table>';
                     html += '<tr>';
                     html += '<td colspan="2">';
