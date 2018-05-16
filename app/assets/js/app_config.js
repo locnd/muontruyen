@@ -21,6 +21,7 @@ function onDeviceReady() {
             localStorage.setItem("unread_time", '');
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
+        localStorage.setItem("unread_time", '');
         check_unread(false);
     });
 

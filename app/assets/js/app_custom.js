@@ -732,18 +732,6 @@ function show_follow(tab, page, is_first) {
     });
 }
 
-function get_mini_description(description, count) {
-    var description_arr = description.split(' ');
-    if(description_arr.length > count) {
-        description = '';
-        for(var j=0;j<count;j++) {
-            description += description_arr[j]+' ';
-        }
-        description = $.trim(description) + '...';
-    }
-    return description;
-}
-
 function login() {
     $('.form-error').html('');
     $('#loading-btn').show();
@@ -764,6 +752,7 @@ function login() {
             if(parseInt(res.data.is_admin) == 1) {
                 localStorage.setItem("is_admin", res.data.is_admin);
             }
+            localStorage.setItem("unread_time", '');
             dl_alert('success', 'Đăng nhập thành công', true);
             window.location.href = 'index.html';
         } else {
