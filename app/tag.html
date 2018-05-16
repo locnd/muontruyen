@@ -39,6 +39,10 @@
         if (param_page == '') {
             param_page = 1;
         }
+        var param_is_full = getParam('is_full');
+        if (param_is_full == '') {
+            param_is_full = 0;
+        }
     </script>
     <script src="cordova.js"></script>
 </head>
@@ -70,7 +74,8 @@
                         </form>
                         <div class="clear15"></div>
                     </li>
-                    <li><a class="f-s-16" href="tags.html">Danh sách thẻ tag</a></li>
+                    <li><a class="f-s-16" href="tags.html">Danh sách thể loại</a></li>
+                    <li><a class="f-s-16" href="authors.html">Danh sách tác giả</a></li>
                     <li class="not_logined"><a class="f-s-16" href="login.html">Đăng nhập</a></li>
                     <li class="not_logined"><a class="f-s-16" href="register.html">Đăng ký</a></li>
                     <li class="logined"><a class="f-s-16" href="follow.html">Truyện đang theo dõi <i class="dl-notify"></i></a></li>
@@ -91,6 +96,9 @@
                     </div>
                     <div class="post-detail section-container">
                         <h3 class="page-title"></h3>
+                        <div id="full_book">
+                            <label for="check_full_book"><input type="checkbox" id="check_full_book"> Tìm truyện đã hoàn thành</label>
+                        </div>
                         <div id="list-books">
                         </div>
                         <div class="clear5" style="height:1px"></div>
@@ -120,7 +128,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_tag(param_id, parseInt(param_page));
+            show_tag(param_id, parseInt(param_page), parseInt(param_is_full));
         });
     </script>
 </body>

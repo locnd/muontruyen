@@ -1,7 +1,7 @@
 body {
     background: url('../img/bg.jpg') center top fixed no-repeat;
     background-size: cover;
-    font-size: 16px;
+    font-size: 15px;
     min-height: 100vh;
 }
 .dl_bg_color {
@@ -37,16 +37,28 @@ body {
     font-size: 18px;
     color: #00acac;
 }
-.a-book .a-cover {
+.a-book .a-cover, .a-book .a-cover-new {
     width:35%;
     float:left;
     padding-top: 3px;
 }
-.a-book .a-description {
+.a-book .a-cover-new {
+    width:20%;
+    min-width: 80px;
+}
+.a-book .a-description, .a-book .a-description-new {
     width:65%;
     padding-left: 10px;
     display:inline-block;
     text-align: justify;
+}
+.a-book .a-description-new {
+    width: 80%;
+    max-width: calc(100% - 80px);
+}
+.a-book .a-description-new td{
+    padding: 2px 0;
+    text-align: left;
 }
 .a-book .a-date {
     border-top: 1px solid lightblue;
@@ -439,12 +451,12 @@ h3.page-title {
     margin-top: 0;
     text-align: left;
     background: white;
-    font-size: 18px;
+    font-size: 17px;
     display: none;
 }
 h3.page-title b {
     color: lightblue;
-    font-size: 20px;
+    font-size: 18px;
 }
 .a-tag a {
     padding-left: 15px;
@@ -452,8 +464,8 @@ h3.page-title b {
 .a-tag {
     float: left;
     width: 49%;
-    min-width: 200px;
-    margin: 7px 0px;
+    min-width: 242px;
+    margin: 7px 0;
 }
 .a-tag img {
     width: 25px;
@@ -547,7 +559,7 @@ a.disable_a {
     pointer-events: none;
 }
 .navbar .nav.navbar-nav>li>a {
-    padding: 13px 25px;
+    padding: 12px 25px;
 }
 .btn-save-to-offline {
     float: right;
@@ -573,7 +585,7 @@ span.saving-bar {
     opacity: 0.5;
 }
 @media (max-width: 484px) {
-    .dl-list-tags .a-tag {
+    .dl-list-tags .a-tag, ul#tags-list li {
         width: 100%;
     }
 }
@@ -597,4 +609,8 @@ div#header-navbar {
     height: 15px;
     margin-right: 10px;
     float: left;
+}
+.label-td {
+    vertical-align: top;
+    width: 100px;
 }

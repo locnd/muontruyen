@@ -14,13 +14,13 @@ function onDeviceReady() {
 
     push.on('notification', function(data) {
         if ( data.additionalData.foreground ){
-            //alert("when the app is active");
+            //console.log("when the app is active");
             dl_alert('success', data.message, false);
         } else {
-            //alert("when the app is not active");
+            //console.log("when the app is not active");
+            localStorage.setItem("unread_time", '');
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
-        localStorage.setItem("unread_time", '');
         check_unread(false);
     });
 
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.5';
+var APP_VERSION = '1.0.6';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';

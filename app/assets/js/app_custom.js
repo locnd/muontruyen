@@ -106,18 +106,52 @@ function display_paging(url,pages, current_page, total_page) {
 
 function display_a_book(book) {
     var html = '<div class="section-container a-book">';
-    html += '<div class="a-title"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
-    html += '<div class="a-cover">';
+    html += '<div class="a-cover-new">';
     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
-    html += '<div class="a-description">';
-    html += '<span>'+get_mini_description(book.description, 60)+'</span>';
+    html += '<div class="a-description-new">';
+    html += '<table>';
+    html += '<tr>';
+    html += '<td colspan="2">';
+    html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
+    html += '<td>';
+    html += '</tr>';
+    html += '<tr>';
+    html += '<td class="label-td">Chương mới</td>';
+    html += '<td class="value-td"><a href="chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
+    html += '</tr>';
+    if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Thể loại</td>';
+        html += '<td class="value-td">';
+        for(var i=0;i<book.tags.length;i++) {
+            html += '<a href="tag.html?id='+book.tags[i].id+'">'+book.tags[i].name+'</a> - ';
+        }
+        html = html.slice(0,-3);
+        html += '</td>';
+        html += '</tr>';
+    }
+    if(typeof(book.authors) != 'undefined' && book.authors.length > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Tác giả</td>';
+        html += '<td class="value-td">';
+        for(var i=0;i<book.authors.length;i++) {
+            html += '<a href="author.html?id='+book.authors[i].id+'">'+book.authors[i].name+'</a> - ';
+        }
+        html = html.slice(0,-3);
+        html += '</td>';
+        html += '</tr>';
+    }
+    html += '<tr>';
+    html += '<td class="label-td">Cập nhật</td>';
+    html += '<td class="value-td">'+book.release_date+'</td>';
+    html += '</tr>';
+    html += '</table>';
     html += '</div>';
     html += '<div class="clear5"></div>';
-    html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
 
     if(typeof(book.chapters) == 'object' && book.chapters.length > 0) {
-        html += '<div class="clear10"></div>';
+        html += '<div class="clear10" style="border-top: 1px solid lightblue;"></div>';
         for(var i=0;i<book.chapters.length;i++) {
             var chapter = book.chapters[i];
             html += '<div class="a-chapter">';
@@ -139,10 +173,10 @@ function display_a_book(book) {
     $('#list-books').append(html);
 }
 
-function display_a_tag(tag) {
+function display_a_tag(tag, type) {
     var html='<div class="a-tag">';
-    html += '<a href="tag.html?id='+tag.id+'">';
-    var tag_name = tag.name.replace('Tác giả', 'TG');
+    html += '<a href="'+type+'.html?id='+tag.id+'">';
+    var tag_name = tag.name.replace('Tác giả: ', '');
     html += '<img src="assets/img/tag.png">'+tag_name + ' ('+tag.count+')';
     html += '</a>';
     html += '</div>';
@@ -174,9 +208,7 @@ function show_book(id) {
             display_book_info(res.data, is_following, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
-            if(res.options.make_read) {
-                show_unread(res.options.unread, true);
-            }
+            show_unread(res.options.unread, true);
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "index.html";
@@ -242,18 +274,30 @@ function display_book_info(book, is_following, tags) {
     html += '</div>';
     html += '<div class="clear10"></div>';
 
+    var author_html = '';
     var tag_html = '';
     for (var i = 0; i < tags.length; i++) {
         if (tags[i].is_checked) {
-            var tag_name = tags[i].name.replace('Tác giả', 'TG');
-            tag_html += '<a href="tag.html?id=' + tags[i].id + '" class="available_tag">' + tag_name + '</a>';
+            var tag_name = tags[i].name.replace('Tác giả: ', '');
+            if(tags[i].name.indexOf('Tác giả') > -1) {
+                author_html += '<a href="author.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
+            } else {
+                tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
+            }
         }
     }
     if(tag_html == '') {
-        html += '<div style="margin-bottom:10px">* Truyện chưa gắn thẻ tag</div>';
+        html += '<div style="margin-bottom:10px">* Truyện chưa phân loại</div>';
     } else {
-        html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
-        html += tag_html;
+        html += '<div style="float:left;margin-right:10px">Thể loại:</div>';
+        html += tag_html.slice(0, -3);
+    }
+    if(author_html != '') {
+        if(author_html != '') {
+            html += '<div class="clear5"></div>';
+        }
+        html += '<div style="float:left;margin-right:10px">Tác giả:</div>';
+        html += author_html.slice(0, -3);
     }
     html += '<div class="clear10" style="height:0"></div>';
     html += '<div style="text-align:right">Số lượt xem: '+book.count_views+'</div>';
@@ -379,7 +423,7 @@ function follow(is_following, book_id) {
 function create_tag() {
     var tag_name = $('#tag_name').val();
     if(tag_name == '') {
-        dl_alert('danger', 'Điền tên thẻ tag', false);
+        dl_alert('danger', 'Điền tên thể loại', false);
         return true;
     }
     if(!is_logined()) {
@@ -635,10 +679,23 @@ function show_follow(tab, page, is_first) {
                     html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
                     html += '</div>';
                     html += '<div class="a-description" style="width:calc(100% - 92px)">';
-                    html += '<span>'+get_mini_description(book.description, 30)+'</span>';
+                    html += '<table>';
+                    html += '<tr>';
+                    html += '<td colspan="2">';
+                    html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
+                    html += '<td>';
+                    html += '</tr>';
+                    html += '<tr>';
+                    html += '<td class="label-td">Chương mới</td>';
+                    html += '<td class="value-td"><a href="chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
+                    html += '</tr>';
+
+                    html += '<tr>';
+                    html += '<td class="label-td">Cập nhật</td>';
+                    html += '<td class="value-td">'+book.release_date+'</td>';
+                    html += '</tr>';
+                    html += '</table>';
                     html += '</div>';
-                    html += '<div class="clear5"></div>';
-                    html += '<div class="a-date">Cập nhật: '+book.release_date+'</div>';
                     html += '<div class="clear5"></div>';
                     html += '</div>';
                 }
@@ -668,7 +725,7 @@ function show_follow(tab, page, is_first) {
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
             display_follow_paging(tab, page, res.count_pages);
-            check_unread(true);
+            check_unread(false);
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -964,20 +1021,35 @@ function change_password() {
 function show_tags() {
     send_api('GET', '/tags', {}, function(res) {
         if (res.success) {
-            show_tags_list(res);
+            $('h3.page-title').html('Danh sách <b>thể loại</b> ('+res.total+' kết quả)');
+            $('h3.page-title').show();
+            show_tags_list(res, 'tag');
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
-function show_tags_list(res) {
-    $('h3.page-title').html('Danh sách <b>thẻ tag</b> ('+res.total+' kết quả)');
-    $('h3.page-title').show();
+function show_authors() {
+    send_api('GET', '/tags', {}, function(res) {
+        if (res.success) {
+            $('h3.page-title').html('Danh sách <b>tác giả</b> ('+res.total+' kết quả)');
+            $('h3.page-title').show();
+            show_tags_list(res, 'author');
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+function show_tags_list(res,type) {
     if(res.total > 0) {
-
-
         for (var i = 0; i < res.data.length; i++) {
-            display_a_tag(res.data[i]);
+            if(type == 'tag' && res.data[i].name.indexOf('Tác giả: ') > -1) {
+                continue;
+            }
+            if(type == 'author' && res.data[i].name.indexOf('Tác giả: ') == -1) {
+                continue;
+            }
+            display_a_tag(res.data[i], type);
         }
     }
     $('#list-books .a-book').show();
@@ -1089,15 +1161,13 @@ function convertToSlug(str)
 
     return str.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-');
 }
-function show_search(keyword, page, check_full) {
+function show_search(keyword, page, is_full) {
     var params = {
         keyword: keyword,
         page: page,
-        is_full: check_full
+        is_full: is_full
     };
-    $('h3.page-title').html('Tìm kiếm "<b>'+keyword+'</b>"');
-    $('h3.page-title').show();
-    if(check_full == 1) {
+    if(is_full == 1) {
         $('#check_full_book').attr('checked','checked');
     }
     $('#check_full_book').attr('onchange','search_again("'+keyword+'")');
@@ -1146,22 +1216,59 @@ function search_again(keyword) {
     }
     window.location.href = 'search.html?keyword='+keyword+'&is_full='+check_full;
 }
-function show_tag(tag_id, page) {
+function show_tag(tag_id, page, is_full) {
     var params = {
         tag_id: tag_id,
-        page: page
+        page: page,
+        is_full: is_full
     };
+    if(is_full == 1) {
+        $('#check_full_book').attr('checked','checked');
+    }
+    $('#check_full_book').attr('onchange','author_again('+tag_id+')');
+    if(tag_id != 50) {
+        $('#full_book').show();
+    }
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
-            show_tag_result(res, page);
+            $('h3.page-title').html('Thể loại "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
+            $('h3.page-title').show();
+            show_tag_result(res, page, 'tag');
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
-function show_tag_result(res, page) {
-    $('h3.page-title').html('Thẻ tag "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
-    $('h3.page-title').show();
+function show_author(tag_id, page,is_full) {
+    var params = {
+        tag_id: tag_id,
+        page: page,
+        is_full: is_full
+    };
+    if(is_full == 1) {
+        $('#check_full_book').attr('checked','checked');
+    }
+    $('#check_full_book').attr('onchange','author_again('+tag_id+')');
+    $('#full_book').show();
+    send_api('GET', '/tag', params, function(res) {
+        if (res.success) {
+            $('h3.page-title').html('Tác giả "<b>'+res.tag.name.replace('Tác giả: ','')+'</b>" ('+res.total+' kết quả)');
+            $('h3.page-title').show();
+            show_tag_result(res, page, 'author');
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+function author_again(tag_id) {
+    var check_full = 0;
+    if($('#check_full_book').is(":checked")) {
+        check_full = 1;
+    }
+    window.location.href = 'author.html?id='+tag_id+'&is_full='+check_full;
+}
+
+function show_tag_result(res, page, type) {
     if(res.total > 0) {
         for (var i = 0; i < res.data.length; i++) {
             display_a_book(res.data[i]);
@@ -1181,7 +1288,7 @@ function show_tag_result(res, page) {
             }
             pages.push(i);
         }
-        display_paging('tag.html?id='+res.tag.id+'&page=',pages, page, res.count_pages);
+        display_paging(type+'.html?id='+res.tag.id+'&page=',pages, page, res.count_pages);
     }
 }
 function save_to_offline(noti) {
@@ -1240,6 +1347,7 @@ function save_cache_book(res) {
     tmp_book_save = {};
     tmp_book_save.id = res.data.id;
     tmp_book_save.name = res.data.name;
+    tmp_book_save.last_chapter_id = res.data.last_chapter_id;
     tmp_book_save.last_chapter_name = res.data.last_chapter_name;
     tmp_book_save.count_views = res.data.count_views;
     tmp_book_save.description = res.data.description;
@@ -1260,8 +1368,12 @@ function save_cache_book(res) {
         tmp_book_save.chapters.push(tmp_chapter);
     }
     tmp_book_save.tags = [];
-    for (var i = 0; i < res.tags.length; i++) {
-        tmp_book_save.tags.push(res.tags[i].name);
+    for (var i = 0; i < res.data.tags.length; i++) {
+        tmp_book_save.tags.push(res.data.tags[i].name);
+    }
+    tmp_book_save.authors = [];
+    for (var i = 0; i < res.data.authors.length; i++) {
+        tmp_book_save.authors.push(res.data.authors[i].name);
     }
     convert_images_to_base64(res);
 }
@@ -1341,15 +1453,49 @@ function display_offline_book(book) {
         return true;
     }
     var html = '<div class="section-container a-book">';
-    html += '<div class="a-title"><a href="offline_book.html?id=' + book.id + '">' + book.name + ' - ' + book.last_chapter_name +'</a></div>';
-    html += '<div class="a-cover">';
-    html += '<a href="offline_book.html?id=' + book.id + '"><img width="100%" src="' + book.image + '" alt="" /></a>';
+    html += '<div class="a-cover-new">';
+    html += '<a href="offline_book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
-    html += '<div class="a-description">';
-    html += '<span>' + get_mini_description(book.description, 60) + '</span>';
+    html += '<div class="a-description-new">';
+    html += '<table>';
+    html += '<tr>';
+    html += '<td colspan="2">';
+    html += '<div class="a-title" style="padding:0"><a href="offline_book.html?id='+book.id+'">'+book.name+'</a></div>';
+    html += '<td>';
+    html += '</tr>';
+    html += '<tr>';
+    html += '<td class="label-td">Chương mới</td>';
+    html += '<td class="value-td"><a href="offline_chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
+    html += '</tr>';
+    if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Thể loại</td>';
+        html += '<td class="value-td">';
+        for(var i=0;i<book.tags.length;i++) {
+            html += '<a href="javascript:;">'+book.tags[i]+'</a> - ';
+        }
+        html = html.slice(0,-3);
+        html += '</td>';
+        html += '</tr>';
+    }
+    if(typeof(book.authors) != 'undefined' && book.authors.length > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Tác giả</td>';
+        html += '<td class="value-td">';
+        for(var i=0;i<book.authors.length;i++) {
+            html += '<a href="javascript:;">'+book.authors[i]+'</a> - ';
+        }
+        html = html.slice(0,-3);
+        html += '</td>';
+        html += '</tr>';
+    }
+    html += '<tr>';
+    html += '<td class="label-td">Cập nhật</td>';
+    html += '<td class="value-td">'+book.release_date+'</td>';
+    html += '</tr>';
+    html += '</table>';
     html += '</div>';
     html += '<div class="clear5"></div>';
-    html += '<div class="a-date">Cập nhật: ' + book.release_date + '</div>';
     html += '</div>';
     $('#list-books').append(html);
 }
@@ -1374,13 +1520,27 @@ function show_offline_book(id) {
 
                 var tag_html = '';
                 for (var i = 0; i < book.tags.length; i++) {
-                    tag_html += '<a href="javascript:;" class="available_tag">' + book.tags[i] + '</a>';
+                    tag_html += '<a href="javascript:;">' + book.tags[i] + '</a> - ';
                 }
                 if(tag_html == '') {
-                    html += '<div style="margin-bottom:10px">* Truyện chưa gắn thẻ tag</div>';
+                    html += '<div style="margin-bottom:10px">* Truyện chưa phân loại</div>';
                 } else {
-                    html += '<div style="float:left;"><img style="width: 25px" src="assets/img/tag.png"></div>';
-                    html += tag_html;
+                    html += '<div style="float:left;margin-right:10px">Thể loại: </div>';
+                    html += tag_html.slice(0, -3);
+                }
+                html += '<div class="clear10" style="height:0"></div>';
+                var author_html = '';
+                for (var i = 0; i < book.authors.length; i++) {
+                    author_html += '<a href="javascript:;">' + book.authors[i] + '</a> - ';
+                }
+                if(author_html == '') {
+                    html += '';
+                } else {
+                    if(tag_html != '') {
+                        html += '<div class="clear5"></div>';
+                    }
+                    html += '<div style="float:left;margin-right:10px">Tác giả: </div>';
+                    html += author_html.slice(0, -3);
                 }
                 html += '<div class="clear10" style="height:0"></div>';
                 $('#book-info').html(html);

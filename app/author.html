@@ -26,9 +26,22 @@
     <script src="assets/js/app_config.js"></script>
     <script>
         if (typeof (Storage) !== "undefined") {
-            checkLogin(2);
+            checkLogin(0);
         } else {
             dl_alert('danger', 'Bộ nhớ không hoạt động', false);
+        }
+        var param_id = getParam('id');
+        if (param_id == '') {
+            dl_alert('danger', 'Không tác giả tìm kiếm', true);
+            window.location.href="index.html";
+        }
+        var param_page = getParam('page');
+        if (param_page == '') {
+            param_page = 1;
+        }
+        var param_is_full = getParam('is_full');
+        if (param_is_full == '') {
+            param_is_full = 0;
         }
     </script>
     <script src="cordova.js"></script>
@@ -82,41 +95,14 @@
                         <i class="fa fa-refresh fa-spin"></i>
                     </div>
                     <div class="post-detail section-container">
-                        <div class="section-container form-page">
-                            <h2 class="a-title">Đăng nhập</h2>
-                            <form name="form" role="form">
-                                <div class="clear10"></div>
-                                <div class="form-group">
-                                    <label for="username">Tên đăng nhập</label>
-                                    <input type="text" name="username" id="username" class="form-control" />
-                                    <span class="form-error" id="username_error"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="name">Tên</label>
-                                    <input type="text" name="name" id="name" class="form-control"/>
-                                    <span class="form-error" id="name_error"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" name="email" id="email" class="form-control"/>
-                                    <span class="form-error" id="email_error"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Mật khẩu</label>
-                                    <input type="password" name="password" id="password" class="form-control"/>
-                                    <span class="form-error" id="password_error"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password2">Xác nhận mật khẩu</label>
-                                    <input type="password" name="password2" id="password2" class="form-control"/>
-                                    <span class="form-error" id="password2_error"></span>
-                                </div>
-                                <div class="form-actions">
-                                    <button id="login-btn" type="button" onclick="register()" class="btn btn-primary">Đăng ký</button>
-                                    <img id="loading-btn" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                                    <a href="login.html" class="btn btn-link">Đăng nhập</a>
-                                </div>
-                            </form>
+                        <h3 class="page-title"></h3>
+                        <div id="full_book">
+                            <label for="check_full_book"><input type="checkbox" id="check_full_book"> Tìm truyện đã hoàn thành</label>
+                        </div>
+                        <div id="list-books">
+                        </div>
+                        <div class="clear5" style="height:1px"></div>
+                        <div class="section-container" id="paging" style="margin-bottom: 20px;">
                         </div>
                     </div>
                 </div>
@@ -142,6 +128,7 @@
     <script>
         $(document).ready(function() {
             App.init();
+            show_author(param_id, parseInt(param_page), parseInt(param_is_full));
         });
     </script>
 </body>
