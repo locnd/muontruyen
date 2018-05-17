@@ -1814,6 +1814,12 @@ function login_facebook() {
 function getFbUserData(){
     FB.api('/me', {locale: 'en_US', fields: 'id,first_name,last_name,email'},
         function (response) {
+            if(typeof(response.id)=='undefined' || typeof(response.email)=='undefined') {
+                $('#loading-btn').hide();
+                $('#login-btn').show();
+                dl_alert('danger', 'Không thể đăng nhập bằng facebook', false);
+                return false;
+            }
             var params = {
                 name: response.last_name+' '+response.first_name,
                 facebook_id: response.id,
