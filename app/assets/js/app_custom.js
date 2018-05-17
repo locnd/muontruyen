@@ -1,34 +1,44 @@
 
-function show_home(page) {
+function show_home(page, sort) {
+    $('#list-books').html('');
+    $('#paging').html('');
     if(page == 1 && !is_admin()) {
-        var time_cache = localStorage.getItem("time_cache_home");
+        var time_cache = localStorage.getItem("time_cache_home_"+sort);
         if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 900000) {
-            get_cache_home();
+            get_cache_home(sort);
             return true;
         }
     }
 
     var params = {
         page: page,
+        sort: sort,
         device_id: localStorage.getItem("device_id"),
         device_type: localStorage.getItem("device_type"),
         app_version: APP_VERSION
     };
     send_api('GET', '/home', params, function(res) {
+        $('#select_sort').val(sort);
+        $('#select_sort').show();
         if (res.success) {
             if(page == 1 && !is_admin()) {
-                localStorage.setItem("time_cache_home", $.now());
+                localStorage.setItem("time_cache_home_"+sort, $.now());
                 localStorage.setItem("count_pages", res.count_pages);
-                save_cache_home_books(res.data);
+                save_cache_home_books(res.data, sort);
             }
-            show_home_content(res, page);
+            show_home_content(res, page, sort);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
+function home_again() {
+    var sort = parseInt($('#select_sort').val());
+    window.location.href="index.html?sort="+sort;
+}
+
 var interval = null;
-function get_cache_home() {
+function get_cache_home(sort) {
     $('#paging').hide();
     var count_pages = localStorage.getItem("count_pages");
     if(count_pages === null || count_pages === '') {
@@ -50,19 +60,21 @@ function get_cache_home() {
             }
             pages.push(i);
         }
-        display_paging('index.html?page=',pages, page, count_pages);
+        display_paging('index.html?sort='+sort+'&page=',pages, page, count_pages);
     }
     interval = setInterval(function() {
         if(typeof(db2) != 'undefined') {
             clearInterval(interval);
-            get_all_home_books(function(data){
+            get_all_home_books(sort, function(data){
+                $('#select_sort').val(sort);
+                $('#select_sort').show();
                 display_a_book(data);
                 $('#paging').show();
             });
         }
     },1);
 }
-function show_home_content(res,page) {
+function show_home_content(res,page,sort) {
     for(var i=0;i<res.data.length;i++) {
         display_a_book(res.data[i]);
     }
@@ -80,7 +92,7 @@ function show_home_content(res,page) {
             }
             pages.push(i);
         }
-        display_paging('index.html?page=',pages, page, res.count_pages);
+        display_paging('index.html?sort='+sort+'&page=',pages, page, res.count_pages);
     }
 }
 function display_paging(url,pages, current_page, total_page) {
@@ -112,7 +124,7 @@ function display_a_book(book) {
     html += '<div class="a-description-new">';
     html += '<table>';
     html += '<tr>';
-    html += '<td colspan="2">';
+    html += '<td colspan="2" style="width:100%">';
     html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
     html += '<td>';
     html += '</tr>';
@@ -144,7 +156,8 @@ function display_a_book(book) {
     }
     html += '<tr>';
     html += '<td class="label-td">Cập nhật</td>';
-    html += '<td class="value-td">'+book.release_date+'</td>';
+
+    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
     html += '</tr>';
     html += '</table>';
     html += '</div>';
@@ -1755,4 +1768,12 @@ function filter_tag() {
             $(tags[i]).hide();
         }
     }
+}
+function get_current_date() {
+    var d = new Date();
+
+    var month = d.getMonth()+1;
+    var day = d.getDate();
+
+    return (day<10?'0':'')+day +'-'+(month<10?'0':'')+month+'-'+d.getFullYear();
 }

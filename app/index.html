@@ -34,6 +34,10 @@
         if (param_page == '') {
             param_page = 1;
         }
+        var param_sort = getParam('sort');
+        if (param_sort == '') {
+            param_sort = 0;
+        }
     </script>
     <script src="cordova.js"></script>
 </head>
@@ -86,6 +90,13 @@
                         <i class="fa fa-refresh fa-spin"></i>
                     </div>
                     <div class="post-detail section-container">
+                        <select id="select_sort" onchange="home_again()">
+                            <option value="0">Mới cập nhật</option>
+                            <option value="1">Xem nhiều</option>
+                            <option value="2">Theo dõi nhiều</option>
+                            <option value="3">Thứ tự A - Z</option>
+                            <option value="4">Thứ tự Z - A</option>
+                        </select>
                         <div id="list-books">
                         </div>
                         <div class="clear5" style="height:1px"></div>
@@ -116,7 +127,7 @@
     <script>
         $(document).ready(function() {
             App.init();
-            show_home(parseInt(param_page));
+            show_home(parseInt(param_page), parseInt(param_sort));
         });
     </script>
 </body>

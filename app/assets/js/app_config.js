@@ -464,29 +464,37 @@ function get_all_offline_books(callback) {
         }
     };
 }
-function get_all_home_books(callback) {
+function get_all_home_books(sort, callback) {
     var transaction = db2.transaction(["home_books"],"readonly");
     var home_books = transaction.objectStore("home_books");
     var cursor = home_books.openCursor();
 
     var has_book = false;
+    var start = sort*20+1;
+    var end = (sort+1)*20;
+    var id = 0;
     cursor.onsuccess = function(e) {
         var res = e.target.result;
         if(res) {
-            has_book = true;
-            callback(res.value);
-            res.continue();
+            id++;
+            if(id<start || id>end) {
+                res.continue();
+            } else {
+                has_book = true;
+                callback(res.value);
+                res.continue();
+            }
         }
-        if(!has_book) {
+        if(id>start && !has_book) {
             dl_alert('danger', 'Không có truyện', false);
         }
     };
 }
-function save_cache_home_books(res) {
+function save_cache_home_books(res,sort) {
     var transaction = db2.transaction(["home_books"], "readwrite");
     var home_books = transaction.objectStore("home_books");
     for(var i=0;i<res.length;i++) {
-        var id=i+1;
+        var id=(sort * 20)+i+1;
         home_books.put(res[i], id);
     }
 }

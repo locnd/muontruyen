@@ -71,7 +71,25 @@ class Apiv1Controller extends Controller
         $page = min($page, $total_page);
         $offset = ($page - 1) * $limit;
 
-        $books->limit($limit)->offset($offset)->orderBy(['release_date' => SORT_DESC, 'id' => SORT_DESC]);
+        $books->limit($limit)->offset($offset);
+
+        $sort = (int) Yii::$app->request->get('sort',0);
+        $sort_array = array();
+        if($sort == 1) {
+            $sort_array['count_views'] = SORT_DESC;
+        }
+        if($sort == 2) {
+            $sort_array['count_follows'] = SORT_DESC;
+        }
+        if($sort == 3) {
+            $sort_array['name'] = SORT_ASC;
+        }
+        if($sort == 4) {
+            $sort_array['name'] = SORT_DESC;
+        }
+        $sort_array['release_date'] = SORT_DESC;
+        $sort_array['id'] = SORT_DESC;
+        $books->orderBy($sort_array);
         $books = $books->all();
 
         $data = array();

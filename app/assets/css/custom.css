@@ -44,7 +44,7 @@ body {
 }
 .a-book .a-cover-new {
     width:20%;
-    min-width: 80px;
+    min-width: 75px;
 }
 .a-book .a-description, .a-book .a-description-new {
     width:65%;
@@ -54,7 +54,7 @@ body {
 }
 .a-book .a-description-new {
     width: 80%;
-    max-width: calc(100% - 80px);
+    max-width: calc(100% - 75px);
 }
 .a-book .a-description-new td{
     padding: 2px 0;
@@ -613,4 +613,17 @@ div#header-navbar {
 .label-td {
     vertical-align: top;
     width: 100px;
+}
+#select_sort {
+    width: 100%;
+    margin-bottom: 10px;
+    height: 34px;
+    background: #fff;
+    padding-left: 10px;
+    display: none;
+}
+.a-description-new table {
+    width: 100%;
+    word-wrap:break-word;
+    table-layout: fixed;
 }
