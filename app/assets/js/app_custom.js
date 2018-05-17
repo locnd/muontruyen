@@ -774,7 +774,7 @@ function login() {
             if(parseInt(res.data.is_admin) == 1) {
                 localStorage.setItem("is_admin", res.data.is_admin);
             }
-            localStorage.setItem("unread_time", '');
+            show_unread(res.unread, true);
             dl_alert('success', 'Đăng nhập thành công', true);
             window.location.href = 'index.html';
         } else {
@@ -943,7 +943,7 @@ function show_profile() {
             html += '<span>'+res.data.email+'</span>';
             html += '</div>';
             html += '<div class="a-profile">';
-            html += '<span><input style="border:1px solid lightgrey" id="open_form_btn" class="dl-btn-default" type="button" value="Đổi mật khẩu" onclick="show_change_password()"></span>';
+            html += '<span><input id="open_form_btn" class="dl-btn-default" type="button" value="Đổi mật khẩu" onclick="show_change_password()"></span>';
             html += '</div>';
 
             html += '<div id="change-password-form" style="display:none">';
@@ -960,7 +960,7 @@ function show_profile() {
             html += '<div><input id="password2" type="password"><br><span class="form-dl-error" id="password2_error"></span></div>';
             html += '</div>';
             html += '<div class="a-profile">';
-            html += '<label></label>';
+            html += '<label class="no_show_when_small"></label>';
             html += '<span><input class="dl-btn-default" onclick="change_password()" value="Lưu" type="button"></span>';
             html += '</div>';
             html += '</div>';
@@ -1794,4 +1794,49 @@ function prev() {
 function next() {
     var a = $('a.btn-next')[0];
     window.location.href = $(a).attr('href');
+}
+function login_facebook() {
+    if(!$('#loading-btn').is(":visible")) {
+        $('#loading-btn').show();
+        $('#login-btn').hide();
+        $('.form-control').removeClass('input-error');
+        $.getScript('https://connect.facebook.net/en_US/sdk.js', function () {
+            FB.init({
+                appId: '729161650453723',
+                version: 'v2.8'
+            });
+            FB.getLoginStatus(function (response) {
+                getFbUserData();
+            });
+        });
+    }
+}
+function getFbUserData(){
+    FB.api('/me', {locale: 'en_US', fields: 'id,first_name,last_name,email'},
+        function (response) {
+            var params = {
+                name: response.last_name+' '+response.first_name,
+                facebook_id: response.id,
+                email: response.email,
+                device_id: localStorage.getItem("device_id", ''),
+                device_type: localStorage.getItem("device_type", ''),
+                app_version: APP_VERSION
+            };
+            send_api('POST', '/login-facebook', params, function(res) {
+                $('#loading-btn').hide();
+                $('#login-btn').show();
+                if (res.success) {
+                    localStorage.setItem("token", res.data.token);
+                    if(parseInt(res.data.is_admin) == 1) {
+                        localStorage.setItem("is_admin", res.data.is_admin);
+                    }
+                    show_unread(res.unread, true);
+                    dl_alert('success', 'Đăng nhập thành công', true);
+                    window.location.href = 'index.html';
+                } else {
+                    dl_alert('danger', res.message, false);
+                }
+            });
+        }
+    );
 }

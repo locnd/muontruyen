@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.6';
+var APP_VERSION = '1.0.7';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -184,8 +184,8 @@ function check_unread(check_cache) {
             }
         }
     }
-    send_api('GET', '/unread', {}, function(data){
-        show_unread(data.data, true);
+    send_api('GET', '/unread', {}, function(res){
+        show_unread(res.data, true);
     });
 }
 

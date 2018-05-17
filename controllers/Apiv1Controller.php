@@ -1432,4 +1432,26 @@ class Apiv1Controller extends Controller
             'count_pages' => $total_page
         );
     }
+    public function actionLoginfacebook() {
+        $user_model = new User();
+        $errors = $user_model->login_facebook(Yii::$app->request->post());
+        if(!empty($errors->id)) {
+            unset($errors->password);
+            $books_ids = array();
+            foreach ($errors->follows as $follow) {
+                if ($follow->status == Follow::UNREAD) {
+                    $books_ids[] = $follow->book_id;
+                }
+            }
+            return array(
+                'success' => true,
+                'data' => $errors,
+                'unread' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
+            );
+        }
+        return array(
+            'success' => false,
+            'message' => empty($errors['message'])?'Đăng nhập thất bại':$errors['message']
+        );
+    }
 }

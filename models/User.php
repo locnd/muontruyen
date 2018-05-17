@@ -63,6 +63,37 @@ class User extends ModelCommon implements IdentityInterface
         return $this->auth_key;
     }
 
+    public function login_facebook($data) {
+        $user = User::find()->where(array('email' => $data['email']))->one();
+        if(empty($user)) {
+            $user = new User();
+            $user->name = $data['name'];
+            $user->email = $data['email'];
+            $username_arr = explode('@', $user->email);
+            $user->username = $username_arr[0];
+            $user->status = self::ACTIVE;
+            $user->facebook_id = $data['facebook_id'];
+            $user->token = $this->randomToken();
+            while(User::find()->where(array('token'=> $user->token))->count() > 0) {
+                $user->token = $this->randomToken();
+            }
+            $user->last_login = date('Y-m-d H:i:s');
+            $user->save();
+        } else {
+            if ($user->status == self::INACTIVE) {
+                return array('message' => 'Tài khoản không khả dụng');
+            }
+            if (!empty($user->deleted_at)) {
+                return array('message' => 'Tài khoản đã bị xoá');
+            }
+            $user->last_login = date('Y-m-d H:i:s');
+            $user->facebook_id = $data['facebook_id'];
+            $user->save();
+        }
+        $user->set_device($data);
+        return $user;
+    }
+
     public function login($data) {
         $errors = array();
         $data['username'] = strtolower($data['username']);
