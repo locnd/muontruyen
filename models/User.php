@@ -39,7 +39,7 @@ class User extends ModelCommon implements IdentityInterface
     {
         return [
             [['username', 'name', 'email', 'password'], 'required'],
-            ['email', 'email', 'message' => 'Email không đúng.'],
+            ['email', 'email', 'message' => 'Email không đúng.']
         ];
     }
     public static function findIdentity($id)
@@ -70,7 +70,12 @@ class User extends ModelCommon implements IdentityInterface
             $user->name = $data['name'];
             $user->email = $data['email'];
             $username_arr = explode('@', $user->email);
-            $user->username = $username_arr[0];
+            $user->username = preg_replace('/[^a-z0-9]/', '', $username_arr[0]);
+            $dem=1;
+            while(User::find()->where(array('username'=> $user->username))->count() > 0) {
+                $dem++;
+                $user->username = preg_replace('/[^a-z0-9]/', '', $username_arr[0]).''.$dem;
+            }
             $user->status = self::ACTIVE;
             $user->facebook_id = $data['facebook_id'];
             $user->token = $this->randomToken();
@@ -78,7 +83,7 @@ class User extends ModelCommon implements IdentityInterface
                 $user->token = $this->randomToken();
             }
             $user->last_login = date('Y-m-d H:i:s');
-            $user->save();
+            $user->save(false);
         } else {
             if ($user->status == self::INACTIVE) {
                 return array('message' => 'Tài khoản không khả dụng');
@@ -224,8 +229,10 @@ class User extends ModelCommon implements IdentityInterface
 
     function change_password($data = array()) {
         $errors = array();
-        if(empty($data['current_password'])) {
-            $errors['current_password'] = 'Mật khẩu hiện tại không được để trống.';
+        if(!empty($this->password)) {
+            if(empty($data['current_password'])) {
+                $errors['current_password'] = 'Mật khẩu hiện tại không được để trống.';
+            }
         }
         if(empty($data['password'])) {
             $errors['password'] = 'Mật khẩu mới không được để trống.';
@@ -236,8 +243,10 @@ class User extends ModelCommon implements IdentityInterface
         if(!empty($errors)) {
             return $errors;
         }
-        if(md5($this->salt.'_'.$data['current_password']) != $this->password) {
-            $errors['current_password'] = 'Mật khẩu hiện tại không đúng.';
+        if(!empty($this->password)) {
+            if (md5($this->salt . '_' . $data['current_password']) != $this->password) {
+                $errors['current_password'] = 'Mật khẩu hiện tại không đúng.';
+            }
         }
         if($data['password'] != $data['password2']) {
             $errors['password2'] = 'Xác nhận mật khẩu mới không đúng.';
