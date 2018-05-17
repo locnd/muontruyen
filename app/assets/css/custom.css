@@ -18,6 +18,9 @@ body {
     padding: 10px;
     margin-bottom: 10px;
 }
+div#header {
+    padding: 2px 0 !important;
+}
 .clear5 {
     clear: both;
     height: 5px;
@@ -72,14 +75,15 @@ body {
     float: left;
     margin-right: 10px;
     position: absolute;
-    top: 6px;
+    top: 2px;
+    left: 20px;
 }
 .a-logo .brand-text {
     margin-left: 60px;
     color: #00acac;
 }
 div.content {
-    margin: 84px 0 0 0;
+    margin: 65px 0 0 0;
 }
 .a-book .book-cover {
     text-align: center;
@@ -626,4 +630,28 @@ div#header-navbar {
     width: 100%;
     word-wrap:break-word;
     table-layout: fixed;
+}
+#chapter-header table {
+    margin: 0 15px;
+    width: calc(100% - 30px);
+}
+#chapter-header table td {
+    padding: 0 5px;
+    text-align: center;
+}
+#chapter-header table .navi-btn{
+    float: left;
+    padding: 2px 12px;
+    margin: 0;
+}
+#chapter-header table .navi-btn i{
+    font-size: 25px;
+    font-weight: 600;
+    width: 10px;
+}
+#chapter-header table #top_select_chapter select {
+    width: 100%;
+    height: 32px;
+    background: #fff;
+    border-radius: 5px;
 }

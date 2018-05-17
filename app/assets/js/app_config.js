@@ -104,6 +104,12 @@ $(document).ready(function() {
     } else {
         mark_reads();
     }
+
+    $( window ).scroll(function() {
+        if($('#chapter-header').length > 0) {
+            check_header();
+        }
+    });
 });
 
 var mouseY = 0;
@@ -123,7 +129,7 @@ $(document).ready(function() {
                     screen = 'normal';
                 }
                 if(screen == 'normal') {
-                    $('body').css('margin-top', (80 + moving / 3) + 'px');
+                    $('body').css('margin-top', (65 + moving / 3) + 'px');
                 } else {
                     $('body').css('margin-top', (moving / 3) + 'px');
                 }
@@ -392,7 +398,7 @@ function fullscreen(change) {
         $('#header').show();
         $('#footer-copyright').show();
         $('.btn-fullscreen').css('right', mg_r+'px');
-        $('#content').css('margin', '84px 0 0 0');
+        $('#content').css('margin', '65px 0 0 0');
         $('#content').css('padding-bottom', '40px');
         $('#content .container .col-md-12').css('padding', '0 15px');
     }
@@ -496,5 +502,14 @@ function save_cache_home_books(res,sort) {
     for(var i=0;i<res.length;i++) {
         var id=(sort * 20)+i+1;
         home_books.put(res[i], id);
+    }
+}
+function check_header() {
+    if($(window).scrollTop()>=$('#chapter-page').position().top + 200){
+        $('#common-header').hide();
+        $('#chapter-header').show();
+    } else {
+        $('#chapter-header').hide();
+        $('#common-header').show();
     }
 }

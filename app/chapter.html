@@ -43,7 +43,7 @@
     <div id="alert-flash" class="alert"></div>
     <div id="header" class="header navbar navbar-default navbar-fixed-top">
         <div class="container">
-            <div class="navbar-header">
+            <div id="common-header" class="navbar-header">
                 <button id="btn-more-menu" style="background: lightblue;" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#header-navbar">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -54,6 +54,34 @@
                     <img src="assets/img/logo.png">
                     <span class="brand-text f-s-18">MƯỢN TRUYỆN</span>
                 </a>
+            </div>
+            <div id="chapter-header" class="navbar-header" style="display:none">
+                <table>
+                    <tr>
+                        <td style="width:60px">
+                            <a href="index.html">
+                                <img style="width: 50px" src="assets/img/logo.png">
+                            </a>
+                        </td>
+                        <td style="width:45px">
+                            <a onclick="to_book()" style="color:black">
+                                <i style="font-size: 35px;" class="fa fa-list-ul"></i>
+                            </a>
+                        </td>
+                        <td id="top_btn_prev" style="width:45px">
+                            <a onclick="prev()" class="dl-btn-default navi-btn">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        </td>
+                        <td id="top_select_chapter"></td>
+                        <td id="top_btn_next" style="width:45px">
+                            <a onclick="next()" class="dl-btn-default navi-btn">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+
             </div>
             <div class="collapse navbar-collapse" id="header-navbar">
                 <ul class="nav navbar-nav navbar-right">
