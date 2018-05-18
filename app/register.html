@@ -117,7 +117,7 @@
                                     <a href="login.html" class="btn btn-link">Đăng nhập</a>
                                 </div>
                             </form>
-                            <div class="facebook_area" style="margin-top: 15px;">
+                            <div class="facebook_area" style="margin-top: 15px;display:none">
                                 <button onclick="login_facebook()" class="loginBtn loginBtn--facebook">
                                     Đăng nhập bằng Facebook
                                 </button>
@@ -148,23 +148,6 @@
         $(document).ready(function() {
             App.init();
         });
-
-        (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-
-        window.fbAsyncInit = function() {
-            FB.init({
-                appId            : '729161650453723',
-                autoLogAppEvents : true,
-                xfbml            : true,
-                version          : 'v3.0'
-            });
-        };
     </script>
 </body>
 </html>

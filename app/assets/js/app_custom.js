@@ -283,7 +283,7 @@ function display_book_info(book, is_following, tags) {
     html += '<div class="book-cover">';
     html += '<img src="'+book.image+'">';
     html += '</div>';
-    html += '<div id="save-btn" onclick="save_to_offline()" class="btn-save-to-offline"><i class="fa fa-download"></i> Lưu đọc Offline</div>';
+    html += '<div id="save-btn" onclick="save_to_offline()" class="btn-save-to-offline"><i class="fa fa-download"></i>&nbsp; Lưu đọc Offline</div>';
     html += '<div class="clear10"></div>';
     html += '<div class="book-description">'+book.description+'</div>';
     html += '<div class="clear10"></div>';
@@ -1319,12 +1319,12 @@ function save_to_offline(noti) {
     var params = {
         id: $('#book_id').val()
     };
-    $('#save-btn').html('<span class="saving-bar"></span><i class="fa fa-spinner fa-spin"></i> Đang lưu Offline...');
+    $('#save-btn').html('<span class="saving-bar"></span><i class="fa fa-spinner fa-spin"></i>&nbsp; Đang lưu Offline...');
     send_api('GET', '/savebook', params, function(res) {
         if (res.success) {
             save_cache_book(res);
         } else {
-            $('#save-btn').html('<i class="fa fa-download"></i> Lưu đọc Offline');
+            $('#save-btn').html('<i class="fa fa-download"></i>&nbsp; Lưu đọc Offline');
             $('#save-btn').attr('onclick','save_to_offline()');
             dl_alert('danger', res.message, false);
         }
@@ -1526,8 +1526,8 @@ function show_offline_book(id) {
                 html += '<div class="book-cover">';
                 html += '<img src="'+book.image+'">';
                 html += '</div>';
-                html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i> Xem Online</a>';
-                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i> Xoá xem Offline</a>';
+                html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i>&nbsp; Xem Online</a>';
+                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá xem Offline</a>';
                 html += '<div class="clear10"></div>';
                 html += '<div class="book-description">'+book.description+'</div>';
                 html += '</div>';
@@ -1804,14 +1804,24 @@ function login_facebook() {
         $('#loading-btn').show();
         $('#login-btn').hide();
         $('.form-control').removeClass('input-error');
-        FB.login(function(response) {
-            if (response.authResponse) {
-                get_facebook_profile();
-            } else {
-                $('#loading-btn').hide();
-                $('#login-btn').show();
-                dl_alert('danger', 'Không thể đăng nhập bằng tài khoản Facebook', false);
-            }
+        $.getScript('https://connect.facebook.net/en_US/sdk.js', function () {
+            FB.init({
+                appId            : '729161650453723',
+                autoLogAppEvents : true,
+                xfbml            : true,
+                version          : 'v3.0'
+            });
+            FB.getLoginStatus(function (response) {
+                if (response.status === 'connected') {
+                    get_facebook_profile();
+                } else {
+                    $('#loading-btn').hide();
+                    $('#login-btn').show();
+                    if (response.status !== 'not_authorized') {
+                        dl_alert('danger', 'Không thể đăng nhập bằng tài khoản Facebook', false);
+                    }
+                }
+            });
         });
     }
 }

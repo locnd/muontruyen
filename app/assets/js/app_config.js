@@ -423,7 +423,7 @@ function save_offline_book(book, noti){
     var req = offline_books.put(book, Number(book.id));
     req.onsuccess = function(e) {
         if(noti) {
-            $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu Offline');
+            $('#save-btn').html('<i class="fa fa-check"></i>&nbsp; Đã lưu Offline');
             dl_alert('success', 'Đã lưu truyện Offline', false);
         }
     };

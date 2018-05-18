@@ -23,6 +23,9 @@ class Scraper
         if(!empty($server->list_items_url)) {
             $url = $server->list_items_url;
         }
+        if($is_daily && !empty($server->daily_url)) {
+            $url = $server->daily_url;
+        }
         $url = str_replace('{page}', $page, $url);
 
         $html_base = $this->get_html_base($url);
