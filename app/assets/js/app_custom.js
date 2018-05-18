@@ -1444,7 +1444,8 @@ function save_offline_book_images() {
 
 function loading_bar(running_image, count_image) {
     var tyle = running_image/count_image;
-    var width = tyle * 185;
+    var btn_w = parseInt($('#save-btn').width());
+    var width = tyle * btn_w;
     $('span.saving-bar').css('width', width+'px');
 }
 function show_offline() {

@@ -248,11 +248,11 @@ ul.social-media-list li a {
     color: black;
 }
 .btn-bookmark {
-    width: 155px;
+    width: 160px;
     background: url(../img/bookmark.png) center left no-repeat;
 }
 .btn-unbookmark {
-    width: 175px;
+    width: 180px;
     background: url(../img/unbookmark.png) center left no-repeat;
 }
 .btn-bookmark:before {
