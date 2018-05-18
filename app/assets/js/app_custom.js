@@ -288,9 +288,9 @@ function display_book_info(book, is_following, tags) {
     html += '<div class="book-description">'+book.description+'</div>';
     html += '<div class="clear10"></div>';
     if(is_following) {
-        html += '<div id="follow-btn" onclick="follow('+is_following+', '+book.id+')" class="btn-unbookmark">';
+        html += '<div id="follow-btn" onclick="follow()" class="btn-unbookmark">';
     } else {
-        html += '<div id="follow-btn" onclick="follow('+is_following+', '+book.id+')" class="btn-bookmark">';
+        html += '<div id="follow-btn" onclick="follow()" class="btn-bookmark">';
     }
     html += '</div>';
     html += '<div class="clear10"></div>';
@@ -425,10 +425,22 @@ function move_image(image_id, is_down) {
     });
 }
 
-function follow(is_following, book_id) {
+function follow() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
         return true;
+    }
+    var book_id = $('#book_id').val();
+    var is_following = false;
+    if($('#follow-btn').length > 0) {
+        if($('#follow-btn').hasClass('btn-unbookmark')) {
+            is_following = true;
+        }
+    }
+    if($('#top_follow')) {
+        if($('#top_follow a').hasClass('btn-unfollow')) {
+            is_following = true;
+        }
     }
     if(!is_following) {
         $('.dl-overlay').fadeIn( 1, function() {
@@ -524,11 +536,12 @@ function send_follow(book_id, is_following) {
                     }
                 });
                 $('#follow-btn').removeClass('btn-bookmark').addClass('btn-unbookmark');
+                $('#top_follow a').removeClass('btn-follow').addClass('btn-unfollow');
             } else {
                 dl_alert('success', 'Đã bỏ theo dõi', false);
                 $('#follow-btn').removeClass('btn-unbookmark').addClass('btn-bookmark');
+                $('#top_follow a').removeClass('btn-unfollow').addClass('btn-follow');
             }
-            $('#follow-btn').attr('onclick', 'follow('+is_following+','+book_id+')');
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -554,7 +567,7 @@ function display_groups(book_id, groups) {
         html += '<div>';
         html += '<label for="group0">';
         html += '<input checked id="group0" type="radio" name="group_id" value="0"> &nbsp;';
-        html += '<span><input style="padding: 0 10px" onfocus="$(\'#group0\').prop(\'checked\',true);" id="input_group_name" type="text"></span>';
+        html += '<span><input style="padding: 0 10px; max-width:100%" onfocus="$(\'#group0\').prop(\'checked\',true);" id="input_group_name" type="text"></span>';
         html += '</label>';
         html += '</div>';
     }
@@ -582,8 +595,14 @@ function show_chapter(id) {
             var book = res.book;
             var images = res.images;
             var chapters = res.chapters;
+            display_groups(res.book.id, res.groups);
             if(book.make_read) {
                 show_unread(book.unread, true);
+            }
+            if(book.is_following) {
+                $('#top_follow a').addClass('btn-unfollow');
+            } else {
+                $('#top_follow a').addClass('btn-follow');
             }
             for(var i=0;i<chapters.length;i++) {
                 if(i==0 && chapter.id == chapters[i].id) {

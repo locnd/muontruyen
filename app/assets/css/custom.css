@@ -712,3 +712,16 @@ td.value-td {
     background-color: #5B7BD5;
     background-image: linear-gradient(#5B7BD5, #4864B1);
 }
+@media (max-width: 296px) {
+    span.brand-text {display:none}
+}
+.btn-follow, .btn-unfollow {
+    padding: 6.5px 19px !important;
+    width: 100%;
+}
+.btn-follow {
+    background: url(../img/bookmark.png) center center no-repeat;
+}
+.btn-unfollow {
+    background: url(../img/unbookmark.png) center center no-repeat;
+}

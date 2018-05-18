@@ -278,11 +278,11 @@ function dl_alert(type, message, save_storage) {
     $('#alert-flash').addClass('alert-'+type);
     $('div.alert').show();
     $('div.alert').css('z-index',999);
+    localStorage.setItem("alert", '');
     setTimeout(function(){
         $('div.alert').fadeOut();
         $('#alert-flash').removeClass('alert-danger');
         $('#alert-flash').removeClass('alert-success');
-        localStorage.setItem("alert", '');
         $('div.alert').css('z-index',0);
     }, 3000);
 }

@@ -248,20 +248,29 @@ class Apiv1Controller extends Controller
             $read->save();
         }
         $book_data['make_read'] = false;
+        $book_data['is_following'] = false;
         $book_data['unread'] = 0;
+        $groups = array();
         if(!empty($user->id)) {
+            foreach ($user->groups as $group) {
+                if($group->status == Group::INACTIVE) { continue; }
+                $groups[] = $group->to_array(array('id', 'name'));
+            }
             $follow = Follow::find()->where(array('book_id'=>$book->id,'user_id'=>$user->id))->one();
             if(!empty($follow)) {
-                $follow->status = Follow::READ;
-                $follow->save();
-                $book_data['make_read'] = true;
-                $books_ids = array();
-                foreach ($user->follows as $u_follow) {
-                    if ($u_follow->status == Follow::UNREAD) {
-                        $books_ids[] = $u_follow->book_id;
+                $book_data['is_following'] = true;
+                if($follow->status == Follow::UNREAD) {
+                    $follow->status = Follow::READ;
+                    $follow->save();
+                    $book_data['make_read'] = true;
+                    $books_ids = array();
+                    foreach ($user->follows as $u_follow) {
+                        if ($u_follow->status == Follow::UNREAD) {
+                            $books_ids[] = $u_follow->book_id;
+                        }
                     }
+                    $book_data['unread'] = Book::find()->where(array('id'=>$books_ids,'status'=>Book::ACTIVE))->count();
                 }
-                $book_data['unread'] = Book::find()->where(array('id'=>$books_ids,'status'=>Book::ACTIVE))->count();
             }
         }
         $images = array();
@@ -285,7 +294,8 @@ class Apiv1Controller extends Controller
             'chapters' => $chapters,
             'book' => $book_data,
             'images' => $images,
-            'is_bookmark' => $check_bookmark > 0 ? true : false
+            'is_bookmark' => $check_bookmark > 0 ? true : false,
+            'groups' => $groups
         );
     }
     public function actionBookforsearch() {
