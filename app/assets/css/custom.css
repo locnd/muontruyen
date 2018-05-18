@@ -240,10 +240,10 @@ ul.social-media-list li a {
     padding-right: 8px;
 }
 .btn-bookmark-chap {
-    width: 125px;
+    width: 120px;
 }
 .btn-unbookmark-chap {
-    width: 135px;
+    width: 125px;
     border-color: lightgrey;
     color: black;
 }
@@ -569,15 +569,15 @@ a.disable_a {
 }
 .btn-save-to-offline {
     float: right;
-    text-align: right;
+    text-align: center;
     height: 33px;
     line-height: 33px;
     border: 1px solid lightblue;
     font-weight: 600;
-    padding-right: 8px;
-    width: 165px;
+    padding: 0 10px;
     margin-top: 10px;
     position: relative;
+    margin-left: 10px;
 }
 .btn-save-to-offline i.fa-download {
     color: cadetblue;

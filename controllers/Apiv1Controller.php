@@ -170,7 +170,9 @@ class Apiv1Controller extends Controller
                     $books_ids[] = $follow->book_id;
                 }
             }
-            $options['unread'] = Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count();
+            if($options['make_read']) {
+                $options['unread'] = Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count();
+            }
         }
         $book->count_views = $book->count_views + 1;
         $book->save();
@@ -246,12 +248,20 @@ class Apiv1Controller extends Controller
             $read->save();
         }
         $book_data['make_read'] = false;
+        $book_data['unread'] = 0;
         if(!empty($user->id)) {
             $follow = Follow::find()->where(array('book_id'=>$book->id,'user_id'=>$user->id))->one();
             if(!empty($follow)) {
                 $follow->status = Follow::READ;
                 $follow->save();
                 $book_data['make_read'] = true;
+                $books_ids = array();
+                foreach ($user->follows as $u_follow) {
+                    if ($u_follow->status == Follow::UNREAD) {
+                        $books_ids[] = $u_follow->book_id;
+                    }
+                }
+                $book_data['unread'] = Book::find()->where(array('id'=>$books_ids,'status'=>Book::ACTIVE))->count();
             }
         }
         $images = array();

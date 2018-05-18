@@ -18,7 +18,6 @@ function onDeviceReady() {
             dl_alert('success', data.message, false);
         } else {
             //console.log("when the app is not active");
-            localStorage.setItem("unread_time", '');
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
         localStorage.setItem("unread_time", '');
@@ -425,7 +424,6 @@ function save_offline_book(book, noti){
     req.onsuccess = function(e) {
         if(noti) {
             $('#save-btn').html('<i class="fa fa-check"></i> Đã lưu Offline');
-            $('#save-btn').css('width', '150px');
             dl_alert('success', 'Đã lưu truyện Offline', false);
         }
     };

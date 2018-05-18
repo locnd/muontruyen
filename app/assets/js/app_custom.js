@@ -1,4 +1,6 @@
 
+var interval = null;
+
 function show_home(page, sort) {
     $('#list-books').html('');
     $('#paging').html('');
@@ -24,7 +26,12 @@ function show_home(page, sort) {
             if(page == 1 && !is_admin()) {
                 localStorage.setItem("time_cache_home_"+sort, $.now());
                 localStorage.setItem("count_pages", res.count_pages);
-                save_cache_home_books(res.data, sort);
+                interval = setInterval(function() {
+                    if(typeof(db2) != 'undefined') {
+                        clearInterval(interval);
+                        save_cache_home_books(res.data, sort);
+                    }
+                },1);
             }
             show_home_content(res, page, sort);
         } else {
@@ -37,7 +44,6 @@ function home_again() {
     window.location.href="index.html?sort="+sort;
 }
 
-var interval = null;
 function get_cache_home(sort) {
     $('#paging').hide();
     var count_pages = localStorage.getItem("count_pages");
@@ -221,7 +227,9 @@ function show_book(id) {
             display_book_info(res.data, is_following, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
-            show_unread(res.options.unread, true);
+            if(res.options.make_read) {
+                show_unread(res.options.unread, true);
+            }
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "index.html";
@@ -574,6 +582,9 @@ function show_chapter(id) {
             var book = res.book;
             var images = res.images;
             var chapters = res.chapters;
+            if(book.make_read) {
+                show_unread(book.unread, true);
+            }
             for(var i=0;i<chapters.length;i++) {
                 if(i==0 && chapter.id == chapters[i].id) {
                     chapter.point = 'last';
@@ -653,10 +664,6 @@ function show_chapter(id) {
             $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
             $('#book_id').val(book.id);
             $('#chapter_id').val(res.data.id);
-
-            if(book.make_read) {
-                check_unread(false);
-            }
             check_header();
         } else {
             dl_alert('danger', res.message, true);
@@ -729,6 +736,7 @@ function show_follow(tab, page, is_first) {
                 return true;
             }
             if(tab == 0) {
+                show_unread(books.length, true);
                 if (books.length > 0) {
                     $('#group0').show();
                 } else {
@@ -747,7 +755,6 @@ function show_follow(tab, page, is_first) {
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
             display_follow_paging(tab, page, res.count_pages);
-            check_unread(false);
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1313,13 +1320,11 @@ function save_to_offline(noti) {
         id: $('#book_id').val()
     };
     $('#save-btn').html('<span class="saving-bar"></span><i class="fa fa-spinner fa-spin"></i> Đang lưu Offline...');
-    $('#save-btn').css('width','185px');
     send_api('GET', '/savebook', params, function(res) {
         if (res.success) {
             save_cache_book(res);
         } else {
             $('#save-btn').html('<i class="fa fa-download"></i> Lưu đọc Offline');
-            $('#save-btn').css('width','155px');
             $('#save-btn').attr('onclick','save_to_offline()');
             dl_alert('danger', res.message, false);
         }
@@ -1521,9 +1526,8 @@ function show_offline_book(id) {
                 html += '<div class="book-cover">';
                 html += '<img src="'+book.image+'">';
                 html += '</div>';
-                html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline" style="width: 130px"><i class="fa fa-globe"></i> Xem Online</a>';
-                html += '<div class="clear0"></div>';
-                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline" style="width: 165px"><i class="fa fa-trash"></i> Xoá xem Offline</a>';
+                html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i> Xem Online</a>';
+                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i> Xoá xem Offline</a>';
                 html += '<div class="clear10"></div>';
                 html += '<div class="book-description">'+book.description+'</div>';
                 html += '</div>';
@@ -1800,28 +1804,28 @@ function login_facebook() {
         $('#loading-btn').show();
         $('#login-btn').hide();
         $('.form-control').removeClass('input-error');
-        $.getScript('https://connect.facebook.net/en_US/sdk.js', function () {
-            FB.init({
-                appId: '729161650453723',
-                version: 'v2.8'
-            });
-            FB.getLoginStatus(function (response) {
-                getFbUserData();
-            });
+        FB.login(function(response) {
+            if (response.authResponse) {
+                get_facebook_profile();
+            } else {
+                $('#loading-btn').hide();
+                $('#login-btn').show();
+                dl_alert('danger', 'Không thể đăng nhập bằng tài khoản Facebook', false);
+            }
         });
     }
 }
-function getFbUserData(){
-    FB.api('/me', {locale: 'en_US', fields: 'id,first_name,last_name,email'},
+function get_facebook_profile(){
+    FB.api('/me', {locale: 'en_US', fields: 'id,name,email'},
         function (response) {
             if(typeof(response.id)=='undefined' || typeof(response.email)=='undefined') {
                 $('#loading-btn').hide();
                 $('#login-btn').show();
-                dl_alert('danger', 'Không thể đăng nhập bằng facebook', false);
+                dl_alert('danger', 'Không thể đăng nhập bằng tài khoản Facebook', false);
                 return false;
             }
             var params = {
-                name: response.last_name+' '+response.first_name,
+                name: response.name,
                 facebook_id: response.id,
                 email: response.email,
                 device_id: localStorage.getItem("device_id", ''),
