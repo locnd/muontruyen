@@ -70,7 +70,16 @@ class Book extends ModelCommon
             $this->image = 'default.jpg';
         }
         $image_dir = \Yii::$app->params['app'].'/web/uploads/books/'.$this->slug;
-        if($this->image == 'default.jpg' || !file_exists($image_dir.'/'.$this->image)) {
+
+        if($this->image != 'default.jpg') {
+            if(!file_exists($image_dir.'/'.$this->image)
+            || filesize($image_dir.'/'.$this->image) == 0) {
+                return \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/default.jpg';
+            }
+        } else {
+            if(empty($this->image_source)) {
+                return \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/default.jpg';
+            }
             $image_source = $this->image_source;
             $array = explode('?', $image_source);
             $tmp_extension = $array[0];

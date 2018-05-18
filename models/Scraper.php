@@ -532,6 +532,7 @@ class Scraper
             }
             $chapter->save();
         }
+        $chapter->status = Chapter::ACTIVE;
         $chapter->will_reload = 0;
         $this->parse_chapter($chapter);
         if(Image::find()->where(array('chapter_id'=>$chapter->id))->count() == 0) {
