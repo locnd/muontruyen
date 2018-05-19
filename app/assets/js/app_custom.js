@@ -218,7 +218,9 @@ function show_book(id) {
                 $('#tag-btn').attr('onclick','show_modal("tag-modal");');
 
                 for(var i=0;i<res.tags.length;i++) {
-                    show_select_tag(res.tags[i], res.tags[i].is_checked);
+                    if(res.tags[i].type == 0) {
+                        show_select_tag(res.tags[i], res.tags[i].is_checked);
+                    }
                 }
             }
             $('#send-report-btn').attr('onclick','send_report('+res.data.id+',0)');
@@ -300,9 +302,9 @@ function display_book_info(book, is_following, tags) {
     for (var i = 0; i < tags.length; i++) {
         if (tags[i].is_checked) {
             if(tags[i].type == 1) {
-                author_html += '<a href="author.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
+                author_html += '<a href="author.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
             } else {
-                tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
+                tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
             }
         }
     }
@@ -1055,7 +1057,7 @@ function change_password() {
 }
 
 function show_tags() {
-    send_api('GET', '/tags', {}, function(res) {
+    send_api('GET', '/tags', {type:0}, function(res) {
         if (res.success) {
             $('h3.page-title').html('Danh sách <b>thể loại</b> ('+res.total+' kết quả)');
             $('h3.page-title').show();
@@ -1066,7 +1068,7 @@ function show_tags() {
     });
 }
 function show_authors() {
-    send_api('GET', '/tags', {}, function(res) {
+    send_api('GET', '/tags', {type:1}, function(res) {
         if (res.success) {
             $('h3.page-title').html('Danh sách <b>tác giả</b> ('+res.total+' kết quả)');
             $('h3.page-title').show();

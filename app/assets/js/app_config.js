@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.7';
+var APP_VERSION = '1.0.1';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';

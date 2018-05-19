@@ -76,15 +76,18 @@ class Apiv1Controller extends Controller
         $sort = (int) Yii::$app->request->get('sort',0);
         $sort_array = array();
         if($sort == 1) {
-            $sort_array['count_views'] = SORT_DESC;
+            $sort_array['created_at'] = SORT_DESC;
         }
         if($sort == 2) {
-            $sort_array['count_follows'] = SORT_DESC;
+            $sort_array['count_views'] = SORT_DESC;
         }
         if($sort == 3) {
-            $sort_array['name'] = SORT_ASC;
+            $sort_array['count_follows'] = SORT_DESC;
         }
         if($sort == 4) {
+            $sort_array['name'] = SORT_ASC;
+        }
+        if($sort == 5) {
             $sort_array['name'] = SORT_DESC;
         }
         $sort_array['release_date'] = SORT_DESC;
@@ -191,12 +194,12 @@ class Apiv1Controller extends Controller
 
         if(!empty($user->id) && $user->is_admin) {
             $tag_fields = array(
-                'id', 'name', 'vn_name'
+                'id', 'name', 'vn_name', 'type'
             );
-            $tags = Tag::find()->select($tag_fields)->where(array('status' => Tag::ACTIVE))->orderBy(array('stt' => SORT_ASC, 'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
+            $tags = Tag::find()->select($tag_fields)->where(array('status' => Tag::ACTIVE))->orderBy(array('stt' => SORT_ASC, 'vn_name' => SORT_ASC, 'id' => SORT_DESC))->all();
             $tag_data = array();
             foreach ($tags as $tag) {
-                $tmp = $tag->to_array(array('id', 'name', 'stt'));
+                $tmp = $tag->to_array(array('id', 'name', 'stt', 'type'));
                 $tmp['is_checked'] = false;
                 if (BookTag::find()->where(array('tag_id' => $tag->id, 'book_id' => $book->id))->count() > 0) {
                     $tmp['is_checked'] = true;
@@ -207,7 +210,7 @@ class Apiv1Controller extends Controller
             $book_tags = BookTag::find()->where(array('book_id' => $book->id))->all();
             $tag_data = array();
             foreach ($book_tags as $book_tag) {
-                $tmp = $book_tag->tag->to_array(array('id', 'name', 'stt', 'status'));
+                $tmp = $book_tag->tag->to_array(array('id', 'name', 'stt', 'status', 'type'));
                 if($tmp['status'] == Tag::INACTIVE) {
                     continue;
                 }
@@ -666,11 +669,12 @@ class Apiv1Controller extends Controller
         );
     }
     public function actionTags() {
-        $fields = array('id', 'name', 'vn_name', 'type');
-        $tags = Tag::find()->select($fields)->where(array('status'=>Tag::ACTIVE))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
+        $type = (int) Yii::$app->request->get('type',0);
+        $fields = array('id', 'name', 'vn_name');
+        $tags = Tag::find()->select($fields)->where(array('status'=>Tag::ACTIVE, 'type'=>$type))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
         $data = array();
         foreach ($tags as $tag) {
-            $tmp = $tag->to_array(array('id', 'name', 'type'));
+            $tmp = $tag->to_array(array('id', 'name'));
             $tmp['count'] = BookTag::find()->where(array('tag_id'=>$tag->id))->count();
             $data[] = $tmp;
         }
