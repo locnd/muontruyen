@@ -195,7 +195,7 @@ function display_a_book(book) {
 function display_a_tag(tag, type) {
     var html='<div class="a-tag">';
     html += '<a href="'+type+'.html?id='+tag.id+'">';
-    var tag_name = tag.name.replace('Tác giả: ', '');
+    var tag_name = tag.name;
     html += '<img src="assets/img/tag.png">'+tag_name + ' ('+tag.count+')';
     html += '</a>';
     html += '</div>';
@@ -299,8 +299,7 @@ function display_book_info(book, is_following, tags) {
     var tag_html = '';
     for (var i = 0; i < tags.length; i++) {
         if (tags[i].is_checked) {
-            var tag_name = tags[i].name.replace('Tác giả: ', '');
-            if(tags[i].name.indexOf('Tác giả') > -1) {
+            if(tags[i].type == 1) {
                 author_html += '<a href="author.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
             } else {
                 tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tag_name + '</a> - ';
@@ -1080,10 +1079,10 @@ function show_authors() {
 function show_tags_list(res,type) {
     if(res.total > 0) {
         for (var i = 0; i < res.data.length; i++) {
-            if(type == 'tag' && res.data[i].name.indexOf('Tác giả: ') > -1) {
+            if(type == 'tag' && res.data[i].type == 1) {
                 continue;
             }
-            if(type == 'author' && res.data[i].name.indexOf('Tác giả: ') == -1) {
+            if(type == 'author' && res.data[i].type == 0) {
                 continue;
             }
             display_a_tag(res.data[i], type);
@@ -1289,7 +1288,7 @@ function show_author(tag_id, page,is_full) {
     $('#full_book').show();
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Tác giả "<b>'+res.tag.name.replace('Tác giả: ','')+'</b>" ('+res.total+' kết quả)');
+            $('h3.page-title').html('Tác giả "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
             $('h3.page-title').show();
             show_tag_result(res, page, 'author');
         } else {

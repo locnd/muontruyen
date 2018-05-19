@@ -41,12 +41,16 @@ class DailyController extends Controller
         }
         $setting_model->set_setting('cron_running', 'yes');
 
-        $page = $setting_model->get_setting('daily_page');
-        if($page == '') {
-            $page = 1;
-        } else {
-            $page = (int)$page + 1;
+        $book_count = Book::find()->count();
+        $page = ceil($book_count / 36);
+        if($book_count % 36 == 0) {
+            $page++;
         }
+
+        if($page > 50) {
+            return ExitCode::OK;
+        }
+
         $scraper = new Scraper();
         $scraper->echo = false;
 
@@ -59,7 +63,6 @@ class DailyController extends Controller
             $log->save();
             $scraper->parse_server($server, $page, $page, $log, true);
         }
-        $setting_model->set_setting('daily_page', $page);
         $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }

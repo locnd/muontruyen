@@ -631,10 +631,11 @@ div#header-navbar {
 #select_sort {
     width: 100%;
     margin-bottom: 10px;
-    height: 34px;
+    height: 36px;
     background: #fff;
     padding-left: 10px;
     display: none;
+    border-radius: 3px;
 }
 .a-description-new table {
     width: 100%;
@@ -724,4 +725,10 @@ td.value-td {
 }
 .btn-unfollow {
     background: url(../img/unbookmark.png) center center no-repeat;
+}
+div#list-books .a-book {
+    width: 100%;
+    float: left;
+    padding: 20px;
+    display:none;
 }

@@ -102,16 +102,14 @@ class Apiv1Controller extends Controller
             $tmp['tags'] = array();
             $tmp['authors'] = array();
             foreach($book->bookTags as $book_tag) {
-                if($book_tag->tag->status == Tag::INACTIVE) {
+                $tmp_tag = $book_tag->tag;
+                if($tmp_tag->status == Tag::INACTIVE) {
                     continue;
                 }
-                $pos = strpos($book_tag->tag->name, 'Tác giả');
-                if($pos === false) {
-                    $tmp['tags'][] = $book_tag->tag->to_array(array('id', 'name'));
+                if($tmp_tag->type == 0) {
+                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
                 } else {
-                    $tmp_tag = $book_tag->tag->to_array(array('id', 'name'));
-                    $tmp_tag['name'] = str_replace('Tác giả: ', '', $tmp_tag['name']);
-                    $tmp['authors'][] = $tmp_tag;
+                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
                 }
             }
             $data[] = $tmp;
@@ -668,11 +666,11 @@ class Apiv1Controller extends Controller
         );
     }
     public function actionTags() {
-        $fields = array('id', 'name', 'vn_name');
+        $fields = array('id', 'name', 'vn_name', 'type');
         $tags = Tag::find()->select($fields)->where(array('status'=>Tag::ACTIVE))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
         $data = array();
         foreach ($tags as $tag) {
-            $tmp = $tag->to_array(array('id', 'name'));
+            $tmp = $tag->to_array(array('id', 'name', 'type'));
             $tmp['count'] = BookTag::find()->where(array('tag_id'=>$tag->id))->count();
             $data[] = $tmp;
         }
@@ -1144,16 +1142,14 @@ class Apiv1Controller extends Controller
             $tmp['tags'] = array();
             $tmp['authors'] = array();
             foreach($book->bookTags as $book_tag) {
-                if($book_tag->tag->status == Tag::INACTIVE) {
+                $tmp_tag = $book_tag->tag;
+                if($tmp_tag->status == Tag::INACTIVE) {
                     continue;
                 }
-                $pos = strpos($book_tag->tag->name, 'Tác giả');
-                if($pos === false) {
-                    $tmp['tags'][] = $book_tag->tag->to_array(array('id', 'name'));
+                if($tmp_tag->type == 0) {
+                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
                 } else {
-                    $tmp_tag = $book_tag->tag->to_array(array('id', 'name'));
-                    $tmp_tag['name'] = str_replace('Tác giả: ', '', $tmp_tag['name']);
-                    $tmp['authors'][] = $tmp_tag;
+                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
                 }
             }
             $data[] = $tmp;
@@ -1241,16 +1237,14 @@ class Apiv1Controller extends Controller
             $tmp['tags'] = array();
             $tmp['authors'] = array();
             foreach($book->bookTags as $book_tag) {
-                if($book_tag->tag->status == Tag::INACTIVE) {
+                $tmp_tag = $book_tag->tag;
+                if($tmp_tag->status == Tag::INACTIVE) {
                     continue;
                 }
-                $pos = strpos($book_tag->tag->name, 'Tác giả');
-                if($pos === false) {
-                    $tmp['tags'][] = $book_tag->tag->to_array(array('id', 'name'));
+                if($tmp_tag->type == 0) {
+                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
                 } else {
-                    $tmp_tag = $book_tag->tag->to_array(array('id', 'name'));
-                    $tmp_tag['name'] = str_replace('Tác giả: ', '', $tmp_tag['name']);
-                    $tmp['authors'][] = $tmp_tag;
+                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
                 }
             }
             $data[] = $tmp;
@@ -1260,14 +1254,14 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'message' => 'Không có truyện',
-                'tag' => $tag->to_array(),
+                'tag' => $tag->to_array(array('name')),
                 'total' => 0
             );
         }
         return array(
             'success' => true,
             'data' => $data,
-            'tag' => $tag->to_array(),
+            'tag' => $tag->to_array(array('name')),
             'total' => $total,
             'count_pages' => $total_page
         );
@@ -1302,16 +1296,14 @@ class Apiv1Controller extends Controller
         $book_data['tags'] = array();
         $book_data['authors'] = array();
         foreach($book->bookTags as $book_tag) {
-            if($book_tag->tag->status == Tag::INACTIVE) {
+            $tmp_tag = $book_tag->tag;
+            if($tmp_tag->status == Tag::INACTIVE) {
                 continue;
             }
-            $pos = strpos($book_tag->tag->name, 'Tác giả');
-            if($pos === false) {
-                $book_data['tags'][] = $book_tag->tag->to_array(array('id', 'name'));
+            if($tmp_tag->type == 0) {
+                $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
             } else {
-                $tmp_tag = $book_tag->tag->to_array(array('id', 'name'));
-                $tmp_tag['name'] = str_replace('Tác giả: ', '', $tmp_tag['name']);
-                $book_data['authors'][] = $tmp_tag;
+                $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
             }
         }
         $chapters = array();
@@ -1415,16 +1407,14 @@ class Apiv1Controller extends Controller
             $tmp['tags'] = array();
             $tmp['authors'] = array();
             foreach($book->bookTags as $book_tag) {
-                if($book_tag->tag->status == Tag::INACTIVE) {
+                $tmp_tag = $book_tag->tag;
+                if($tmp_tag->status == Tag::INACTIVE) {
                     continue;
                 }
-                $pos = strpos($book_tag->tag->name, 'Tác giả');
-                if($pos === false) {
-                    $tmp['tags'][] = $book_tag->tag->to_array(array('id', 'name'));
+                if($tmp_tag->type == 0) {
+                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
                 } else {
-                    $tmp_tag = $book_tag->tag->to_array(array('id', 'name'));
-                    $tmp_tag['name'] = str_replace('Tác giả: ', '', $tmp_tag['name']);
-                    $tmp['authors'][] = $tmp_tag;
+                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
                 }
             }
             $chapters = Chapter::find()->select($chapter_fields)->where(array('status'=>Chapter::ACTIVE, 'id' => $chapter_ids[$book->id]))->orderBy(['stt' => SORT_DESC, 'id' => SORT_DESC])->all();

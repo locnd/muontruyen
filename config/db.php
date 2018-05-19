@@ -8,9 +8,9 @@ return [
     'charset' => 'utf8',
 
 //    'class' => 'yii\db\Connection',
-//    'dsn' => 'mysql:host=localhost;dbname=cp486787_muontruyen',
-//    'username' => 'cp486787_truyen',
-//    'password' => 'admin!@#123',
+//    'dsn' => 'mysql:host=localhost;dbname=muontruyen',
+//    'username' => 'root',
+//    'password' => 'l!o@c#n$g%u^y&e*n',
 //    'charset' => 'utf8',
 
 

@@ -24,7 +24,7 @@ class Scraper
             $url = $server->list_items_url;
         }
         if($is_daily && !empty($server->daily_url)) {
-            $url = $server->daily_url;
+            // $url = $server->daily_url;
         }
         $url = str_replace('{page}', $page, $url);
 
@@ -122,10 +122,11 @@ class Scraper
             echo '---- ' . $slug . "\n";
 
         $image_src = $html_base->find($server->image_key)[0]->src;
-        $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.'/'.$slug;
+        $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
         if(substr($image_src, 0, 2) == '//') {
             $image_src = 'http:'.$image_src;
         }
+        $image_src = str_replace('https:','http:', $image_src);
         $image = $this->save_image($image_src, $image_dir);
 
         $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
@@ -141,7 +142,7 @@ class Scraper
         if($author_str != 'Đang cập nhật') {
             $authors = $author->find('a');
             foreach ($authors as $author) {
-                $tags[] = 'Tác giả: '.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+                $tags[] = 'Author:'.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
             }
         }
 
@@ -198,7 +199,7 @@ class Scraper
         if(count($chapters) == 0) {
             $html_base->clear();
             unset($html_base);
-            $html_base = $this->get_html_base($book->url, false, 'phantom');
+            $html_base = $this->get_html_base($book->url, 'phantom', true);
             if(empty($html_base)) {
                 return 0;
             }
@@ -276,7 +277,7 @@ class Scraper
         $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/chap'.$chapter->id;
 
         $image_urls = array();
-        $html_base = $this->get_html_base($chapter->url, true);
+        $html_base = $this->get_html_base($chapter->url, '', true);
         if(!empty($html_base)) {
             $images = $html_base->find($server->images_key);
             foreach ($images as $id=>$image) {
@@ -301,6 +302,7 @@ class Scraper
             if(substr($image_src, 0, 2) == '//') {
                 $image_src = 'http:'.$image_src;
             }
+            $image_src = str_replace('https:','http:', $image_src);
             $image_name = $this->save_image($image_src, $dir, $id+1);
             $new_image = Image::find()->where(array('chapter_id'=>$chapter->id, 'image_source' => $image_src))->one();
             if(empty($new_image)) {
@@ -396,21 +398,15 @@ class Scraper
     }
 
     public function save_image($image_source, $image_dir, $stt=0) {
-        $image = 'default.jpg';
-        if($stt > 0) {
-            $image = 'error.jpg';
-        }
-        return $image;
-        $array = explode('?', $image_source);
-        $tmp_extension = $array[0];
-        $array = explode('.', $tmp_extension);
-        $extension = end($array);
-        if(strlen($extension) > 4 || strlen($extension) < 3) {
-            $image = 'default.jpg';
-            if($stt > 0) {
-                $image = 'error.jpg';
+        $image = 'error.jpg';
+        if($stt == 0) {
+            $array = explode('?', $image_source);
+            $tmp_extension = $array[0];
+            $array = explode('.', $tmp_extension);
+            $extension = strtolower(end($array));
+            if(!in_array($extension, array('jpg','png','jpeg','gif'))) {
+                $extension = 'jpg';
             }
-        } else {
             $image = 'cover.'.$extension;
             if($stt > 0) {
                 $ten = ''.$stt;
@@ -428,7 +424,6 @@ class Scraper
                 }
             }
             $image_dir = $image_dir.'/'.$image;
-
             $ch = curl_init($image_source);
             $fp = fopen($image_dir, 'wb');
             curl_setopt($ch, CURLOPT_FILE, $fp);
@@ -436,6 +431,13 @@ class Scraper
             curl_exec($ch);
             curl_close($ch);
             fclose($fp);
+            if(filesize($image_dir) == 0) {
+                unlink($image_dir);
+                $image = 'default.jpg';
+                if($stt > 0) {
+                    $image = 'error.jpg';
+                }
+            }
         }
         return $image;
     }
@@ -466,6 +468,7 @@ class Scraper
             if(substr($image_src, 0, 2) == '//') {
                 $image_src = 'http:'.$image_src;
             }
+            $image_src = str_replace('https:','http:', $image_src);
             $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
             $image = $this->save_image($image_src, $image_dir);
 
@@ -482,7 +485,7 @@ class Scraper
             if($author_str != 'Đang cập nhật') {
                 $authors = $author->find('a');
                 foreach ($authors as $author) {
-                    $tags[] = 'Tác giả: '.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+                    $tags[] = 'Author:'.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
                 }
             }
 
@@ -615,34 +618,24 @@ page.open("%s", function (status) {
         curl_close($ch);
     }
 
-    private function get_html_base($url, $show_way=false, $way='curl') {
-        if($way == 'phantom') {
+    private function get_html_base($url, $way='',$show_way=false) {
+        $still_way = ''; $html_base = array();
+        if($way == '' ||  $way=='curl') {
+            $still_way = 'curl';
+            $html = $this->curl_getcontent($url);
+            $html_base = HtmlDomParser::str_get_html($html);
+            unset($html);
+        }
+        if(($way == '' && empty($html_base)) || $way=='phantom') {
+            $still_way = 'phantom';
             $file_html = $this->parse_url_by_phantom($url);
             if($file_html != '') {
                 $html_base = HtmlDomParser::str_get_html($file_html);
                 unset($file_html);
             }
-            if (empty($html_base)) {
-                $way='curl';
-                $html = $this->curl_getcontent($url);
-                $html_base = HtmlDomParser::str_get_html($html);
-                unset($html);
-            }
-        } else {
-            $html = $this->curl_getcontent($url);
-            $html_base = HtmlDomParser::str_get_html($html);
-            unset($html);
-            if (empty($html_base)) {
-                $way = 'phantom';
-                $file_html = $this->parse_url_by_phantom($url);
-                if ($file_html != '') {
-                    $html_base = HtmlDomParser::str_get_html($file_html);
-                    unset($file_html);
-                }
-            }
         }
         if($show_way && $this->echo) {
-            echo ' - '.$way;
+            echo ' - '.$still_way;
         }
         return $html_base;
     }
