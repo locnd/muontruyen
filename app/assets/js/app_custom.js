@@ -210,21 +210,12 @@ function show_book(id) {
         if (res.success) {
             $('#book_id').val(res.data.id);
             if(is_admin()) {
-                $('#reload-btn').attr('onclick','reload('+res.data.id+',0)');
-                $('#edit-title-btn').attr('onclick','edit_title()');
-                $('#edit-description-btn').attr('onclick','edit_description()');
-                $('#disable-btn').attr('onclick','disable('+res.data.id+',0)');
-                $('#moving-manage-btn').attr('onclick','$(".mov-btn").toggle()');
-                $('#tag-btn').attr('onclick','show_modal("tag-modal");');
-
                 for(var i=0;i<res.tags.length;i++) {
                     if(res.tags[i].type == 0) {
                         show_select_tag(res.tags[i], res.tags[i].is_checked);
                     }
                 }
             }
-            $('#send-report-btn').attr('onclick','send_report('+res.data.id+',0)');
-
             var is_following = res.options.is_following;
             display_book_info(res.data, is_following, res.tags);
             display_list_chapters(res.chapters);
@@ -247,7 +238,7 @@ function open_reports() {
     show_modal('report-modal');
 }
 
-function send_report(book_id, chapter_id) {
+function send_report() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
         return true;
@@ -256,6 +247,11 @@ function send_report(book_id, chapter_id) {
     if(content == '') {
         dl_alert('danger', 'Hãy nhập nội dung lỗi', false);
         return false;
+    }
+    var book_id = $('#book_id').val();
+    var chapter_id = 0;
+    if($('#chapter_id').length > 0) {
+        chapter_id = $('#chapter_id').val();
     }
     var params = {
         book_id: book_id,
@@ -585,11 +581,13 @@ function show_chapter(id) {
     };
     send_api('GET', '/chapter', params, function(res) {
         if (res.success) {
+            $('#book_id').val(res.book.id);
+            $('#chapter_id').val(res.data.id);
             if(is_admin()) {
                 $('#reload-btn').attr('onclick','reload(0,'+res.data.id+')');
                 $('#disable-btn').attr('onclick','disable(0,'+res.data.id+')');
-                $('#edit-name-btn').attr('onclick','edit_name('+res.data.id+')');
-                $('#moving-manage-btn').attr('onclick','$(".mov-btn").toggle()');
+                $('#edit-name-btn').attr('onclick','edit_name()');
+                $('#moving-manage-btn').attr('onclick','');
                 $('#input-textarea').val(res.data.name);
             }
             var chapter = res.data;
@@ -681,9 +679,7 @@ function show_chapter(id) {
             html+='<div class="clear10"></div>';
             $('#chapter-page').html(html);
             $('#chapter-page').show();
-            $('#send-report-btn').attr('onclick','send_report('+book.id+','+res.data.id+')');
-            $('#book_id').val(book.id);
-            $('#chapter_id').val(res.data.id);
+            $('#send-report-btn').attr('onclick','send_report()');
             check_header();
         } else {
             dl_alert('danger', res.message, true);
@@ -856,7 +852,7 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-function disable(book_id, chapter_id) {
+function disable() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
         return true;
@@ -870,6 +866,12 @@ function disable(book_id, chapter_id) {
     }
     if(confirm('Bạn có chắc là muốn ẩn truyện này không ?')) {
         $('#loading-btn').show();
+        var book_id = $('#book_id').val();
+        var chapter_id = 0;
+        if($('#chapter_id').length > 0) {
+            book_id = 0;
+            chapter_id = $('#chapter_id').val();
+        }
         var params = {
             book_id: book_id,
             chapter_id: chapter_id
@@ -920,7 +922,7 @@ function save_tags() {
         }
     });
 }
-function reload(book_id, chapter_id) {
+function reload() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
         return true;
@@ -934,6 +936,12 @@ function reload(book_id, chapter_id) {
     }
     if(confirm('Bạn có chắc là muốn lấy lại truyện này không ?')) {
         $('#loading-btn').show();
+        var book_id = $('#book_id').val();
+        var chapter_id = 0;
+        if($('#chapter_id').length > 0) {
+            book_id = 0;
+            chapter_id = $('#chapter_id').val();
+        }
         var params = {
             book_id: book_id,
             chapter_id: chapter_id
@@ -1097,8 +1105,7 @@ function show_number(num) {
     num = ''+num;
     return num.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
 }
-function edit_name(chapter_id) {
-    $('#chapter_id').val(chapter_id);
+function edit_name() {
     $('#input-textarea').css('height', '36px');
     $('.input-admin').show();
 }
