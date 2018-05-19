@@ -41,13 +41,13 @@ class DailyController extends Controller
         }
         $setting_model->set_setting('cron_running', 'yes');
 
-        $book_count = Book::find()->count();
-        $page = ceil($book_count / 36);
-        if($book_count % 36 == 0) {
-            $page++;
+        $page = $setting_model->get_setting('daily_page');
+        if($page == '') {
+            $page = 2;
+        } else {
+            $page = (int)$page + 1;
         }
-
-        if($page > 50) {
+        if($page > 20) {
             return ExitCode::OK;
         }
 
@@ -64,6 +64,7 @@ class DailyController extends Controller
             $scraper->parse_server($server, $page, $page, $log, true);
         }
         $setting_model->set_setting('cron_running', '');
+        $setting_model->set_setting('daily_page', $page);
         return ExitCode::OK;
     }
 }
