@@ -33,13 +33,16 @@ class Scraper
             return true;
         }
         $list_items = $html_base->find($server->list_items_key);
-        if($this->echo)
-            echo ' - '.count($list_items).' truyen'."\n";
         if(count($list_items) == 0) {
             $html_base->clear();
             unset($html_base);
-            return true;
+            $html_base = $this->get_html_base($url, 'phantom');
+            if(empty($html_base)) {
+                return true;
+            }
         }
+        if($this->echo)
+            echo ' - '.count($list_items).' truyen'."\n";
         $dem = 0;
         $urls = array();
         foreach ($list_items as $stt => $item) {
@@ -106,6 +109,15 @@ class Scraper
         $html_base = $this->get_html_base($a_href);
         if(empty($html_base)) {
             return 1;
+        }
+        $titles = $html_base->find($server->title_key);
+        if(count($titles) == 0) {
+            $html_base->clear();
+            unset($html_base);
+            $html_base = $this->get_html_base($a_href, 'phantom');
+            if(empty($html_base)) {
+                return 1;
+            }
         }
         $title = trim($html_base->find($server->title_key)[0]->plaintext);
         $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
@@ -452,6 +464,15 @@ class Scraper
             $html_base = $this->get_html_base($book->url);
             if(empty($html_base)) {
                 return true;
+            }
+            $titles = $html_base->find($server->title_key);
+            if(count($titles) == 0) {
+                $html_base->clear();
+                unset($html_base);
+                $html_base = $this->get_html_base($book->url, 'phantom');
+                if(empty($html_base)) {
+                    return 1;
+                }
             }
             $title = trim($html_base->find($server->title_key)[0]->plaintext);
             $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
