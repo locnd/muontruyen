@@ -134,26 +134,26 @@ class Scraper
         $tags_arr = $html_base->find($server->list_tags_key);
         $tags = array();
         foreach ($tags_arr as $tag) {
-            $tags[] = ucfirst(strtolower(trim(html_entity_decode($tag->plaintext))));
+            $tags[] = strtolower(trim(html_entity_decode($tag->plaintext), ' .,-'));
         }
 
         $author = $html_base->find($server->list_authors_key)[0];
-        $author_str = ucfirst(strtolower(trim(html_entity_decode($author->plaintext))));
-        if($author_str != 'Đang cập nhật') {
+        $author_str = strtolower(trim(html_entity_decode($author->plaintext), ' .,-'));
+        if($author_str != 'đang cập nhật') {
             $authors = $author->find('a');
             foreach ($authors as $author) {
-                $tags[] = 'Author:'.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+                $tags[] = 'author:'.trim(html_entity_decode($author->plaintext), ' .,-');
             }
         }
 
         $status = $html_base->find($server->status_key)[0];
-        $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
-        if($status_str == 'Hoàn thành') {
+        $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
+        if($status_str == 'hoàn thành') {
             $tags[] = $status_str;
         }
 
-        if(in_array('One shot', $tags) && !in_array('Hoàn thành', $tags)) {
-            $tags[] = 'Hoàn thành';
+        if(in_array('one shot', $tags) && !in_array('hoàn thành', $tags)) {
+            $tags[] = 'hoàn thành';
         }
 
         $html_base->clear();
@@ -206,8 +206,8 @@ class Scraper
         }
 
         $status = $html_base->find($server->status_key)[0];
-        $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
-        if($status_str == 'Hoàn thành') {
+        $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
+        if($status_str == 'hoàn thành') {
             $book->add_tag($status_str);
         }
 
@@ -477,26 +477,26 @@ class Scraper
             $tags_arr = $html_base->find($server->list_tags_key);
             $tags = array();
             foreach ($tags_arr as $tag) {
-                $tags[] = ucfirst(strtolower(trim(html_entity_decode($tag->plaintext))));
+                $tags[] = strtolower(trim(html_entity_decode($tag->plaintext), ' .,-'));
             }
 
             $author = $html_base->find($server->list_authors_key)[0];
-            $author_str = ucfirst(strtolower(trim(html_entity_decode($author->plaintext))));
-            if($author_str != 'Đang cập nhật') {
+            $author_str = strtolower(trim(html_entity_decode($author->plaintext), ' .,-'));
+            if($author_str != 'đang cập nhật') {
                 $authors = $author->find('a');
                 foreach ($authors as $author) {
-                    $tags[] = 'Author:'.ucfirst(strtolower(trim(html_entity_decode($author->plaintext), ' .,-')));
+                    $tags[] = 'author:'.trim(html_entity_decode($author->plaintext), ' .,-');
                 }
             }
 
             $status = $html_base->find($server->status_key)[0];
-            $status_str = ucfirst(strtolower(trim(html_entity_decode($status->plaintext))));
-            if($status_str == 'Hoàn thành') {
+            $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
+            if($status_str == 'hoàn thành') {
                 $tags[] = $status_str;
             }
 
-            if(in_array('One shot', $tags) && !in_array('Hoàn thành', $tags)) {
-                $tags[] = 'Hoàn thành';
+            if(in_array('one shot', $tags) && !in_array('hoàn thành', $tags)) {
+                $tags[] = 'hoàn thành';
             }
 
             $html_base->clear();

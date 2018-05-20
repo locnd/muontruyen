@@ -19,7 +19,7 @@ class ModelCommon extends \yii\db\ActiveRecord
     public function get_data($params = array(), $with = array(), $pagging = array(), $get_one = false,$is_count = false) {
         $cache_key = '';
         if(Yii::$app->params['use_cache']) {
-            $cache_key = make_cache_key('list-'.$this->tableName(),$params,$with,$pagging,$is_count);
+            $cache_key = make_cache_key($get_one.'-'.$this->tableName(),$params,$with,$pagging,$is_count);
             $data=Yii::$app->cache->get($cache_key);
             if($data!==false){
                 return $data;
@@ -73,9 +73,6 @@ class ModelCommon extends \yii\db\ActiveRecord
             }
             if($k == 'release_date') {
                 $tmp_data['release_date'] = date('d-m-Y H:i',strtotime($this->release_date));
-            }
-            if($k == 'name' && !empty($this->vn_name)) {
-                $tmp_data['name'] = $this->vn_name;
             }
         }
         return $tmp_data;

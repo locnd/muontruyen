@@ -50,22 +50,39 @@ class Book extends ModelCommon
     }
 
     public function add_tag($tag_name) {
-        $type = 0;
-        if(strpos($tag_name, 'Author:') !== false) {
-            $tag_name = str_replace('Author:','',$tag_name);
-            $type = 1;
-        }
-        if($tag_name == 'Chưa cập nhật') {
+        $tag_name = strtolower($tag_name);
+        if($tag_name == 'chưa cập nhật') {
             return true;
         }
-        $tag_name = str_replace('Đ','đ',$tag_name);
-        $tag = Tag::find()->where(array('name'=>$tag_name, 'type'=>$type))->one();
+        $type = 0;
+        if(strpos($tag_name, 'author:') !== false) {
+            $tag_name = str_replace('author:','',$tag_name);
+            $type = 1;
+        }
+        $new_name = '';
+        $name_arr = explode(' ', $tag_name);
+        foreach ($name_arr as $tmp_name) {
+            if(!empty($tmp_name)) {
+                if($new_name == '' || $type == 1) {
+                    $new_name .= ucfirst(strtolower($tmp_name)).' ';
+                } else {
+                    $new_name .= strtolower($tmp_name).' ';
+                }
+            }
+        }
+        $tag_name = trim($new_name);
+        $slug = generate_key($tag_name);
+        $tag = Tag::find()->where(array('slug'=>$slug, 'type'=>$type))->one();
         if(empty($tag)) {
             $tag = new Tag();
             $tag->name = $tag_name;
-            $tag->slug = generate_key($tag_name);
+            $tag->slug = $slug;
             $tag->status = Tag::ACTIVE;
             $tag->type = $type;
+            $tag->save();
+        }
+        if($tag->name != $tag_name) {
+            $tag->name = $tag_name;
             $tag->save();
         }
         if(BookTag::find()->where(array('book_id'=>$this->id, 'tag_id'=>$tag->id))->count() > 0) {

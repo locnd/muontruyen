@@ -194,9 +194,9 @@ class Apiv1Controller extends Controller
 
         if(!empty($user->id) && $user->is_admin) {
             $tag_fields = array(
-                'id', 'name', 'vn_name', 'type'
+                'id', 'name', 'type'
             );
-            $tags = Tag::find()->select($tag_fields)->where(array('status' => Tag::ACTIVE))->orderBy(array('stt' => SORT_ASC, 'vn_name' => SORT_ASC, 'id' => SORT_DESC))->all();
+            $tags = Tag::find()->select($tag_fields)->where(array('status' => Tag::ACTIVE))->orderBy(array('stt' => SORT_ASC, 'name' => SORT_ASC, 'id' => SORT_DESC))->all();
             $tag_data = array();
             foreach ($tags as $tag) {
                 $tmp = $tag->to_array(array('id', 'name', 'stt', 'type'));
@@ -670,7 +670,7 @@ class Apiv1Controller extends Controller
     }
     public function actionTags() {
         $type = (int) Yii::$app->request->get('type',0);
-        $fields = array('id', 'name', 'vn_name');
+        $fields = array('id', 'name');
         $tags = Tag::find()->select($fields)->where(array('status'=>Tag::ACTIVE, 'type'=>$type))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
         $data = array();
         foreach ($tags as $tag) {
@@ -1177,7 +1177,7 @@ class Apiv1Controller extends Controller
     public function actionTag() {
         ini_set('memory_limit', '-1');
         $tag_id = (int) Yii::$app->request->get('tag_id',0);
-        $fields = array('id','name','vn_name');
+        $fields = array('id','name', 'type');
         $tag = Tag::find()->select($fields)->where(array(
             'id' => $tag_id, 'status' => Tag::ACTIVE
         ))->one();
@@ -1258,14 +1258,14 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'message' => 'Không có truyện',
-                'tag' => $tag->to_array(array('name')),
+                'tag' => $tag->to_array(array('name', 'type')),
                 'total' => 0
             );
         }
         return array(
             'success' => true,
             'data' => $data,
-            'tag' => $tag->to_array(array('name')),
+            'tag' => $tag->to_array(array('name', 'type')),
             'total' => $total,
             'count_pages' => $total_page
         );
