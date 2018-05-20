@@ -321,6 +321,7 @@ class AjaxController extends Controller
         if($book->image != 'default.jpg') {
             $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/'.$book->image;
             if(file_exists($dir)) {
+                chmod($dir, 0777);
                 unlink($dir);
             }
         }

@@ -431,7 +431,7 @@ class Scraper
             curl_exec($ch);
             curl_close($ch);
             fclose($fp);
-            if(filesize($image_dir) == 0) {
+            if(file_exists($image_dir) && filesize($image_dir) == 0) {
                 unlink($image_dir);
                 $image = 'default.jpg';
                 if($stt > 0) {

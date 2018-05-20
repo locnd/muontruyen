@@ -47,28 +47,30 @@ class CronController extends Controller
 
         $cron_time = time();
 
-        $log = new ScraperLog();
-        $log->type='reload';
-        $log->save();
-
         $scraper = new Scraper();
         $scraper->echo = false;
 
         if($scraper->echo) {
             echo '---------- reload ---------'."\n";
         }
+        $count_books = 0;
         $books = Book::find()->where(array('will_reload' => 1))->all();
         foreach ($books as $book) {
-            $log->number_books++;
-            $log->save();
+            $count_books++;
             $scraper->reload_book($book);
         }
-
+        $count_chapters = 0;
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
         foreach ($chapters as $chapter) {
-            $log->number_chapters++;
-            $log->save();
+            $count_chapters++;
             $scraper->reload_chapter($chapter);
+        }
+        if($count_books > 0 || $count_chapters > 0) {
+            $log = new ScraperLog();
+            $log->type='reload';
+            $log->number_books = $count_books;
+            $log->number_chapters = $count_chapters;
+            $log->save();
         }
 
         if(time() > $cron_time + 1800) {
