@@ -318,13 +318,6 @@ class AjaxController extends Controller
 
         $book->status = Book::INACTIVE;
         $book->will_reload = 0;
-        if($book->image != 'default.jpg') {
-            $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/'.$book->image;
-            if(file_exists($dir)) {
-                chmod($dir, 0777);
-                unlink($dir);
-            }
-        }
         $book->image = 'default.jpg';
         $book->save();
         return array(

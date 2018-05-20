@@ -710,7 +710,12 @@ class Apiv1Controller extends Controller
             $options['Số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
             $options['Số chương'] = Chapter::find()->count();
             $options['Số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
-            $options['Số hình ảnh'] = Image::find()->count();
+            $options['Số ảnh'] = Image::find()->count();
+            $options['Số ảnh bị ẩn'] = Image::find()->where(array('status'=>Image::INACTIVE))->count();
+            $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
+
+            $options['Số báo lỗi'] = Report::find()->count();
+            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
 
             $options['Cron'] = 'stop';
             $setting_model = new Setting();
@@ -718,10 +723,10 @@ class Apiv1Controller extends Controller
                 $options['Cron'] = 'running';
             }
             $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
-            $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
-            $options['Số báo lỗi'] = Report::find()->count();
-            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
+            $last_scraper_log = ScraperLog::find()->limit(1)->orderBy(array('created_at'=>SORT_DESC))->one();
+            $options['Cron start'] = date('H:i:s', strtotime($last_scraper_log->created_at));
+            $options['Cron update'] = date('H:i:s', strtotime($last_scraper_log->updated_at));
         }
         return array(
             'success' => true,
