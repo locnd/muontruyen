@@ -1859,3 +1859,21 @@ function get_facebook_profile(){
         }
     );
 }
+
+function change_cron() {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    send_api('GET', '/changecron', {}, function(res) {
+        if (res.success) {
+            window.location.reload();
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}

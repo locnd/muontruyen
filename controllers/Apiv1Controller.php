@@ -717,6 +717,7 @@ class Apiv1Controller extends Controller
             if($setting_model->get_setting('cron_running') != '') {
                 $options['Cron'] = 'running';
             }
+            $options['Cron'] .= '<input style="float: right;margin:-3px 0 0 0;" class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
             $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
             $options['Số báo lỗi'] = Report::find()->count();
@@ -732,6 +733,30 @@ class Apiv1Controller extends Controller
                 'options' => $user_options
             ),
             'options' => $options
+        );
+    }
+    public function actionChangecron() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        if(empty($user->is_admin)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có quyền thực hiện'
+            );
+        }
+        $setting_model = new Setting();
+        if($setting_model->get_setting('cron_running') != '') {
+            $setting_model->set_setting('cron_running', '');
+        } else {
+            $setting_model->set_setting('cron_running', 'yes');
+        }
+        return array(
+            'success' => true
         );
     }
     public function actionReport() {
