@@ -45,7 +45,7 @@ class DailyController extends Controller
         if($page == '') {
             $page = 2;
         } else {
-            $page = (int)$page + 1;
+            $page = (int) $page;
         }
         if($page > 20) {
             return ExitCode::OK;
@@ -64,7 +64,7 @@ class DailyController extends Controller
             $scraper->parse_server($server, $page, $page, $log, true);
         }
         $setting_model->set_setting('cron_running', '');
-        $setting_model->set_setting('daily_page', $page);
+        $setting_model->set_setting('daily_page', $page+1);
         return ExitCode::OK;
     }
 }
