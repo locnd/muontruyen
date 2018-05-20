@@ -154,7 +154,7 @@ function display_a_book(book) {
         html += '<td class="label-td">Tác giả</td>';
         html += '<td class="value-td">';
         for(var i=0;i<book.authors.length;i++) {
-            html += '<a href="author.html?id='+book.authors[i].id+'">'+book.authors[i].name+'</a> - ';
+            html += '<a href="tag.html?id='+book.authors[i].id+'">'+book.authors[i].name+'</a> - ';
         }
         html = html.slice(0,-3);
         html += '</td>';
@@ -192,9 +192,9 @@ function display_a_book(book) {
     $('#list-books').append(html);
 }
 
-function display_a_tag(tag, type) {
+function display_a_tag(tag) {
     var html='<div class="a-tag">';
-    html += '<a href="'+type+'.html?id='+tag.id+'">';
+    html += '<a href="tag.html?id='+tag.id+'">';
     var tag_name = tag.name;
     html += '<img src="assets/img/tag.png">'+tag_name + ' ('+tag.count+')';
     html += '</a>';
@@ -298,7 +298,7 @@ function display_book_info(book, is_following, tags) {
     for (var i = 0; i < tags.length; i++) {
         if (tags[i].is_checked) {
             if(tags[i].type == 1) {
-                author_html += '<a href="author.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
+                author_html += '<a href="tag.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
             } else {
                 tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
             }
@@ -748,17 +748,17 @@ function show_follow(tab, page, is_first) {
             $('#list_follows').html(html);
             if(groups.length == 0) {
                 $('#list_groups').hide();
-                $('#list_follows').css('width','100%');
+                $('.dl-content').css('width','100%');
                 return true;
             }
             if(tab == 0) {
-                show_unread(books.length, true);
                 if (books.length > 0) {
+                    show_unread(books.length, true);
                     $('#group0').show();
                 } else {
                     $('#group0').hide();
                     if(page > 1) {
-                        show_follow(0, (page - 1), false);
+                        show_follow(0, 1, false);
                         return true;
                     }
                     if (groups.length > 0) {
@@ -1000,6 +1000,7 @@ function show_profile() {
             html += '</div>';
             html += '</div>';
             $('#profile').html(html);
+            $('#profile').show();
             $.each(res.data.options, function( index, value ) {
                 var admin_html = '';
                 admin_html += '<div class="a-profile">';
@@ -1064,38 +1065,25 @@ function change_password() {
     });
 }
 
-function show_tags() {
-    send_api('GET', '/tags', {type:0}, function(res) {
+function show_tags(type) {
+    send_api('GET', '/tags', {type:type}, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Danh sách <b>thể loại</b> ('+res.total+' kết quả)');
+            if(type == 0) {
+                $('h3.page-title').html('Danh sách <b>thể loại</b> ('+res.total+' kết quả)');
+            } else {
+                $('h3.page-title').html('Danh sách <b>tác giả</b> ('+res.total+' kết quả)');
+            }
             $('h3.page-title').show();
-            show_tags_list(res, 'tag');
+            show_tags_list(res);
         } else {
             dl_alert('danger', res.message, false);
         }
     });
 }
-function show_authors() {
-    send_api('GET', '/tags', {type:1}, function(res) {
-        if (res.success) {
-            $('h3.page-title').html('Danh sách <b>tác giả</b> ('+res.total+' kết quả)');
-            $('h3.page-title').show();
-            show_tags_list(res, 'author');
-        } else {
-            dl_alert('danger', res.message, false);
-        }
-    });
-}
-function show_tags_list(res,type) {
+function show_tags_list(res) {
     if(res.total > 0) {
         for (var i = 0; i < res.data.length; i++) {
-            if(type == 'tag' && res.data[i].type == 1) {
-                continue;
-            }
-            if(type == 'author' && res.data[i].type == 0) {
-                continue;
-            }
-            display_a_tag(res.data[i], type);
+            display_a_tag(res.data[i]);
         }
     }
     $('#list-books .a-book').show();
@@ -1270,13 +1258,18 @@ function show_tag(tag_id, page, is_full) {
     if(is_full == 1) {
         $('#check_full_book').attr('checked','checked');
     }
-    $('#check_full_book').attr('onchange','author_again('+tag_id+')');
+    $('#check_full_book').attr('onchange','tag_again('+tag_id+')');
     if(tag_id != 50) {
         $('#full_book').show();
     }
     send_api('GET', '/tag', params, function(res) {
         if (res.success) {
-            $('h3.page-title').html('Thể loại "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
+            if(res.tag.type == 0) {
+                $('h3.page-title').html('Thể loại "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
+            }
+            if(res.tag.type == 1) {
+                $('h3.page-title').html('Tác giả "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
+            }
             $('h3.page-title').show();
             show_tag_result(res, page, 'tag');
         } else {
@@ -1284,33 +1277,12 @@ function show_tag(tag_id, page, is_full) {
         }
     });
 }
-function show_author(tag_id, page,is_full) {
-    var params = {
-        tag_id: tag_id,
-        page: page,
-        is_full: is_full
-    };
-    if(is_full == 1) {
-        $('#check_full_book').attr('checked','checked');
-    }
-    $('#check_full_book').attr('onchange','author_again('+tag_id+')');
-    $('#full_book').show();
-    send_api('GET', '/tag', params, function(res) {
-        if (res.success) {
-            $('h3.page-title').html('Tác giả "<b>'+res.tag.name+'</b>" ('+res.total+' kết quả)');
-            $('h3.page-title').show();
-            show_tag_result(res, page, 'author');
-        } else {
-            dl_alert('danger', res.message, false);
-        }
-    });
-}
-function author_again(tag_id) {
+function tag_again(tag_id) {
     var check_full = 0;
     if($('#check_full_book').is(":checked")) {
         check_full = 1;
     }
-    window.location.href = 'author.html?id='+tag_id+'&is_full='+check_full;
+    window.location.href = 'tag.html?id='+tag_id+'&is_full='+check_full;
 }
 
 function show_tag_result(res, page, type) {
@@ -1471,8 +1443,7 @@ function save_offline_book_images() {
 
 function loading_bar(running_image, count_image) {
     var tyle = running_image/count_image;
-    var btn_w = parseInt($('#save-btn').width());
-    var width = tyle * btn_w;
+    var width = tyle * 176;
     $('span.saving-bar').css('width', width+'px');
 }
 function show_offline() {
@@ -1555,7 +1526,7 @@ function show_offline_book(id) {
                 html += '<img src="'+book.image+'">';
                 html += '</div>';
                 html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i>&nbsp; Xem Online</a>';
-                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá xem Offline</a>';
+                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá Offline</a>';
                 html += '<div class="clear10"></div>';
                 html += '<div class="book-description">'+book.description+'</div>';
                 html += '</div>';

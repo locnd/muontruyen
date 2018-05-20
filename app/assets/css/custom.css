@@ -731,3 +731,6 @@ div#list-books .a-book {
     float: left;
     padding: 20px;
 }
+#profile {
+    display:none;
+}
