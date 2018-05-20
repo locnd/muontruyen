@@ -717,7 +717,7 @@ class Apiv1Controller extends Controller
             if($setting_model->get_setting('cron_running') != '') {
                 $options['Cron'] = 'running';
             }
-            $options['Cron'] .= '<input style="float: right;margin:-3px 0 0 0;" class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
+            $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
             $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
             $options['Số báo lỗi'] = Report::find()->count();

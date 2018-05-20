@@ -752,8 +752,8 @@ function show_follow(tab, page, is_first) {
                 return true;
             }
             if(tab == 0) {
+                show_unread(books.length, true);
                 if (books.length > 0) {
-                    show_unread(books.length, true);
                     $('#group0').show();
                 } else {
                     $('#group0').hide();
