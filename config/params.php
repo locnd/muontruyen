@@ -27,7 +27,10 @@ function getParam($key, $default='', $method='get') {
 }
 
 function show_number($num, $dec=0) {
-    return number_format($num, $dec, ',','.');
+    if(is_numeric($num)) {
+        return number_format($num, $dec, ',','.');
+    }
+    return $num;
 }
 
 function get_limit($key='backend_limit') {

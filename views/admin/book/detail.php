@@ -122,6 +122,7 @@
             <a onclick="sort_chapters()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Sort'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-sort"></i></a>
             <a onclick="reset_chapters_name()" style="padding: 3px 7px;float: right;margin-right: 10px;" href="javascript:;" title="<?php echo 'Reset'; ?>" class="btn btn-primary"><i class="glyphicon glyphicon-refresh"></i></a>
             <input placeholder="remove string" type="text" class="form-control" id="tmp_name" style="width:200px;float:right;margin-right:10px;">
+            <div style="clear:both;height:0px"></div>
             <div class="col-sm-12">
                 <table class="table table-striped table-bordered data-table admin-table">
                     <thead>

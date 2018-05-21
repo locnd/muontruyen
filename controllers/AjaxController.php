@@ -318,7 +318,6 @@ class AjaxController extends Controller
 
         $book->status = Book::INACTIVE;
         $book->will_reload = 0;
-        $book->image = 'default.jpg';
         $book->save();
         return array(
             'success' => true

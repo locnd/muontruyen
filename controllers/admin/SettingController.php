@@ -7,7 +7,7 @@ use app\models\ScraperLog;
 use app\models\Setting;
 use Yii;
 
-class CronController extends Controller
+class SettingController extends Controller
 {
     public $layout = 'admin';
 
@@ -25,12 +25,12 @@ class CronController extends Controller
     }
     
     public function actionIndex() {
-        $this->view->params['page_id'] = 'cron';
+        $this->view->params['page_id'] = 'setting';
 
         $settings = Setting::find()->all();
-        $logs = ScraperLog::find()->limit(50)->orderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC])->all();
+        $logs = ScraperLog::find()->limit(10)->orderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC])->all();
 
-        return $this->render('/admin/cron/index', array(
+        return $this->render('/admin/setting/index', array(
             'settings' => $settings,
             'logs' => $logs,
         ));

@@ -1,7 +1,7 @@
 
 <ol class="breadcrumb dl-breadcrumb">
     <li><a href="/admin"><i class="fa fa-home"></i> <?php echo 'Dashboard';?></a></li>
-    <li class="active"><?php echo 'List';?> <?php echo 'Cron';?></li>
+    <li class="active"><?php echo 'List';?> <?php echo 'Setting';?></li>
 </ol>
 <input id="crsf_token" type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
 <div class="row">

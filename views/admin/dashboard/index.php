@@ -8,17 +8,11 @@
             <div class="panel-body border-area">
                 <h3>Thông tin chung</h3>
                 <div class="clear5"></div>
-                <label class="col-md-3">Số thành viên</label>
-                <div class="col-md-9"><?php echo show_number($count_users); ?></div>
-                <div class="clear5"></div>
-                <label class="col-md-3">Số truyện</label>
-                <div class="col-md-9"><?php echo show_number($count_books); ?></div>
-                <div class="clear5"></div>
-                <label class="col-md-3">Số chương</label>
-                <div class="col-md-9"><?php echo show_number($count_chapters); ?></div>
-                <div class="clear5"></div>
-                <label class="col-md-3">Số hình ảnh</label>
-                <div class="col-md-9"><?php echo show_number($count_images); ?></div>
+                <?php foreach ($options as $k => $v) { ?>
+                    <label class="col-md-3"><?php echo $k; ?></label>
+                    <div class="col-md-9"><?php echo show_number($v); ?></div>
+                    <div class="clear5"></div>
+                <?php } ?>
             </div>
             <div class="panel-body border-area">
                 <h3>Gửi tin nhắn</h3>

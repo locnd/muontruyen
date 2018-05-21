@@ -115,14 +115,18 @@ class CronController extends Controller
         $log = new ScraperLog();
         $log->type='daily';
         $log->save();
-        foreach ($servers as $server) {
-            $log->number_servers++;
-            $log->save();
-            $scraper->parse_server($server, $page, $page, $log, true);
+
+        while(time() < $cron_time + 5400) {
+            $page++;
+            foreach ($servers as $server) {
+                $log->number_servers++;
+                $log->save();
+                $scraper->parse_server($server, $page, $page, $log, true);
+            }
         }
 
         $setting_model->set_setting('cron_running', '');
-        $setting_model->set_setting('daily_page', $page+1);
+        $setting_model->set_setting('daily_page', $page);
         return ExitCode::OK;
     }
 }

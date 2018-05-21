@@ -7,7 +7,10 @@ use yii\web\Controller;
 use app\models\User;
 use app\models\Book;
 use app\models\Chapter;
+use app\models\Setting;
 use app\models\Image;
+use app\models\Report;
+use app\models\ScraperLog;
 use Yii;
 
 class DashboardController extends Controller
@@ -25,13 +28,29 @@ class DashboardController extends Controller
             return $this->redirect('/admin/login');
         }
 
-        $data = array();
-        $data['count_users'] = User::find()->count();
-        $data['count_books'] = Book::find()->count();
-        $data['count_chapters'] = Chapter::find()->count();
-        $data['count_images'] = Image::find()->count();
+        $options = array();
+        $options['Số thành viên'] = User::find()->count();
+        $options['Số truyện'] = Book::find()->count();
+        $options['Số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
+        $options['Số chương'] = Chapter::find()->count();
+        $options['Số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
+        $options['Số ảnh'] = Image::find()->count();
+        $options['Số ảnh bị ẩn'] = Image::find()->where(array('status'=>Image::INACTIVE))->count();
+        $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
-        $data['users'] = User::find()->all();
+        $options['Số báo lỗi'] = Report::find()->count();
+        $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
+
+        $options['Cron'] = 'stop';
+        $setting_model = new Setting();
+        if($setting_model->get_setting('cron_running') != '') {
+            $options['Cron'] = 'running';
+        }
+
+        $last_scraper_log = ScraperLog::find()->limit(1)->orderBy(array('created_at'=>SORT_DESC))->one();
+        $options['Cron start'] = date('H:i:s', strtotime($last_scraper_log->created_at));
+        $options['Cron update'] = date('H:i:s', strtotime($last_scraper_log->updated_at));
+
         if (Yii::$app->request->post()){
             $user_id = Yii::$app->request->post('user_id');
             $message = Yii::$app->request->post('message');
@@ -41,7 +60,10 @@ class DashboardController extends Controller
             }
         }
 
-        return $this->render('index', $data);
+        return $this->render('index', array(
+            'options' => $options,
+            'users' => User::find()->all()
+        ));
     }
 
     public function actionLogin() {
