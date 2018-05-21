@@ -53,24 +53,21 @@ class CronController extends Controller
         if($scraper->echo) {
             echo '---------- reload ---------'."\n";
         }
-        $count_books = 0;
+        $log = new ScraperLog();
+        $log->type='reload';
+        $log->number_books = 0;
         $books = Book::find()->where(array('will_reload' => 1))->all();
         foreach ($books as $book) {
-            $count_books++;
+            $log->number_books++;
+            $log->save();
             $scraper->reload_book($book);
         }
-        $count_chapters = 0;
+        $log->number_chapters = 0;
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
         foreach ($chapters as $chapter) {
-            $count_chapters++;
-            $scraper->reload_chapter($chapter);
-        }
-        if($count_books > 0 || $count_chapters > 0) {
-            $log = new ScraperLog();
-            $log->type='reload';
-            $log->number_books = $count_books;
-            $log->number_chapters = $count_chapters;
+            $log->number_chapters++;
             $log->save();
+            $scraper->reload_chapter($chapter);
         }
 
         if(time() > $cron_time + 1800) {
@@ -84,8 +81,8 @@ class CronController extends Controller
 
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
+        $log->number_servers = 0;
         $log->type='scraper';
-        $log->save();
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();
@@ -114,10 +111,11 @@ class CronController extends Controller
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='daily';
+        $log->number_servers = 0;
         $log->save();
-
         while(time() < $cron_time + 5400) {
             $page++;
+            if($page > 20) { break; }
             foreach ($servers as $server) {
                 $scraper->parse_server($server, $page, $page, $log, true);
             }

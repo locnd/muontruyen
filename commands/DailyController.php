@@ -47,12 +47,13 @@ class DailyController extends Controller
         } else {
             $page = (int) $page;
         }
+        $page++;
         if($page > 20) {
+            $setting_model->set_setting('cron_running', '');
             return ExitCode::OK;
         }
 
         $scraper = new Scraper();
-        $scraper->echo = false;
 
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
@@ -64,7 +65,7 @@ class DailyController extends Controller
             $scraper->parse_server($server, $page, $page, $log, true);
         }
         $setting_model->set_setting('cron_running', '');
-        $setting_model->set_setting('daily_page', $page+1);
+        $setting_model->set_setting('daily_page', $page);
         return ExitCode::OK;
     }
 }
