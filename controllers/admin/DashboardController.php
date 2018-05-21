@@ -43,11 +43,10 @@ class DashboardController extends Controller
 
         $options['Cron'] = 'stop';
         $setting_model = new Setting();
-        if($setting_model->get_setting('cron_running') != '') {
-            $options['Cron'] = 'running';
-        }
-
         $last_scraper_log = ScraperLog::find()->limit(1)->orderBy(array('created_at'=>SORT_DESC))->one();
+        if($setting_model->get_setting('cron_running') != '') {
+            $options['Cron'] = 'running - '.$last_scraper_log->type;
+        }
         $options['Cron start'] = date('H:i:s', strtotime($last_scraper_log->created_at));
         $options['Cron update'] = date('H:i:s', strtotime($last_scraper_log->updated_at));
 

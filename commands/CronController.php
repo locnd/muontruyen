@@ -119,11 +119,11 @@ class CronController extends Controller
         while(time() < $cron_time + 5400) {
             $page++;
             foreach ($servers as $server) {
-                $log->number_servers++;
-                $log->save();
                 $scraper->parse_server($server, $page, $page, $log, true);
             }
         }
+        $log->updated_at = date('Y-m-d H:i:s');
+        $log->save();
 
         $setting_model->set_setting('cron_running', '');
         $setting_model->set_setting('daily_page', $page);

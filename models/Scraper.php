@@ -56,9 +56,12 @@ class Scraper
             if($is_daily && $check_book > 0) {
                 continue;
             }
-            $number_chapters = $this->parse_book($server, $url);
             if(!empty($log)) {
                 $log->number_books++;
+                $log->save();
+            }
+            $number_chapters = $this->parse_book($server, $url);
+            if(!empty($log)) {
                 $log->number_chapters += $number_chapters;
                 $log->save();
             }
