@@ -504,14 +504,9 @@ class Apiv1Controller extends Controller
         $follow->save();
         $follow->book->count_follows = $follow->book->count_follows+1;
         $follow->book->save();
-        $groups = array();
-        foreach ($user->groups as $group) {
-            if ($group->status == Group::INACTIVE) {
-                continue;
-            }
-            $tmp_group = $group->to_array(array('id', 'name'));
-            $tmp_group['name'] .= ' (' . count($group->follows) . ')';
-            $groups[] = $tmp_group;
+        $groups = Group::find()->select(array('id', 'name'))->where(array('user_id'=>$user->id,'status'=>Group::ACTIVE))->all();
+        foreach ($groups as $i=>$group) {
+            $groups[$i]['name'] .= ' (' . count($group->follows) . ')';
         }
         return array(
             'success' => true,
