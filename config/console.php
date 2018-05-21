@@ -2,7 +2,7 @@
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
-
+$functions = require __DIR__ . '/functions.php';
 $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
