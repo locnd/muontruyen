@@ -155,7 +155,9 @@ class Apiv1Controller extends Controller
         if(!empty($user->id)) {
             foreach ($user->groups as $group) {
                 if($group->status == Group::INACTIVE) { continue; }
-                $groups[] = $group->to_array(array('id', 'name'));
+                $tmp_group = $group->to_array(array('id', 'name'));
+                $tmp_group['name'] .= ' ('.count($group->follows).')';
+                $groups[] = $tmp_group;
             }
             $books_ids = array();
             foreach ($user->follows as $follow) {
@@ -255,7 +257,9 @@ class Apiv1Controller extends Controller
         if(!empty($user->id)) {
             foreach ($user->groups as $group) {
                 if($group->status == Group::INACTIVE) { continue; }
-                $groups[] = $group->to_array(array('id', 'name'));
+                $tmp_group = $group->to_array(array('id', 'name'));
+                $tmp_group['name'] .= ' ('.count($group->follows).')';
+                $groups[] = $tmp_group;
             }
             $follow = Follow::find()->where(array('book_id'=>$book->id,'user_id'=>$user->id))->one();
             if(!empty($follow)) {
@@ -500,11 +504,19 @@ class Apiv1Controller extends Controller
         $follow->save();
         $follow->book->count_follows = $follow->book->count_follows+1;
         $follow->book->save();
-
+        $groups = array();
+        foreach ($user->groups as $group) {
+            if ($group->status == Group::INACTIVE) {
+                continue;
+            }
+            $tmp_group = $group->to_array(array('id', 'name'));
+            $tmp_group['name'] .= ' (' . count($group->follows) . ')';
+            $groups[] = $tmp_group;
+        }
         return array(
             'success' => true,
             'data' => true,
-            'groups' => $user->groups
+            'groups' => $groups
         );
     }
     public function actionFollow() {
