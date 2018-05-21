@@ -49,7 +49,6 @@ class ReloadController extends Controller
         $log->save();
 
         $scraper = new Scraper();
-        $scraper->echo = false;
 
         $books = Book::find()->where(array('will_reload' => 1))->all();
         foreach ($books as $book) {

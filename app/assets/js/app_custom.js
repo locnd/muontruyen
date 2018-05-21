@@ -134,10 +134,12 @@ function display_a_book(book) {
     html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
     html += '<td>';
     html += '</tr>';
-    html += '<tr>';
-    html += '<td class="label-td">Chương mới</td>';
-    html += '<td class="value-td"><a href="chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
-    html += '</tr>';
+    if(book.last_chapter_id > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Chương mới</td>';
+        html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        html += '</tr>';
+    }
     if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
         html += '<tr>';
         html += '<td class="label-td">Thể loại</td>';
@@ -730,11 +732,12 @@ function show_follow(tab, page, is_first) {
                     html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
                     html += '<td>';
                     html += '</tr>';
-                    html += '<tr>';
-                    html += '<td class="label-td">Chương mới</td>';
-                    html += '<td class="value-td"><a href="chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
-                    html += '</tr>';
-
+                    if(book.last_chapter_id > 0) {
+                        html += '<tr>';
+                        html += '<td class="label-td">Chương mới</td>';
+                        html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+                        html += '</tr>';
+                    }
                     html += '<tr>';
                     html += '<td class="label-td">Cập nhật</td>';
                     html += '<td class="value-td">'+book.release_date+'</td>';
@@ -1478,10 +1481,12 @@ function display_offline_book(book) {
     html += '<div class="a-title" style="padding:0"><a href="offline_book.html?id='+book.id+'">'+book.name+'</a></div>';
     html += '<td>';
     html += '</tr>';
-    html += '<tr>';
-    html += '<td class="label-td">Chương mới</td>';
-    html += '<td class="value-td"><a href="offline_chapter.html?id='+book.last_chapter_id+'">'+book.last_chapter_name+'</a></td>';
-    html += '</tr>';
+    if(book.last_chapter_id > 0) {
+        html += '<tr>';
+        html += '<td class="label-td">Chương mới</td>';
+        html += '<td class="value-td"><a href="offline_chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        html += '</tr>';
+    }
     if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
         html += '<tr>';
         html += '<td class="label-td">Thể loại</td>';

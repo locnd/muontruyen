@@ -108,7 +108,6 @@ class CronController extends Controller
             $setting_model->set_setting('cron_running', '');
             return ExitCode::OK;
         }
-        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='daily';
         $log->number_servers = 0;

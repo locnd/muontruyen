@@ -43,7 +43,6 @@ class ScraperController extends Controller
         $setting_model->set_setting('cron_running', 'yes');
 
         $scraper = new Scraper();
-        $scraper->echo = false;
 
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();

@@ -101,6 +101,9 @@ class Apiv1Controller extends Controller
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
+            } else {
+                $tmp['last_chapter_id'] = 0;
+                $tmp['last_chapter_name'] = '';
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -558,6 +561,9 @@ class Apiv1Controller extends Controller
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
+            } else {
+                $tmp['last_chapter_id'] = 0;
+                $tmp['last_chapter_name'] = '';
             }
             $data[] = $tmp;
         }
@@ -1179,6 +1185,9 @@ class Apiv1Controller extends Controller
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
+            } else {
+                $tmp['last_chapter_id'] = 0;
+                $tmp['last_chapter_name'] = '';
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -1274,6 +1283,9 @@ class Apiv1Controller extends Controller
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
+            } else {
+                $tmp['last_chapter_id'] = 0;
+                $tmp['last_chapter_name'] = '';
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -1333,6 +1345,9 @@ class Apiv1Controller extends Controller
         if(!empty($book->lastChapter)) {
             $book_data['last_chapter_id'] = $book->lastChapter->id;
             $book_data['last_chapter_name'] = $book->lastChapter->name;
+        } else {
+            $book_data['last_chapter_id'] = 0;
+            $book_data['last_chapter_name'] = '';
         }
         $book_data['tags'] = array();
         $book_data['authors'] = array();
@@ -1444,6 +1459,9 @@ class Apiv1Controller extends Controller
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
+            } else {
+                $tmp['last_chapter_id'] = 0;
+                $tmp['last_chapter_name'] = '';
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
