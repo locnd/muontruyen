@@ -32,7 +32,6 @@ class DailyController extends Controller
      */
     public function actionIndex()
     {
-        ini_set('max_execution_time', 24*60*60);
         ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
@@ -43,7 +42,7 @@ class DailyController extends Controller
 
         $page = $setting_model->get_setting('daily_page');
         if($page == '') {
-            $page = 2;
+            $page = 1;
         } else {
             $page = (int) $page;
         }

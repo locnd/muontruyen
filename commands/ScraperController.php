@@ -31,9 +31,8 @@ class ScraperController extends Controller
      * @param string $message the message to be echoed.
      * @return int Exit code
      */
-    public function actionIndex($page, $to_page)
+    public function actionIndex($page, $to_page, $skip_existed)
     {
-        ini_set('max_execution_time', 24*60*60);
         ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
@@ -51,7 +50,7 @@ class ScraperController extends Controller
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();
-            $scraper->parse_server($server, $page, $to_page, $log);
+            $scraper->parse_server($server, $page, $to_page, $log, $skip_existed);
         }
         $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;

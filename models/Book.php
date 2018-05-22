@@ -95,11 +95,8 @@ class Book extends ModelCommon
     }
 
     public function get_image() {
-        if(empty($this->image)) {
-            $this->image = 'default.jpg';
-        }
         $image_dir = \Yii::$app->params['app'].'/web/uploads/books/'.$this->slug;
-        if($this->image != 'default.jpg' && !empty($this->slug)
+        if(!empty(empty($this->image)) && $this->image != 'default.jpg' && !empty($this->slug)
             && file_exists($image_dir.'/'.$this->image)
             && filesize($image_dir.'/'.$this->image) > 0 ) {
             return \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/' . $this->slug . '/' . $this->image;

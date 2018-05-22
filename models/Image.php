@@ -21,7 +21,7 @@ class Image extends ModelCommon
             if(\Yii::$app->params['use_image_source']) {
                 $image = $this->image_source;
             } else {
-                $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->image;
+                $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/error.jpg';
             }
         } else {
             $image = \Yii::$app->urlManager->createAbsoluteUrl(['/']).'uploads/books/'.$this->chapter->book->slug.'/chap'.$this->chapter->id.'/'.$this->image;

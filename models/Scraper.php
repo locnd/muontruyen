@@ -96,12 +96,11 @@ class Scraper
                 $book->save();
                 foreach ($book->follows as $follow) {
                     $follow->status = Follow::UNREAD;
-                    $follow->updated_at = date('Y-m-d H:i:s');
                     $follow->save();
                     $this->send_push_notification($follow->user_id);
                 }
             }
-            if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
+            if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
                 $book->will_reload = 1;
                 $book->status = Book::INACTIVE;
                 $book->save();
@@ -195,7 +194,7 @@ class Scraper
             $book->release_date = date('Y-m-d H:i:s');
             $book->save();
         }
-        if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
+        if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
             $book->will_reload = 1;
             $book->status = Book::INACTIVE;
             $book->save();
