@@ -186,6 +186,12 @@ class AjaxController extends Controller
                 'message' => 'Item not found'
             );
         }
+        if($type == 'chapter') {
+            Yii::$app->db->createCommand("
+                DELETE FROM dl_images 
+                WHERE chapter_id = '$item->id'
+            ")->execute();
+        }
         $item->delete();
         return array(
             'success' => true

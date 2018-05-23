@@ -117,13 +117,12 @@ class CronController extends Controller
         $scraper->skip_book_existed = true;
         $scraper->skip_chapter_existed = true;
         $scraper->log = $log;
-        $scraper->is_daily = true;
 
         $page++;
         foreach ($servers as $server) {
             $scraper->log->number_books++;
             $scraper->log->save();
-            $scraper->parse_server($server, $page, $page);
+            $scraper->parse_server($server, $page, $page, true);
         }
 
         $log->updated_at = date('Y-m-d H:i:s');

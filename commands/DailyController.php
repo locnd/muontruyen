@@ -60,11 +60,10 @@ class DailyController extends Controller
         $log->type='daily';
         $log->save();
         $scraper->log = $log;
-        $scraper->is_daily = true;
         foreach ($servers as $server) {
             $scraper->log->number_servers++;
             $scraper->log->save();
-            $scraper->parse_server($server, $page, $page);
+            $scraper->parse_server($server, $page, $page, true);
         }
         $setting_model->set_setting('cron_running', '');
         $setting_model->set_setting('daily_page', $page);

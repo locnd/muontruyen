@@ -12,15 +12,14 @@ class Scraper
     public $echo = true;
     public $skip_book_existed = false;
     public $skip_chapter_existed = true;
-    public $is_daily = false;
     public $log = array();
 
-    public function parse_server($server, $page=1, $to_page=1) {
+    public function parse_server($server, $page=1, $to_page=1, $is_daily=false) {
         $url = $server->url;
         if(!empty($server->list_items_url)) {
             $url = $server->list_items_url;
         }
-        if($this->is_daily && !empty($server->daily_url)) {
+        if($is_daily && !empty($server->daily_url)) {
             // $url = $server->daily_url;
         }
         $page_urls = array();
@@ -158,7 +157,8 @@ class Scraper
 
                 $description = $this->get_text($book_html_base->find($server->description_key)[0]->plaintext);
 
-                $book->status = Book::ACTIVE;
+                $book->status = Book::INACTIVE;
+                $book->will_reload = 1;
                 $book->server_id = $server->id;
                 $book->url = $book_urls[$stt];
                 $book->image_source = $image_src;
@@ -224,6 +224,7 @@ class Scraper
                     $db_chapter->url = $chapter_url;
                     $db_chapter->name = ucfirst($name);
                     $db_chapter->status = Chapter::INACTIVE;
+                    $db_chapter->will_reload = 1;
                     $db_chapter->save();
                 }
                 $db_chapters[$num] = $db_chapter;
@@ -231,7 +232,7 @@ class Scraper
             }
             $book_html_base->clear();
             unset($book_html_base);
-            
+
             if(!empty($this->log)) {
                 $this->log->number_chapters = $this->log->number_chapters + count($db_chapters);
                 $this->log->save();
