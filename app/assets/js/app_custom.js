@@ -634,7 +634,7 @@ function show_chapter(id) {
             html+='<div class="clear10"></div>';
             html+='<div id="report">';
             if(res.is_bookmark) {
-                html+='<a onclick="bookmark()" id="unbookmark-btn" class="btn-unbookmark-chap"><i class="fa fa-star"></i> Bỏ đánh dấu</a>';
+                html+='<a onclick="bookmark()" id="bookmark-btn" class="btn-unbookmark-chap"><i class="fa fa-star"></i> Bỏ đánh dấu</a>';
             } else {
                 html+='<a onclick="bookmark()" id="bookmark-btn" class="btn-bookmark-chap"><i class="fa fa-star"></i> Đánh dấu</a>';
             }
@@ -740,15 +740,14 @@ function show_follow(tab, page, is_first) {
                     }
                     html += '<tr>';
                     html += '<td class="label-td">Cập nhật</td>';
-                    html += '<td class="value-td">'+book.release_date+'</td>';
+                    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
                     html += '</tr>';
                     html += '</table>';
                     html += '</div>';
-                    html += '<div class="clear5"></div>';
+                    html += '<div class="clear0"></div>';
                     html += '</div>';
                 }
             }
-            $('#list_follows').html(html);
             if(groups.length == 0) {
                 $('#list_groups').hide();
                 $('.dl-content').css('width','100%');
@@ -770,6 +769,7 @@ function show_follow(tab, page, is_first) {
                     }
                 }
             }
+            $('#list_follows').html(html);
             $('.a-book.active').removeClass('active');
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
@@ -1511,7 +1511,7 @@ function display_offline_book(book) {
     }
     html += '<tr>';
     html += '<td class="label-td">Cập nhật</td>';
-    html += '<td class="value-td">'+book.release_date+'</td>';
+    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
     html += '</tr>';
     html += '</table>';
     html += '</div>';
@@ -1542,7 +1542,7 @@ function show_offline_book(id) {
                     tag_html += '<a href="javascript:;">' + book.tags[i] + '</a> - ';
                 }
                 if(tag_html == '') {
-                    html += '<div style="margin-bottom:10px">* Truyện chưa phân loại</div>';
+                    html += '<div>* Truyện chưa phân loại</div>';
                 } else {
                     html += '<div style="float:left;margin-right:10px">Thể loại: </div>';
                     html += tag_html.slice(0, -3);

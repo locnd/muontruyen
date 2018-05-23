@@ -1357,9 +1357,9 @@ class Apiv1Controller extends Controller
                 continue;
             }
             if($tmp_tag->type == 0) {
-                $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
+                $book_data['tags'][] = $tmp_tag->to_array(array('id', 'name'));
             } else {
-                $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
+                $book_data['authors'][] = $tmp_tag->to_array(array('id', 'name'));
             }
         }
         $chapters = array();

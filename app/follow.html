@@ -25,19 +25,14 @@
     <!-- ================== END BASE JS ================== -->
     <script src="assets/js/app_config.js"></script>
     <script>
+        if(!!window.performance && window.performance.navigation.type === 2) {
+            window.location.reload();
+        }
         if (typeof (Storage) !== "undefined") {
             checkLogin(1);
         } else {
             dl_alert('danger', 'Bộ nhớ không hoạt động', false);
         }
-        window.addEventListener( "pageshow", function ( event ) {
-            var historyTraversal = event.persisted ||
-                ( typeof window.performance != "undefined" &&
-                    window.performance.navigation.type === 2 );
-            if ( historyTraversal ) {
-                window.location.reload();
-            }
-        });
     </script>
     <script src="cordova.js"></script>
 </head>

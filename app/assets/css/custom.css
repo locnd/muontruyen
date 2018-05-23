@@ -729,7 +729,7 @@ td.value-td {
 div#list-books .a-book {
     width: 100%;
     float: left;
-    padding: 20px;
+    padding: 10px 10px 0 10px;
 }
 #profile {
     display:none;
