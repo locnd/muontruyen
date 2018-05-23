@@ -31,26 +31,24 @@ class ScraperController extends Controller
      * @param string $message the message to be echoed.
      * @return int Exit code
      */
-    public function actionIndex($page, $to_page, $skip_existed)
+    public function actionIndex($page, $to_page)
     {
         ini_set('memory_limit', '-1');
-
         $setting_model = new Setting();
         if($setting_model->get_setting('cron_running') != '') {
             return ExitCode::OK;
         }
         $setting_model->set_setting('cron_running', 'yes');
-
         $scraper = new Scraper();
-
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='scraper';
         $log->save();
+        $scraper->log = $log;
         foreach ($servers as $server) {
             $log->number_servers++;
             $log->save();
-            $scraper->parse_server($server, $page, $to_page, $log, $skip_existed);
+            $scraper->parse_server($server, $page, $to_page);
         }
         $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;

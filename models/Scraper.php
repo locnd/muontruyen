@@ -10,88 +10,227 @@ class Scraper
     public $via_proxy = true;
     public $proxyAuth = 'galvin24x7:egor99';
     public $echo = true;
+    public $skip_book_existed = true;
+    public $skip_chapter_existed = true;
+    public $is_daily = false;
+    public $log = array();
 
-    public function parse_server($server, $page=1, $to_page=1, $log=array(), $is_daily = false)
-    {
-        if($page > $to_page) {
-            return true;
-        }
-        if($this->echo)
-            echo $server->slug . ' - page ' . $page;
-
+    public function parse_server($server, $page=1, $to_page=1) {
         $url = $server->url;
         if(!empty($server->list_items_url)) {
             $url = $server->list_items_url;
         }
-        if($is_daily && !empty($server->daily_url)) {
+        if($this->is_daily && !empty($server->daily_url)) {
             // $url = $server->daily_url;
         }
-        $url = str_replace('{page}', $page, $url);
-
-        $html_base = $this->get_html_base($url);
-        if(empty($html_base)) {
+        $page_urls = array();
+        for($i=$page;$i<=$to_page;$i++) {
+            $page_urls[$i] = str_replace('{page}', $i, $url);
+        }
+        if(empty($page_urls)) {
             return true;
         }
-        $list_items = $html_base->find($server->list_items_key);
-        if(count($list_items) == 0) {
-            $html_base->clear();
-            unset($html_base);
-            $html_base = $this->get_html_base($url, 'phantom');
-            if(empty($html_base)) {
-                return true;
-            }
-        }
-        if($this->echo)
-            echo ' - '.count($list_items).' truyen'."\n";
-        $dem = 0;
-        $urls = array();
-        foreach ($list_items as $stt => $item) {
-            $urls[] = $this->get_full_href($server, $item->href);
-        }
-        $html_base->clear();
-        unset($html_base);
+        $this->parse_pages($server, $page_urls);
+    }
 
-        foreach ($urls as $url) {
-            $check_book = Book::find()->where(array('url'=>$url))->count();
-            if($is_daily && $check_book > 0) {
+    public function parse_pages($server, $page_urls)
+    {
+        $pages_data = $this->run_curl_multiple($page_urls);
+        foreach ($pages_data as $stt => $page_html) {
+            if ($this->echo) echo $server->slug . ' - page ' . $stt;
+            $html_base = HtmlDomParser::str_get_html($page_html);
+            unset($page_html);
+            $pages_data[$stt] = '';
+            if (empty($html_base)) {
+                $html_base = $this->get_html_base($page_urls[$stt], '', true);
+                if (empty($html_base)) {
+                    if ($this->echo) echo ' - can not get html1'."\n";
+                    continue;
+                }
+            }
+            $list_books = $html_base->find($server->list_items_key);
+            if (count($list_books) == 0) {
+                $html_base->clear();
+                unset($html_base);
+                $html_base = $this->get_html_base($page_urls[$stt], 'phantom', true);
+                if (empty($html_base)) {
+                    if ($this->echo) echo ' - can not get html2'."\n";
+                    continue;
+                }
+                $list_books = $html_base->find($server->list_items_key);
+            }
+            if (count($list_books) == 0) {
+                if ($this->echo) echo ' - can not get html3'."\n";
                 continue;
             }
-            if(!empty($log)) {
-                $log->number_books++;
-                $log->save();
+            if ($this->echo) echo '' . "\n";
+
+            $book_urls = array();
+            $db_books = array();
+            foreach ($list_books as $i => $book) {
+                $book_url = $this->get_full_href($server, $book->href);
+                $db_books[$i] = Book::find()->where(array('url' => $book_url))->one();
+                if ($this->skip_book_existed && !empty($db_books[$i])) {
+                    continue;
+                }
+                if (!empty($this->log)) {
+                    $this->log->number_books++;
+                    $this->log->save();
+                }
+                $book_urls[$i] = $book_url;
             }
-            $number_chapters = $this->parse_book($server, $url);
-            if(!empty($log)) {
-                $log->number_chapters += $number_chapters;
-                $log->save();
-            }
-            if($number_chapters == 0) {
-                $dem++;
-                if(!$is_daily && $dem >=5 ) { return true; }
+            $html_base->clear();
+            unset($html_base);
+            $dem_skip_book = $this->parse_books($server, $book_urls, $db_books);
+            if ($dem_skip_book > 5) {
+                break;
             }
         }
-        $this->parse_server($server, $page + 1, $to_page, $log);
-        return true;
     }
-
-    private function get_full_href($server, $a_href) {
-        if(substr($a_href,0,4) != 'http') {
-            $a_href = $server->url.''.$a_href;
-        }
-        return str_replace('https:','http:', $a_href);
-    }
-
-    private function parse_book($server, $a_href)
-    {
-        $book = Book::find()->where(array('url'=>$a_href))->one();
-        if(!empty($book)) {
-            if($this->echo)
-                echo '---- ' . $book->slug . "\n";
-            if($book->status == Book::INACTIVE || $book->will_reload == 1) {
-                return 1;
+    public function parse_books($server, $book_urls, $db_books) {
+        $dem_skip_book = 0;
+        $books_data = $this->run_curl_multiple($book_urls);
+        foreach ($books_data as $stt => $book_html) {
+            $book_html_base = HtmlDomParser::str_get_html($book_html);
+            unset($book_html);
+            $books_data[$stt] = '';
+            if (empty($book_html_base)) {
+                $book_html_base = $this->get_html_base($book_urls[$stt], '', true);
+                if (empty($book_html_base)) {
+                    if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html1' . "\n";
+                    continue;
+                }
             }
-            $number_chapters = $this->get_chapters($book);
-            if($number_chapters > 0) {
+            $chapters = $book_html_base->find($server->list_chapters_key);
+            if (count($chapters) == 0) {
+                $book_html_base->clear();
+                unset($book_html_base);
+                $book_html_base = $this->get_html_base($book_urls[$stt], 'phantom', true);
+                if (empty($book_html_base)) {
+                    if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html2' . "\n";
+                    continue;
+                }
+                $chapters = $book_html_base->find($server->list_chapters_key);
+            }
+            if (count($chapters) == 0) {
+                if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html3' . "\n";
+                continue;
+            }
+
+            if (!empty($db_books[$stt])) {
+                $book = $db_books[$stt];
+                if ($db_books[$stt]->status == Book::INACTIVE || $db_books[$stt]->will_reload == 1) {
+                    continue;
+                }
+                if ($this->echo)
+                    echo '----- ' . $db_books[$stt]->slug . "\n";
+            } else {
+                $book = new Book();
+            }
+            if (empty($book->slug)) {
+                $title = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
+                $new_slug = $slug = $this->createSlug($title);
+                $tm = 1;
+                while (Book::find()->where(array('slug' => $new_slug))->count() > 0) {
+                    $tm++;
+                    $new_slug = $slug . '-' . $tm;
+                }
+                $slug = $new_slug;
+
+                if ($this->echo) echo '----- ' . $slug . "\n";
+
+                if(strpos($slug,'raw') !== false) {
+                    if ($this->echo) echo '----- ----- skip for RAW'. "\n";
+                    continue;
+                }
+
+                $image_src = $book_html_base->find($server->image_key)[0]->src;
+                $image_dir = Yii::$app->params['app'] . '/web/uploads/books/' . $slug;
+                if (substr($image_src, 0, 2) == '//') {
+                    $image_src = 'http:' . $image_src;
+                }
+                $image_src = str_replace('https:', 'http:', $image_src);
+                $image = $this->save_image($image_src, $image_dir);
+
+                $description = $this->get_text($book_html_base->find($server->description_key)[0]->plaintext);
+
+                $book->status = Book::ACTIVE;
+                $book->server_id = $server->id;
+                $book->url = $book_urls[$stt];
+                $book->image_source = $image_src;
+                $book->image = $image;
+                $book->name = $title;
+                $book->slug = $slug;
+                $book->description = $description;
+                $book->release_date = date('Y-m-d H:i:s');
+                $book->save();
+
+                $tags_arr = $book_html_base->find($server->list_tags_key);
+                $tags = array();
+                foreach ($tags_arr as $tag) {
+                    $tags[] = strtolower(trim($this->get_text($tag->plaintext), ' .,-'));
+                }
+                $author = $book_html_base->find($server->list_authors_key)[0];
+                $author_str = strtolower(trim($this->get_text($author->plaintext), ' .,-'));
+                if ($author_str != 'đang cập nhật') {
+                    $authors = $author->find('a');
+                    foreach ($authors as $author) {
+                        $tags[] = 'author:' . trim($this->get_text($author->plaintext), ' .,-');
+                    }
+                }
+                $status = $book_html_base->find($server->status_key)[0];
+                $status_str = strtolower(trim($this->get_text($status->plaintext), ' .,-'));
+                if ($status_str == 'hoàn thành') {
+                    $tags[] = $status_str;
+                }
+                if (in_array('one shot', $tags) && !in_array('hoàn thành', $tags)) {
+                    $tags[] = 'hoàn thành';
+                }
+                foreach ($tags as $tag) {
+                    $book->add_tag($tag);
+                }
+            }
+            $db_chapters = array();
+            $chapter_urls = array();
+            $chapter_skip = 0;
+            $dem_new_chapter = 0;
+            foreach ($chapters as $num => $chapter) {
+                if($chapter_skip > 3) { break; }
+                $chapter_url = $this->get_full_href($server, $chapter->href);
+                $db_chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
+                if(!empty($db_chapter) &&
+                    ($db_chapter->status == Chapter::INACTIVE || $db_chapter->will_reload == 1)) {
+                    continue;
+                }
+                if(!empty($db_chapter) && $this->skip_chapter_existed) {
+                    $chapter_skip++;
+                    continue;
+                }
+                if(empty($db_chapter)) {
+                    $name = strtolower($this->get_text($chapter->plaintext));
+                    $name = str_replace('chapter','chương',$name);
+                    $name = str_replace('chap','chương',$name);
+                    $name = trim(str_replace('chuong','chương',$name));
+                    if (strpos($name, 'raw') !== false) {
+                        continue;
+                    }
+                    $dem_new_chapter++;
+                    $db_chapter = new Chapter();
+                    $db_chapter->book_id = $book->id;
+                    $db_chapter->stt = count($chapters) - $num + 1;
+                    $db_chapter->url = $chapter_url;
+                    $db_chapter->name = ucfirst($name);
+                    $db_chapter->status = Chapter::ACTIVE;
+                    $db_chapter->save();
+                }
+                $db_chapters[$num] = $db_chapter;
+                $chapter_urls[$num] = $chapter_url;
+            }
+            if($dem_new_chapter == 0) {
+                $dem_skip_book++;
+            } else {
+                $book->status = Book::ACTIVE;
+                $book->will_reload = 0;
                 $book->release_date = date('Y-m-d H:i:s');
                 $book->save();
                 foreach ($book->follows as $follow) {
@@ -100,239 +239,163 @@ class Scraper
                     $this->send_push_notification($follow->user_id);
                 }
             }
+            $book_html_base->clear();
+            unset($book_html_base);
+            $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
             if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
-                $book->will_reload = 1;
                 $book->status = Book::INACTIVE;
+                $book->will_reload = 1;
                 $book->save();
             }
-            return $number_chapters;
         }
-
-        $html_base = $this->get_html_base($a_href);
-        if(empty($html_base)) {
-            return 1;
-        }
-        $titles = $html_base->find($server->title_key);
-        if(count($titles) == 0) {
-            $html_base->clear();
-            unset($html_base);
-            $html_base = $this->get_html_base($a_href, 'phantom');
-            if(empty($html_base)) {
-                return 1;
-            }
-        }
-        $title = trim($html_base->find($server->title_key)[0]->plaintext);
-        $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
-
-        $new_slug = $slug = $this->createSlug($title);
-        $tm = 1;
-        while(Book::find()->where(array('slug'=>$new_slug))->count() > 0) {
-            $tm++;
-            $new_slug = $slug.'-'.$tm;
-        }
-        $slug = $new_slug;
-
-        if($this->echo)
-            echo '---- ' . $slug . "\n";
-
-        $image_src = $html_base->find($server->image_key)[0]->src;
-        $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
-        if(substr($image_src, 0, 2) == '//') {
-            $image_src = 'http:'.$image_src;
-        }
-        $image_src = str_replace('https:','http:', $image_src);
-        $image = $this->save_image($image_src, $image_dir);
-
-        $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
-
-        $tags_arr = $html_base->find($server->list_tags_key);
-        $tags = array();
-        foreach ($tags_arr as $tag) {
-            $tags[] = strtolower(trim(html_entity_decode($tag->plaintext), ' .,-'));
-        }
-
-        $author = $html_base->find($server->list_authors_key)[0];
-        $author_str = strtolower(trim(html_entity_decode($author->plaintext), ' .,-'));
-        if($author_str != 'đang cập nhật') {
-            $authors = $author->find('a');
-            foreach ($authors as $author) {
-                $tags[] = 'author:'.trim(html_entity_decode($author->plaintext), ' .,-');
-            }
-        }
-
-        $status = $html_base->find($server->status_key)[0];
-        $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
-        if($status_str == 'hoàn thành') {
-            $tags[] = $status_str;
-        }
-
-        if(in_array('one shot', $tags) && !in_array('hoàn thành', $tags)) {
-            $tags[] = 'hoàn thành';
-        }
-
-        $html_base->clear();
-        unset($html_base);
-
-        $book = new Book();
-        $book->status = Book::ACTIVE;
-        $book->server_id = $server->id;
-        $book->url = $a_href;
-        $book->image_source = $image_src;
-        $book->image = $image;
-        $book->name = $title;
-        $book->slug = $slug;
-        $book->description = $description;
-        $book->release_date = date('Y-m-d H:i:s');
-        $book->save();
-
-        foreach ($tags as $tag) {
-            $book->add_tag($tag);
-        }
-
-        $number_chapters = $this->get_chapters($book);
-        if($number_chapters > 0) {
-            $book->release_date = date('Y-m-d H:i:s');
-            $book->save();
-        }
-        if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
-            $book->will_reload = 1;
-            $book->status = Book::INACTIVE;
-            $book->save();
-        }
-        return $number_chapters;
+        return $dem_skip_book;
     }
+    public function parse_chapters($server, $chapter_urls, $db_chapters, $book) {
+        $chapters_data = $this->run_curl_multiple($chapter_urls);
+        foreach ($chapters_data as $num => $chapter_html) {
+            if($this->echo)
+                echo '----- ----- '.$db_chapters[$num]->name;
+            $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/chapter_'.$db_chapters[$num]->id;
 
-    private function get_chapters($book, $skip=true) {
-        $html_base = $this->get_html_base($book->url);
-        if(empty($html_base)) {
-            return 0;
-        }
-        $server = $book->server;
-
-        $chapters = $html_base->find($server->list_chapters_key);
-        if(count($chapters) == 0) {
-            $html_base->clear();
-            unset($html_base);
-            $html_base = $this->get_html_base($book->url, 'phantom', true);
-            if(empty($html_base)) {
-                return 0;
-            }
-        }
-
-        $status = $html_base->find($server->status_key)[0];
-        $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
-        if($status_str == 'hoàn thành') {
-            $book->add_tag($status_str);
-        }
-
-        $chapters = $html_base->find($server->list_chapters_key);
-        if(count($chapters) == 0) {
-            $html_base->clear();
-            unset($html_base);
-            return 0;
-        }
-        $db_chapters = array();
-        $dem = 0;
-        $chap_skip = 0;
-        foreach ($chapters as $num => $chapter) {
-            $url = $this->get_full_href($server, $chapter->href);
-            $db_chapter = Chapter::find()->where(array('url' => $url))->one();
-            if(!empty($db_chapter) &&
-                ($db_chapter->status == Chapter::INACTIVE || $db_chapter->will_reload == 1)) {
-                continue;
-            }
-            if(!empty($db_chapter) && $skip) {
-                $chap_skip++;
-                if($chap_skip >= 3) { break; }
-                continue;
-            }
-            if(empty($db_chapter)) {
-                $name = strtolower(html_entity_decode($chapter->plaintext));
-                $name = str_replace('chapter','chương',$name);
-                $name = str_replace('chap','chương',$name);
-                $name = trim(str_replace('chuong','chương',$name));
-
-                if (strpos($name, 'raw') !== false) {
+            $chapter_html_base = HtmlDomParser::str_get_html($chapter_html);
+            unset($chapter_html);
+            $chapters_data[$num] = '';
+            if(empty($chapter_html_base)) {
+                $chapter_html_base = $this->get_html_base($chapter_urls[$num],'',true);
+                if(empty($chapter_html_base)) {
+                    if($this->echo) echo ' - can not get html'."\n";
                     continue;
                 }
-                $dem++;
-
-                $db_chapter = new Chapter();
-                $db_chapter->book_id = $book->id;
-                $db_chapter->stt = count($chapters) - $num + 1;
-                $db_chapter->url = $url;
-                $db_chapter->name = ucfirst($name);
-                $db_chapter->status = Chapter::ACTIVE;
             }
-            $db_chapters[] = $db_chapter;
-        }
-        $html_base->clear();
-        unset($html_base);
-        foreach ($db_chapters as $db_chapter) {
-            $db_chapter->save();
-            $this->parse_chapter($db_chapter);
-            if(Image::find()->where(array('chapter_id'=>$db_chapter->id))->count() == 0) {
-                $db_chapter->will_reload = 1;
-                $db_chapter->status = Chapter::INACTIVE;
-                $db_chapter->save();
+
+            $images = $chapter_html_base->find($server->images_key);
+            if(count($images) == 0) {
+                $chapter_html_base->clear();
+                unset($chapter_html_base);
+                $chapter_html_base = $this->get_html_base($chapter_urls[$num], 'phantom',true);
+                if(empty($chapter_html_base)) {
+                    if($this->echo) echo ' - can not get html'."\n";
+                    continue;
+                }
+                $images = $chapter_html_base->find($server->images_key);
             }
-        }
-        return $dem;
-    }
+            if(count($images) == 0) {
+                if($this->echo) echo ' - can not get html'."\n";
+                continue;
+            }
 
-    private function parse_chapter($chapter)
-    {
-        if($this->echo)
-            echo '-------- ' . $chapter->name;
-
-        $book = $chapter->book;
-        $server = $book->server;
-
-        $dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug.'/chap'.$chapter->id;
-
-        $image_urls = array();
-        $html_base = $this->get_html_base($chapter->url, '', true);
-        if(!empty($html_base)) {
-            $images = $html_base->find($server->images_key);
+            $image_urls = array();
             foreach ($images as $id=>$image) {
                 $image_src = $image->src;
                 if(empty($image_src)) {
                     continue;
                 }
-                $image_urls[$id] = $image_src;
+                if(substr($image_src, 0, 2) == '//') {
+                    $image_src = 'http:'.$image_src;
+                }
+                $image_urls[$id] = str_replace('https:','http:', $image_src);
             }
-            $html_base->clear();
-            unset($html_base);
-        }
 
-        $current_images = Image::find()->where(array('chapter_id'=>$chapter->id))->all();
-        foreach ($current_images as $current_image) {
-            $current_image->status = Image::INACTIVE;
-            $current_image->save();
+            $current_images = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id))->all();
+            foreach ($current_images as $current_image) {
+                $current_image->status = Image::INACTIVE;
+                $current_image->save();
+            }
+            $dem = 0;
+            foreach ($image_urls as $id=>$image_src) {
+                $image_name = $this->save_image($image_src, $dir, $id+1);
+                $new_image = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'image_source' => $image_src))->one();
+                if(empty($new_image)) {
+                    $new_image = new Image();
+                    $new_image->chapter_id = $db_chapters[$num]->id;
+                    $new_image->image_source = $image_src;
+                }
+                $new_image->image = $image_name;
+                $new_image->status = Image::ACTIVE;
+                $new_image->stt = $id+1;
+                $new_image->save();
+                $dem++;
+            }
+            $inactive_images = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'status'=>Image::INACTIVE))->all();
+            foreach ($inactive_images as $inactive_image) {
+                $inactive_image->delete();
+            }
+            if($this->echo)
+                echo ' - ' . $dem . ' images' . "\n";
+
+            if(Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'status'=>Image::ACTIVE))->count() == 0) {
+                $db_chapters[$num]->status = Book::INACTIVE;
+                $db_chapters[$num]->will_reload = 1;
+                $db_chapters[$num]->save();
+            }
         }
-        unset($current_images);
+    }
+
+    public function get_text($txt) {
+        return remove_symbols(html_entity_decode($txt), true, true, false, true, '(),.:;?!_"\-\'');
+    }
+
+    public function run_curl_multiple($urls) {
+        $headers = array();
+        $headers[] = "Accept-Encoding: gzip, deflate";
+        $headers[] = "Accept-Language: en-US,en;q=0.9";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Cache-Control: max-age=0";
+        $headers[] = "Connection: keep-alive";
         $dem = 0;
-        foreach ($image_urls as $id=>$image_src) {
-            if(substr($image_src, 0, 2) == '//') {
-                $image_src = 'http:'.$image_src;
+        $result = array();
+        while($dem < count($urls)) {
+            $curls = array();
+            $mh = curl_multi_init();
+            $stt = -1;
+            foreach ($urls as $id => $url) {
+                $stt++;
+                if($stt<$dem) {
+                    continue;
+                }
+                if ($stt > $dem+17) {
+                    $dem = $stt;
+                    break;
+                }
+                $curls[$id] = curl_init();
+                curl_setopt($curls[$id], CURLOPT_URL, $url);
+                curl_setopt($curls[$id], CURLOPT_HEADER, 0);
+                curl_setopt($curls[$id], CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($curls[$id], CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curls[$id], CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+                curl_setopt($curls[$id], CURLOPT_CUSTOMREQUEST, "GET");
+                curl_setopt($curls[$id], CURLOPT_ENCODING, 'gzip, deflate');
+                if ($this->via_proxy) {
+                    curl_setopt($curls[$id], CURLOPT_PROXY, 'http://' . $this->getProxy());
+                    curl_setopt($curls[$id], CURLOPT_PROXYUSERPWD, $this->proxyAuth);
+                }
+                curl_multi_add_handle($mh, $curls[$id]);
+                if($stt==count($urls)-1) {
+                    $dem = count($urls);
+                    break;
+                }
             }
-            $image_src = str_replace('https:','http:', $image_src);
-            $image_name = $this->save_image($image_src, $dir, $id+1);
-            $new_image = Image::find()->where(array('chapter_id'=>$chapter->id, 'image_source' => $image_src))->one();
-            if(empty($new_image)) {
-                $new_image = new Image();
-                $new_image->chapter_id = $chapter->id;
-                $new_image->image_source = $image_src;
+            $running = null;
+            do {
+                usleep (10000);
+                curl_multi_exec($mh, $running);
+            } while ($running > 0);
+            foreach ($curls as $id => $c) {
+                $result[$id] = curl_multi_getcontent($c);
+                curl_multi_remove_handle($mh, $c);
             }
-            $new_image->image = $image_name;
-            $new_image->status = Image::ACTIVE;
-            $new_image->stt = $id+1;
-            $new_image->save();
-            $dem++;
+            curl_multi_close($mh);
         }
-        if($this->echo)
-            echo ' - ' . $dem . ' images' . "\n";
-        return true;
+        return $result;
+    }
+
+    private function get_full_href($server, $a_href) {
+        if(substr($a_href,0,4) != 'http') {
+            $a_href = $server->url.''.$a_href;
+        }
+        return str_replace('https:','http:', $a_href);
     }
 
     private function createSlug($str, $delimiter = '-'){
@@ -348,60 +411,6 @@ class Scraper
         $slug = preg_replace('/([\s]+)/', $delimiter, $slug);
         $slug = preg_replace('/--/', $delimiter, $slug);
         return trim($slug,$delimiter);
-    }
-
-    private function remove_symbols($string, $is_number=true, $is_vietnamese=true, $is_lower=false, $is_space=true, $special='', $only_number = false){
-        $basic = 'a-zA-Z';
-        if($only_number) {
-            $basic ='';
-        }
-        if($is_number) {
-            $basic .= '0-9';
-        }
-        $utf8 = '';
-        if($is_vietnamese) {
-            $utf8 = 'áàảãạăắặằẳẵâấầẩẫậđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẶẰẲẴÂẤẦẨẪẬĐÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ';
-        }
-        if($is_lower) {
-            $string = strtolower($string);
-        }
-        if(!$is_space) {
-            $string = str_replace(' ','',$string);
-        }
-        $string = preg_replace( '/^[^'.$basic . $utf8 .'\s+]+/iu', '', $string );
-        $string = preg_replace( '/[^'.$basic . $utf8 . $special . '\s+]+/iu', '', $string );
-        return $string;
-    }
-
-    private function curl_getcontent($url,$count = 0)
-    {
-        $headers = array();
-        $headers[] = "Accept-Encoding: gzip, deflate";
-        $headers[] = "Accept-Language: en-US,en;q=0.9";
-        $headers[] = "Upgrade-Insecure-Requests: 1";
-        $headers[] = "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36";
-        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
-        $headers[] = "Cache-Control: max-age=0";
-        $headers[] = "Connection: keep-alive";
-
-        $ch = curl_init();
-        if($this->via_proxy) {
-            curl_setopt($ch, CURLOPT_PROXY, 'http://' . $this->getProxy());
-            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyAuth);
-        }
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-        $content = curl_exec($ch);
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close ($ch);
-
-        if((($status != 200 && $status != 404) || trim($content)=='') && $count<5 ) {
-            return $this->curl_getcontent($url, $count+1);
-        }
-        return $content;
     }
 
     private function getProxy()
@@ -458,114 +467,26 @@ class Scraper
 
     public function reload_book($book) {
         if($this->echo) {
-            echo '---- ' . $book->slug . "\n";
+            echo '----- ' . $book->slug . "\n";
         }
-        if(empty($book->slug)) {
-            $server = $book->server;
-
-            $html_base = $this->get_html_base($book->url);
-            if(empty($html_base)) {
-                return true;
-            }
-            $titles = $html_base->find($server->title_key);
-            if(count($titles) == 0) {
-                $html_base->clear();
-                unset($html_base);
-                $html_base = $this->get_html_base($book->url, 'phantom');
-                if(empty($html_base)) {
-                    return 1;
-                }
-            }
-            $title = trim($html_base->find($server->title_key)[0]->plaintext);
-            $title = $this->remove_symbols(html_entity_decode($title), true, true, false, true, '(),.:;?!_"\-\'');
-
-            $new_slug = $slug = $this->createSlug($title);
-            $tm = 1;
-            while(Book::find()->where(array('slug'=>$new_slug))->count() > 0) {
-                $tm++;
-                $new_slug = $slug.'-'.$tm;
-            }
-            $slug = $new_slug;
-
-            $image_src = $html_base->find($server->image_key)[0]->src;
-            if(substr($image_src, 0, 2) == '//') {
-                $image_src = 'http:'.$image_src;
-            }
-            $image_src = str_replace('https:','http:', $image_src);
-            $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$slug;
-            $image = $this->save_image($image_src, $image_dir);
-
-            $description = ucfirst(strtolower(trim($this->remove_symbols(html_entity_decode(trim($html_base->find($server->description_key)[0]->plaintext)), true, true, false, true, '(),.:;?!_"\-\''))));
-
-            $tags_arr = $html_base->find($server->list_tags_key);
-            $tags = array();
-            foreach ($tags_arr as $tag) {
-                $tags[] = strtolower(trim(html_entity_decode($tag->plaintext), ' .,-'));
-            }
-
-            $author = $html_base->find($server->list_authors_key)[0];
-            $author_str = strtolower(trim(html_entity_decode($author->plaintext), ' .,-'));
-            if($author_str != 'đang cập nhật') {
-                $authors = $author->find('a');
-                foreach ($authors as $author) {
-                    $tags[] = 'author:'.trim(html_entity_decode($author->plaintext), ' .,-');
-                }
-            }
-
-            $status = $html_base->find($server->status_key)[0];
-            $status_str = strtolower(trim(html_entity_decode($status->plaintext), ' .,-'));
-            if($status_str == 'hoàn thành') {
-                $tags[] = $status_str;
-            }
-
-            if(in_array('one shot', $tags) && !in_array('hoàn thành', $tags)) {
-                $tags[] = 'hoàn thành';
-            }
-
-            $html_base->clear();
-            unset($html_base);
-
-            foreach ($tags as $tag) {
-                $book->add_tag($tag);
-            }
-
-            $book->image_source = $image_src;
-            $book->image = $image;
-            $book->name = $title;
-            $book->slug = $slug;
-            $book->description = $description;
-        }
-        $book->release_date = date('Y-m-d H:i:s');
-        $book->will_reload = 0;
-        $book->status = Book::ACTIVE;
-        $this->get_chapters($book, false);
-        if(Chapter::find()->where(array('book_id'=>$book->id))->count() == 0) {
-            $book->will_reload = 1;
-            $book->status = Book::INACTIVE;
-        }
-        $book->save();
+        $this->skip_book_existed = false;
+        $this->skip_chapter_existed = false;
+        $server = Server::find()->where(array('id'=>$book->server_id))->one();
+        $book_urls = array($book->url);
+        $db_books = array($book);
+        $this->parse_books($server, $book_urls, $db_books);
     }
     public function reload_chapter($chapter) {
         if($this->echo) {
             echo '---- ' . $chapter->book->slug . "\n";
         }
-        if(empty($chapter->stt) && !empty($chapter->book_id)) {
-            if($chapter->stt == 0) {
-                $last_chap = Chapter::find()->where(['>', 'stt', '0'])->andWhere(array('book_id' => $chapter->book_id))->orderBy(['stt' => SORT_DESC])->one();
-                if(!empty($last_chap)) {
-                    $chapter->stt = $last_chap->stt + 1;
-                }
-            }
-            $chapter->save();
-        }
-        $chapter->status = Chapter::ACTIVE;
-        $chapter->will_reload = 0;
-        $this->parse_chapter($chapter);
-        if(Image::find()->where(array('chapter_id'=>$chapter->id))->count() == 0) {
-            $chapter->will_reload = 1;
-            $chapter->status = Chapter::INACTIVE;
-        }
-        $chapter->save();
+        $this->skip_book_existed = false;
+        $this->skip_chapter_existed = false;
+        $book = $chapter->book;
+        $server = Server::find()->where(array('id'=>$book->server_id))->one();
+        $chapter_urls = array($chapter->url);
+        $db_chapters = array($chapter);
+        $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
     }
 
     private function parse_url_by_phantom($url) {
@@ -590,11 +511,11 @@ page.open("%s", function (status) {
         $errorPath = Yii::$app->params['app'].'/phantom/error.txt';
 
         file_put_contents($fetchPath, sprintf($fetchScript, $htmlPath, $errorPath, $url, $htmlPath ));
-        usleep(100000);
+        usleep(1000);
         exec($phantomPath . ' '.$fetchPath);
 
         $html='';
-        usleep(100000);
+        usleep(1000);
         if (file_exists($htmlPath)){
             $html = file_get_contents($htmlPath);
         }

@@ -153,3 +153,25 @@ function show_date($date, $is_time=true, $has_second = true) {
     }
     return date($format, strtotime($date));
 }
+function remove_symbols($string, $is_number=true, $is_vietnamese=true, $is_lower=false, $is_space=true, $special='', $only_number = false){
+    $basic = 'a-zA-Z';
+    if($only_number) {
+        $basic ='';
+    }
+    if($is_number) {
+        $basic .= '0-9';
+    }
+    $utf8 = '';
+    if($is_vietnamese) {
+        $utf8 = 'áàảãạăắặằẳẵâấầẩẫậđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẶẰẲẴÂẤẦẨẪẬĐÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ';
+    }
+    if($is_lower) {
+        $string = strtolower($string);
+    }
+    if(!$is_space) {
+        $string = str_replace(' ','',$string);
+    }
+    $string = preg_replace( '/^[^'.$basic . $utf8 .'\s+]+/iu', '', $string );
+    $string = preg_replace( '/[^'.$basic . $utf8 . $special . '\s+]+/iu', '', $string );
+    return $string;
+}
