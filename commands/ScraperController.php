@@ -46,8 +46,8 @@ class ScraperController extends Controller
         $log->save();
         $scraper->log = $log;
         foreach ($servers as $server) {
-            $log->number_servers++;
-            $log->save();
+            $scraper->log->number_servers++;
+            $scraper->log->save();
             $scraper->parse_server($server, $page, $to_page);
         }
         $setting_model->set_setting('cron_running', '');

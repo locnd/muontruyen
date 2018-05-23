@@ -82,10 +82,13 @@ class CronController extends Controller
         $log = new ScraperLog();
         $log->number_servers = 0;
         $log->type='scraper';
+        $scraper->skip_book_existed = false;
+        $scraper->skip_chapter_existed = true;
+        $scraper->log = $log;
         foreach ($servers as $server) {
-            $log->number_servers++;
-            $log->save();
-            $scraper->parse_server($server, 1, 5, $log);
+            $scraper->log->number_servers++;
+            $scraper->log->save();
+            $scraper->parse_server($server, 1, 2);
         }
 
         if(time() > $cron_time + 3600) {
@@ -99,11 +102,11 @@ class CronController extends Controller
 
         $page = $setting_model->get_setting('daily_page');
         if($page == '') {
-            $page = 2;
+            $page = 1;
         } else {
             $page = (int) $page;
         }
-        if($page > 20) {
+        if($page > 30) {
             $setting_model->set_setting('cron_running', '');
             return ExitCode::OK;
         }
@@ -111,13 +114,18 @@ class CronController extends Controller
         $log->type='daily';
         $log->number_servers = 0;
         $log->save();
-        while(time() < $cron_time + 5400) {
-            $page++;
-            if($page > 20) { break; }
-            foreach ($servers as $server) {
-                $scraper->parse_server($server, $page, $page, $log, true);
-            }
+        $scraper->skip_book_existed = true;
+        $scraper->skip_chapter_existed = true;
+        $scraper->log = $log;
+        $scraper->is_daily = true;
+
+        $page++;
+        foreach ($servers as $server) {
+            $scraper->log->number_books++;
+            $scraper->log->save();
+            $scraper->parse_server($server, $page, $page);
         }
+
         $log->updated_at = date('Y-m-d H:i:s');
         $log->save();
 

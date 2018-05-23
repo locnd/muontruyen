@@ -10,7 +10,7 @@ class Scraper
     public $via_proxy = true;
     public $proxyAuth = 'galvin24x7:egor99';
     public $echo = true;
-    public $skip_book_existed = true;
+    public $skip_book_existed = false;
     public $skip_chapter_existed = true;
     public $is_daily = false;
     public $log = array();
@@ -119,11 +119,10 @@ class Scraper
 
             if (!empty($db_books[$stt])) {
                 $book = $db_books[$stt];
-                if ($db_books[$stt]->status == Book::INACTIVE || $db_books[$stt]->will_reload == 1) {
+                if ($db_books[$stt]->status == Book::INACTIVE && $db_books[$stt]->will_reload == 0) {
                     continue;
                 }
-                if ($this->echo)
-                    echo '----- ' . $db_books[$stt]->slug . "\n";
+                if ($this->echo) echo '----- ' . $db_books[$stt]->slug . "\n";
             } else {
                 $book = new Book();
             }
@@ -198,8 +197,7 @@ class Scraper
                 if($chapter_skip > 3) { break; }
                 $chapter_url = $this->get_full_href($server, $chapter->href);
                 $db_chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
-                if(!empty($db_chapter) &&
-                    ($db_chapter->status == Chapter::INACTIVE || $db_chapter->will_reload == 1)) {
+                if (!empty($db_chapter) && $db_chapter->status == Chapter::INACTIVE && $db_chapter->will_reload == 0) {
                     continue;
                 }
                 if(!empty($db_chapter) && $this->skip_chapter_existed) {
@@ -220,32 +218,36 @@ class Scraper
                     $db_chapter->stt = count($chapters) - $num + 1;
                     $db_chapter->url = $chapter_url;
                     $db_chapter->name = ucfirst($name);
-                    $db_chapter->status = Chapter::ACTIVE;
+                    $db_chapter->status = Chapter::INACTIVE;
                     $db_chapter->save();
                 }
                 $db_chapters[$num] = $db_chapter;
                 $chapter_urls[$num] = $chapter_url;
             }
+            $book_html_base->clear();
+            unset($book_html_base);
+
+            $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
+
+            $book->status = Book::ACTIVE;
+            $book->will_reload = 0;
             if($dem_new_chapter == 0) {
                 $dem_skip_book++;
             } else {
-                $book->status = Book::ACTIVE;
-                $book->will_reload = 0;
                 $book->release_date = date('Y-m-d H:i:s');
-                $book->save();
                 foreach ($book->follows as $follow) {
                     $follow->status = Follow::UNREAD;
                     $follow->save();
                     $this->send_push_notification($follow->user_id);
                 }
             }
-            $book_html_base->clear();
-            unset($book_html_base);
-            $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
             if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
                 $book->status = Book::INACTIVE;
                 $book->will_reload = 1;
-                $book->save();
+            }
+            $book->save();
+            if($dem_skip_book > 5) {
+                break;
             }
         }
         return $dem_skip_book;
@@ -263,7 +265,7 @@ class Scraper
             if(empty($chapter_html_base)) {
                 $chapter_html_base = $this->get_html_base($chapter_urls[$num],'',true);
                 if(empty($chapter_html_base)) {
-                    if($this->echo) echo ' - can not get html'."\n";
+                    if($this->echo) echo ' - can not get html1'."\n";
                     continue;
                 }
             }
@@ -274,13 +276,13 @@ class Scraper
                 unset($chapter_html_base);
                 $chapter_html_base = $this->get_html_base($chapter_urls[$num], 'phantom',true);
                 if(empty($chapter_html_base)) {
-                    if($this->echo) echo ' - can not get html'."\n";
+                    if($this->echo) echo ' - can not get html2'."\n";
                     continue;
                 }
                 $images = $chapter_html_base->find($server->images_key);
             }
             if(count($images) == 0) {
-                if($this->echo) echo ' - can not get html'."\n";
+                if($this->echo) echo ' - can not get html3'."\n";
                 continue;
             }
 
@@ -316,18 +318,20 @@ class Scraper
                 $new_image->save();
                 $dem++;
             }
+            if($this->echo) echo ' - ' . $dem . ' images' . "\n";
+
             $inactive_images = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'status'=>Image::INACTIVE))->all();
             foreach ($inactive_images as $inactive_image) {
                 $inactive_image->delete();
             }
-            if($this->echo)
-                echo ' - ' . $dem . ' images' . "\n";
 
+            $db_chapters[$num]->status = Chapter::ACTIVE;
+            $db_chapters[$num]->will_reload = 0;
             if(Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'status'=>Image::ACTIVE))->count() == 0) {
-                $db_chapters[$num]->status = Book::INACTIVE;
+                $db_chapters[$num]->status = Chapter::INACTIVE;
                 $db_chapters[$num]->will_reload = 1;
-                $db_chapters[$num]->save();
             }
+            $db_chapters[$num]->save();
         }
     }
 
@@ -467,7 +471,7 @@ class Scraper
 
     public function reload_book($book) {
         if($this->echo) {
-            echo '----- ' . $book->slug . "\n";
+            echo 'reload book ';
         }
         $this->skip_book_existed = false;
         $this->skip_chapter_existed = false;
@@ -478,7 +482,7 @@ class Scraper
     }
     public function reload_chapter($chapter) {
         if($this->echo) {
-            echo '---- ' . $chapter->book->slug . "\n";
+            echo 'reload chapter ';
         }
         $this->skip_book_existed = false;
         $this->skip_chapter_existed = false;
@@ -579,8 +583,39 @@ page.open("%s", function (status) {
             }
         }
         if($show_way && $this->echo) {
-            echo ' - '.$still_way;
+            echo ' - '.$still_way.' ';
         }
         return $html_base;
+    }
+
+    private function curl_getcontent($url,$count = 0)
+    {
+        $headers = array();
+        $headers[] = "Accept-Encoding: gzip, deflate";
+        $headers[] = "Accept-Language: en-US,en;q=0.9";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Cache-Control: max-age=0";
+        $headers[] = "Connection: keep-alive";
+
+        $ch = curl_init();
+        if($this->via_proxy) {
+            curl_setopt($ch, CURLOPT_PROXY, 'http://' . $this->getProxy());
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyAuth);
+        }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        $content = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close ($ch);
+
+        if((($status != 200 && $status != 404) || trim($content)=='') && $count<5 ) {
+            return $this->curl_getcontent($url, $count+1);
+        }
+        return $content;
     }
 }

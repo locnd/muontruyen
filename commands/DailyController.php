@@ -42,26 +42,29 @@ class DailyController extends Controller
 
         $page = $setting_model->get_setting('daily_page');
         if($page == '') {
-            $page = 1;
+            $page = 0;
         } else {
             $page = (int) $page;
         }
-        $page++;
-        if($page > 20) {
+        if($page > 30) {
             $setting_model->set_setting('cron_running', '');
             return ExitCode::OK;
         }
+        $page++;
 
         $scraper = new Scraper();
+        $scraper->skip_book_existed = true;
 
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         $log = new ScraperLog();
         $log->type='daily';
         $log->save();
+        $scraper->log = $log;
+        $scraper->is_daily = true;
         foreach ($servers as $server) {
-            $log->number_servers++;
-            $log->save();
-            $scraper->parse_server($server, $page, $page, $log, true);
+            $scraper->log->number_servers++;
+            $scraper->log->save();
+            $scraper->parse_server($server, $page, $page);
         }
         $setting_model->set_setting('cron_running', '');
         $setting_model->set_setting('daily_page', $page);
