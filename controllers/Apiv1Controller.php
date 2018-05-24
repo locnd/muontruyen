@@ -22,6 +22,7 @@ use app\models\Setting;
 use app\models\Tag;
 use app\models\BookTag;
 use app\models\Device;
+use app\models\BookCron;
 
 class Apiv1Controller extends Controller
 {
