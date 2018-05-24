@@ -124,7 +124,6 @@ class CronController extends Controller
                 $to_page = $page;
                 $setting_model->set_setting('daily_finished', $to_page);
             }
-            $scraper = new Scraper();
             $scraper->skip_book_existed = true;
             $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
             foreach ($servers as $server) {
