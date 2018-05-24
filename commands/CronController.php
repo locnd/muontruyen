@@ -112,7 +112,7 @@ class CronController extends Controller
         }
 
         if(BookCron::find()->where(array('status' => 0))->count() < 10) {
-            $count_book = Book::find()->count();
+            $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
             if($count_book % 36 == 0) {
                 $page++;
