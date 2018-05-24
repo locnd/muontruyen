@@ -229,7 +229,7 @@ class Apiv1Controller extends Controller
         $check_bookmark = 0;
         if(!empty($user->id)) {
             $check_bookmark = Bookmark::find()->where(array(
-                'user_id' => $user->id, 'chapter_id' => $chapter->id, 'status' => 1))->count();
+                'user_id' => $user->id, 'chapter_id' => $chapter['id'], 'status' => 1))->count();
         }
         $chapters = $book['chapters'];
         unset($book['chapters']);
