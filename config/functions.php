@@ -175,3 +175,75 @@ function remove_symbols($string, $is_number=true, $is_vietnamese=true, $is_lower
     $string = preg_replace( '/[^'.$basic . $utf8 . $special . '\s+]+/iu', '', $string );
     return $string;
 }
+function get_book_detail($id) {
+    $data = Yii::$app->cache->getOrSet('book_detail_'.$id, function () use ($id) {
+        $book = app\models\Book::find()->where(array('id'=>$id))->one();
+        if(empty($book)) {
+            return null;
+        }
+        $tmp = $book->to_array();
+        $tmp['tags'] = array();
+        $tmp['authors'] = array();
+        $tmp['last_chapter_read'] = false;
+        $tmp['last_chapter_id'] = 0;
+        $tmp['last_chapter_name'] = '';
+        foreach($book->bookTags as $book_tag) {
+            $tmp_tag = $book_tag->tag;
+            if($tmp_tag->status == 0) {
+                continue;
+            }
+            if($tmp_tag->type == 0) {
+                $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
+            } else {
+                $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
+            }
+        }
+        $tmp['chapters'] = array();
+        foreach ($book->chapters as $stt => $chapter) {
+            if($chapter->status == 0) {
+                continue;
+            }
+            if($stt == 0) {
+                $tmp['last_chapter_id'] = $chapter->id;
+                $tmp['last_chapter_name'] = $chapter->name;
+            }
+            $tmp_chapter = $chapter->to_array(array('id','name'));
+            $tmp_chapter['read'] = false;
+            $tmp_chapter['release_date'] = date('d-m-Y H:i', strtotime($chapter->created_at));
+            $tmp['chapters'][] = $tmp_chapter;
+        }
+        return $tmp;
+    });
+    if(empty($data)) {
+        Yii::$app->cache->delete('book_detail_'.$id);
+    }
+    return $data;
+}
+
+function get_user_groups($user_id) {
+    return Yii::$app->cache->getOrSet('user_groups_'.$user_id, function () use ($user_id) {
+        $db_groups = app\models\Group::find()->where(array('user_id'=>$user_id, 'status'=>1))->all();
+        $groups = array();
+        foreach ($db_groups as $group) {
+            $tmp_group = $group->to_array(array('id', 'name'));
+            $tmp_group['name'] .= ' ('.count($group->follows).')';
+            $groups[] = $tmp_group;
+        }
+        return $groups;
+    });
+}
+
+function get_tags() {
+    return Yii::$app->cache->getOrSet('tags_list', function () {
+        $tag_fields = array('id', 'name', 'stt', 'type');
+        $tags = app\models\Tag::find()->select($tag_fields)->where(array('status' => 1))->orderBy(array('stt' => SORT_ASC, 'name' => SORT_ASC, 'id' => SORT_DESC))->all();
+        $tag_data = array();
+        foreach ($tags as $tag) {
+            $tmp = $tag->to_array(array('id', 'name', 'stt', 'type'));
+            $tmp['is_checked'] = false;
+            $tmp['count'] = app\models\BookTag::find()->where(array('tag_id'=>$tag->id))->count();
+            $tag_data[] = $tmp;
+        }
+        return $tag_data;
+    });
+}

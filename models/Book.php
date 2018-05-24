@@ -92,6 +92,7 @@ class Book extends ModelCommon
         $book_tag->book_id = $this->id;
         $book_tag->tag_id = $tag->id;
         $book_tag->save();
+        \Yii::$app->cache->delete('tags_list');
     }
 
     public function get_image() {

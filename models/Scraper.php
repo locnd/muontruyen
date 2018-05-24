@@ -242,9 +242,9 @@ class Scraper
             }
             $book_html_base->clear();
             unset($book_html_base);
-
-            $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
-
+            if(!empty($chapter_urls)) {
+                $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
+            }
             $book->status = Book::ACTIVE;
             $book->will_reload = 0;
             if($dem_new_chapter > 0) {
@@ -260,6 +260,7 @@ class Scraper
                 $book->will_reload = 1;
             }
             $book->save();
+            Yii::$app->cache->delete('book_detail_'.$book->id);
         }
     }
     public function parse_chapters($server, $chapter_urls, $db_chapters, $book) {
@@ -477,27 +478,6 @@ class Scraper
             }
         }
         return $image;
-    }
-
-    public function reload_book($book) {
-        if($this->echo) {
-            echo 'reload book ';
-        }
-        $this->skip_chapter_existed = false;
-        $server = Server::find()->where(array('id'=>$book->server_id))->one();
-        $book_urls = array($book->url);
-        $db_books = array($book);
-        $this->parse_books($server, $book_urls, $db_books);
-    }
-    public function reload_chapter($chapter) {
-        if($this->echo) {
-            echo 'reload chapter ';
-        }
-        $book = $chapter->book;
-        $server = Server::find()->where(array('id'=>$book->server_id))->one();
-        $chapter_urls = array($chapter->url);
-        $db_chapters = array($chapter);
-        $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
     }
 
     private function parse_url_by_phantom($url) {
