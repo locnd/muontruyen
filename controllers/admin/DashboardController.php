@@ -47,7 +47,12 @@ class DashboardController extends Controller
             $options['Cron'] = 'running';
         }
         $options['Cronners'] = (int) $setting_model->get_setting('cronners');
-        $options['Book Crons'] = BookCron::find()->where(array('status'=>1))->count().' - '.BookCron::find()->where(array('status'=>0))->count();
+        $book_cronning = BookCron::find()->where(array('status'=>1))->count();
+        if($options['Cronners'] > $book_cronning) {
+            $setting_model->set_setting('cronners', $book_cronning);
+        }
+        $options['Book Crons'] = $book_cronning.' - '.BookCron::find()->where(array('status'=>0))->count();
+
         if (Yii::$app->request->post()){
             $user_id = Yii::$app->request->post('user_id');
             $message = Yii::$app->request->post('message');
