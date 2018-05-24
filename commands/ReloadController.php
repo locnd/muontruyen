@@ -7,6 +7,7 @@
 
 namespace app\commands;
 
+use app\models\Server;
 use Yii;
 
 use yii\console\Controller;
@@ -16,7 +17,6 @@ use app\models\Scraper;
 use app\models\Book;
 use app\models\Chapter;
 use app\models\Setting;
-use app\models\ScraperLog;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -43,24 +43,55 @@ class ReloadController extends Controller
         }
         $setting_model->set_setting('cron_running', 'yes');
 
-        $log = new ScraperLog();
-        $log->type='reload';
-        $log->save();
-
         $scraper = new Scraper();
 
         $books = Book::find()->where(array('will_reload' => 1))->all();
+        $book_urls = array();
+        $db_books = array();
+        $db_servers = array();
         foreach ($books as $book) {
-            $log->number_books++;
-            $log->save();
-            $scraper->reload_book($book);
+            $server = $book->server;
+            if(empty($db_servers[$server->id])) {
+                $db_servers[$server->id] = '';
+                $db_books[$server->id] = array();
+                $book_urls[$server->id] = array();
+            }
+            $book_urls[$server->id][] = array($book->url);
+            $db_books[$server->id][] = array($book);
+            $db_servers[$server->id] = $book->server;
+        }
+        if($scraper->echo) {
+            echo 'reload books ' . count($books) . "\n";
+        }
+        if(count($books) > 0) {
+            $scraper->skip_chapter_existed = false;
+            foreach ($db_servers as $i => $db_server) {
+                $scraper->parse_books($db_server, $book_urls[$i], $db_books[$i]);
+            }
         }
 
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
+        $chapter_urls = array();
+        $db_chapters = array();
+        $db_books = array();
         foreach ($chapters as $chapter) {
-            $log->number_chapters++;
-            $log->save();
-            $scraper->reload_chapter($chapter);
+            $book = $chapter->book;
+            if(empty($db_books[$book->id])) {
+                $db_books[$book->id] = '';
+                $db_chapters[$book->id] = array();
+                $chapter_urls[$book->id] = array();
+            }
+            $db_chapters[$book->id][] = $chapter;
+            $chapter_urls[$book->id][] = $chapter->url;
+            $db_books[$book->id] = $book;
+        }
+        if($scraper->echo) {
+            echo 'reload chapters ' . count($chapters) . "\n";
+        }
+        if(count($chapters) > 0) {
+            foreach ($db_books as $i => $db_book) {
+                $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
+            }
         }
 
         $setting_model->set_setting('cron_running', '');

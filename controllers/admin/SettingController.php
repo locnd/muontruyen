@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use yii\web\Controller;
-use app\models\ScraperLog;
 use app\models\Setting;
 use Yii;
 
@@ -28,11 +27,8 @@ class SettingController extends Controller
         $this->view->params['page_id'] = 'setting';
 
         $settings = Setting::find()->all();
-        $logs = ScraperLog::find()->limit(10)->orderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC])->all();
-
         return $this->render('/admin/setting/index', array(
-            'settings' => $settings,
-            'logs' => $logs,
+            'settings' => $settings
         ));
     }
 }

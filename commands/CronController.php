@@ -16,7 +16,6 @@ use app\models\Scraper;
 use app\models\Book;
 use app\models\Chapter;
 use app\models\Setting;
-use app\models\ScraperLog;
 use app\models\Server;
 
 /**
@@ -44,92 +43,74 @@ class CronController extends Controller
         }
         $setting_model->set_setting('cron_running', 'yes');
 
-        $cron_time = time();
-
         $scraper = new Scraper();
         $scraper->echo = false;
 
         if($scraper->echo) {
             echo '---------- reload ---------'."\n";
         }
-        $log = new ScraperLog();
-        $log->type='reload';
-        $log->number_books = 0;
+
         $books = Book::find()->where(array('will_reload' => 1))->all();
+        $book_urls = array();
+        $db_books = array();
+        $db_servers = array();
         foreach ($books as $book) {
-            $log->number_books++;
-            $log->save();
-            $scraper->reload_book($book);
+            $server = $book->server;
+            if(empty($db_servers[$server->id])) {
+                $db_servers[$server->id] = '';
+                $db_books[$server->id] = array();
+                $book_urls[$server->id] = array();
+            }
+            $book_urls[$server->id][] = array($book->url);
+            $db_books[$server->id][] = array($book);
+            $db_servers[$server->id] = $book->server;
         }
-        $log->number_chapters = 0;
-        $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
-        foreach ($chapters as $chapter) {
-            $log->number_chapters++;
-            $log->save();
-            $scraper->reload_chapter($chapter);
+        if($scraper->echo) {
+            echo 'reload books ' . count($books) . "\n";
+        }
+        if(count($books) > 0) {
+            $scraper->skip_chapter_existed = false;
+            foreach ($db_servers as $i => $db_server) {
+                $scraper->parse_books($db_server, $book_urls[$i], $db_books[$i]);
+            }
         }
 
-        if(time() > $cron_time + 1800) {
-            $setting_model->set_setting('cron_running', '');
-            return ExitCode::OK;
+        $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
+        $chapter_urls = array();
+        $db_chapters = array();
+        $db_books = array();
+        foreach ($chapters as $chapter) {
+            $book = $chapter->book;
+            if(empty($db_books[$book->id])) {
+                $db_books[$book->id] = '';
+                $db_chapters[$book->id] = array();
+                $chapter_urls[$book->id] = array();
+            }
+            $db_chapters[$book->id][] = $chapter;
+            $chapter_urls[$book->id][] = $chapter->url;
+            $db_books[$book->id] = $book;
+        }
+        if($scraper->echo) {
+            echo 'reload chapters ' . count($chapters) . "\n";
+        }
+        if(count($chapters) > 0) {
+            foreach ($db_books as $i => $db_book) {
+                $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
+            }
         }
 
         if($scraper->echo) {
             echo '---------- scraper ---------'."\n";
         }
-
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
-        $log = new ScraperLog();
-        $log->number_servers = 0;
-        $log->type='scraper';
+
         $scraper->skip_book_existed = false;
         $scraper->skip_chapter_existed = true;
-        $scraper->log = $log;
         foreach ($servers as $server) {
-            $scraper->log->number_servers++;
-            $scraper->log->save();
             $scraper->parse_server($server, 1, 2);
         }
 
-        if(time() > $cron_time + 3600) {
-            $setting_model->set_setting('cron_running', '');
-            return ExitCode::OK;
-        }
-
-        if($scraper->echo) {
-            echo '---------- daily ---------'."\n";
-        }
-
-        $page = $setting_model->get_setting('daily_page');
-        if($page == '') {
-            $page = 1;
-        } else {
-            $page = (int) $page;
-        }
-        if($page > 30) {
-            $setting_model->set_setting('cron_running', '');
-            return ExitCode::OK;
-        }
-        $log = new ScraperLog();
-        $log->type='daily';
-        $log->number_servers = 0;
-        $log->save();
-        $scraper->skip_book_existed = true;
-        $scraper->skip_chapter_existed = true;
-        $scraper->log = $log;
-
-        $page++;
-        foreach ($servers as $server) {
-            $scraper->log->number_books++;
-            $scraper->log->save();
-            $scraper->parse_server($server, $page, $page, true);
-        }
-
-        $log->updated_at = date('Y-m-d H:i:s');
-        $log->save();
-
         $setting_model->set_setting('cron_running', '');
-        $setting_model->set_setting('daily_page', $page);
         return ExitCode::OK;
     }
 }

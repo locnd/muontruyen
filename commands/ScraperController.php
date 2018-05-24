@@ -14,7 +14,6 @@ use yii\console\ExitCode;
 
 use app\models\Scraper;
 use app\models\Server;
-use app\models\ScraperLog;
 use app\models\Setting;
 /**
  * This command echoes the first argument that you have entered.
@@ -41,13 +40,7 @@ class ScraperController extends Controller
         $setting_model->set_setting('cron_running', 'yes');
         $scraper = new Scraper();
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
-        $log = new ScraperLog();
-        $log->type='scraper';
-        $log->save();
-        $scraper->log = $log;
         foreach ($servers as $server) {
-            $scraper->log->number_servers++;
-            $scraper->log->save();
             $scraper->parse_server($server, $page, $to_page);
         }
         $setting_model->set_setting('cron_running', '');

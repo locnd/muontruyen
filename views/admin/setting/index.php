@@ -44,37 +44,6 @@
                             </table>
                         </div>
                     </div>
-                    <div class="row">
-                        <h3 style="padding-left: 10px;">Cron Logs</h3>
-                        <div class="col-sm-12">
-                            <table class="table table-striped table-bordered data-table admin-table">
-                                <thead>
-                                <tr>
-                                    <th><?php echo 'ID';?></th>
-                                    <th><?php echo 'Type';?></th>
-                                    <th><?php echo 'Number Servers';?></th>
-                                    <th><?php echo 'Number Books';?></th>
-                                    <th><?php echo 'Number Chapters';?></th>
-                                    <th><?php echo 'Updated date';?></th>
-                                    <th><?php echo 'Created date';?></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <?php foreach ($logs as $log) { ?>
-                                    <tr id="item-<?php echo $log->id; ?>">
-                                        <td><?php echo $log->id; ?></td>
-                                        <td><?php echo $log->type; ?></td>
-                                        <td><?php echo show_number($log->number_servers); ?></td>
-                                        <td><?php echo show_number($log->number_books); ?></td>
-                                        <td><?php echo show_number($log->number_chapters); ?></td>
-                                        <td><?php echo date('d-m-Y H:i:s',strtotime($log->updated_at)); ?></td>
-                                        <td><?php echo date('d-m-Y H:i:s',strtotime($log->created_at)); ?></td>
-                                    </tr>
-                                <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

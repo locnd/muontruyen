@@ -12,7 +12,6 @@ class Scraper
     public $echo = true;
     public $skip_book_existed = false;
     public $skip_chapter_existed = true;
-    public $log = array();
 
     public function parse_server($server, $page=1, $to_page=1, $is_daily=false) {
         $url = $server->url;
@@ -64,30 +63,41 @@ class Scraper
             }
             if ($this->echo) echo '' . "\n";
 
-            $book_urls = array();
-            $db_books = array();
             foreach ($list_books as $i => $book) {
                 $book_url = $this->get_full_href($server, $book->href);
-                $db_books[$i] = Book::find()->where(array('url' => $book_url))->one();
-                if ($this->skip_book_existed && !empty($db_books[$i])) {
-                    continue;
+                if($this->skip_book_existed) {
+                    if(Book::find()->where(array('url'=>$book_url))->count() > 0) {
+                        continue;
+                    }
                 }
-                $book_urls[$i] = $book_url;
+
+                $first_chapter = $book->parent()->parent()->find('li.chapter')[0]->find('a')[0];
+                $first_chapter_url = $this->get_full_href($server, $first_chapter->href);
+                if(Chapter::find()->where(array('url'=>$first_chapter_url))->count() > 0) {
+                    break 2;
+                }
+                if ($this->echo) {
+                    echo ' ----- ' . $book_url . "\n";
+                }
+                $cron = BookCron::find()->where(array(
+                    'book_url'=>$book_url
+                ))->one();
+                if(empty($cron)) {
+                    $cron = new BookCron();
+                    $cron->book_url = $book_url;
+                    $cron->status = 0;
+                    $cron->save();
+                }
+                if($cron->status == 2) {
+                    $cron->status = 0;
+                    $cron->save();
+                }
             }
             $html_base->clear();
             unset($html_base);
-            $updated_book = $this->parse_books($server, $book_urls, $db_books);
-            if(!empty($this->log)) {
-                $this->log->number_books = $this->log->number_books + $updated_book;
-                $this->log->save();
-            }
-            if ($updated_book < count($list_books)) {
-                break;
-            }
         }
     }
     public function parse_books($server, $book_urls, $db_books) {
-        $updated_book = $dem_skip_book = 0;
         $books_data = $this->run_curl_multiple($book_urls);
         foreach ($books_data as $stt => $book_html) {
             $book_html_base = HtmlDomParser::str_get_html($book_html);
@@ -97,7 +107,6 @@ class Scraper
                 $book_html_base = $this->get_html_base($book_urls[$stt], '', true);
                 if (empty($book_html_base)) {
                     if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html1' . "\n";
-                    $updated_book++;
                     continue;
                 }
             }
@@ -108,21 +117,18 @@ class Scraper
                 $book_html_base = $this->get_html_base($book_urls[$stt], 'phantom', true);
                 if (empty($book_html_base)) {
                     if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html2' . "\n";
-                    $updated_book++;
                     continue;
                 }
                 $chapters = $book_html_base->find($server->list_chapters_key);
             }
             if (count($chapters) == 0) {
                 if ($this->echo) echo '----- Book ' . $book_urls[$stt] . ' can not get html3' . "\n";
-                $updated_book++;
                 continue;
             }
 
             if (!empty($db_books[$stt])) {
                 $book = $db_books[$stt];
                 if ($db_books[$stt]->status == Book::INACTIVE && $db_books[$stt]->will_reload == 0) {
-                    $updated_book++;
                     continue;
                 }
                 if ($this->echo) echo '----- ' . $db_books[$stt]->slug . "\n";
@@ -143,7 +149,6 @@ class Scraper
 
                 if(strpos($slug,'raw') !== false) {
                     if ($this->echo) echo '----- ----- skip for RAW'. "\n";
-                    $updated_book++;
                     continue;
                 }
 
@@ -158,7 +163,7 @@ class Scraper
                 $description = $this->get_text($book_html_base->find($server->description_key)[0]->plaintext);
 
                 $book->status = Book::INACTIVE;
-                $book->will_reload = 1;
+                $book->will_reload = 0;
                 $book->server_id = $server->id;
                 $book->url = $book_urls[$stt];
                 $book->image_source = $image_src;
@@ -224,7 +229,7 @@ class Scraper
                     $db_chapter->url = $chapter_url;
                     $db_chapter->name = ucfirst($name);
                     $db_chapter->status = Chapter::INACTIVE;
-                    $db_chapter->will_reload = 1;
+                    $db_chapter->will_reload = 0;
                     $db_chapter->save();
                 }
                 $db_chapters[$num] = $db_chapter;
@@ -233,19 +238,11 @@ class Scraper
             $book_html_base->clear();
             unset($book_html_base);
 
-            if(!empty($this->log)) {
-                $this->log->number_chapters = $this->log->number_chapters + count($db_chapters);
-                $this->log->save();
-            }
-
             $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
 
             $book->status = Book::ACTIVE;
             $book->will_reload = 0;
-            if($dem_new_chapter == 0) {
-                $dem_skip_book++;
-            } else {
-                $updated_book++;
+            if($dem_new_chapter > 0) {
                 $book->release_date = date('Y-m-d H:i:s');
                 foreach ($book->follows as $follow) {
                     $follow->status = Follow::UNREAD;
@@ -258,11 +255,7 @@ class Scraper
                 $book->will_reload = 1;
             }
             $book->save();
-            if($dem_skip_book > 4) {
-                break;
-            }
         }
-        return $updated_book;
     }
     public function parse_chapters($server, $chapter_urls, $db_chapters, $book) {
         $chapters_data = $this->run_curl_multiple($chapter_urls);
@@ -485,7 +478,6 @@ class Scraper
         if($this->echo) {
             echo 'reload book ';
         }
-        $this->skip_book_existed = false;
         $this->skip_chapter_existed = false;
         $server = Server::find()->where(array('id'=>$book->server_id))->one();
         $book_urls = array($book->url);
@@ -496,8 +488,6 @@ class Scraper
         if($this->echo) {
             echo 'reload chapter ';
         }
-        $this->skip_book_existed = false;
-        $this->skip_chapter_existed = false;
         $book = $chapter->book;
         $server = Server::find()->where(array('id'=>$book->server_id))->one();
         $chapter_urls = array($chapter->url);

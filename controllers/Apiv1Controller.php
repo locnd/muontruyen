@@ -18,7 +18,6 @@ use app\models\Group;
 use app\models\Scraper;
 use app\models\Read;
 use app\models\Server;
-use app\models\ScraperLog;
 use app\models\Setting;
 use app\models\Tag;
 use app\models\BookTag;
@@ -732,14 +731,10 @@ class Apiv1Controller extends Controller
 
             $options['Cron'] = 'stop';
             $setting_model = new Setting();
-            $last_scraper_log = ScraperLog::find()->limit(1)->orderBy(array('created_at'=>SORT_DESC))->one();
             if($setting_model->get_setting('cron_running') != '') {
-                $options['Cron'] = 'running - '.$last_scraper_log->type;
+                $options['Cron'] = 'running';
             }
             $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
-
-            $options['Cron start'] = date('H:i:s', strtotime($last_scraper_log->created_at));
-            $options['Cron update'] = date('H:i:s', strtotime($last_scraper_log->updated_at));
         }
         return array(
             'success' => true,
