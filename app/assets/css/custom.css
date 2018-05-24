@@ -60,7 +60,7 @@ div#header {
     max-width: calc(100% - 75px);
 }
 .a-book .a-description-new td{
-    padding: 2px 0;
+    padding: 2px 2px 2px 0;
     text-align: left;
     display: inline-block;
 }
@@ -626,7 +626,7 @@ div#header-navbar {
 }
 .label-td {
     vertical-align: top;
-    width: 100px;
+    width: 95px;
 }
 #select_sort {
     width: 100%;
@@ -667,7 +667,7 @@ div#header-navbar {
     border-radius: 5px;
 }
 td.value-td {
-    width: calc(100% - 100px);
+    width: calc(100% - 95px);
 }
 
 .loginBtn {

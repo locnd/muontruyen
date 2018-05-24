@@ -132,12 +132,16 @@ function display_a_book(book) {
     html += '<tr>';
     html += '<td colspan="2" style="width:100%">';
     html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
-    html += '<td>';
+    html += '</td>';
     html += '</tr>';
     if(book.last_chapter_id > 0) {
         html += '<tr>';
         html += '<td class="label-td">Chương mới</td>';
-        html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        if(typeof(book.last_chapter_read) != 'undefined' && book.last_chapter_read) {
+            html += '<td class="value-td"><a style="color:darkgoldenrod"href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        } else {
+            html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        }
         html += '</tr>';
     }
     if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
@@ -730,12 +734,16 @@ function show_follow(tab, page, is_first) {
                     html += '<tr>';
                     html += '<td colspan="2">';
                     html += '<div class="a-title" style="padding:0"><a href="book.html?id='+book.id+'">'+book.name+'</a></div>';
-                    html += '<td>';
+                    html += '</td>';
                     html += '</tr>';
                     if(book.last_chapter_id > 0) {
                         html += '<tr>';
                         html += '<td class="label-td">Chương mới</td>';
-                        html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+                        if(typeof(book.last_chapter_read) != 'undefined' && book.last_chapter_read) {
+                            html += '<td class="value-td"><a style="color:darkgoldenrod"href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+                        } else {
+                            html += '<td class="value-td"><a href="chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+                        }
                         html += '</tr>';
                     }
                     html += '<tr>';
@@ -1479,7 +1487,7 @@ function display_offline_book(book) {
     html += '<tr>';
     html += '<td colspan="2">';
     html += '<div class="a-title" style="padding:0"><a href="offline_book.html?id='+book.id+'">'+book.name+'</a></div>';
-    html += '<td>';
+    html += '</td>';
     html += '</tr>';
     if(book.last_chapter_id > 0) {
         html += '<tr>';

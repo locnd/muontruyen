@@ -96,14 +96,18 @@ class Apiv1Controller extends Controller
         $books = $books->all();
 
         $data = array();
+        $user = $this->check_user();
         foreach ($books as $book) {
             $tmp = $book->to_array(array('id','name', 'image', 'release_date'));
+            $tmp['last_chapter_read'] = false;
+            $tmp['last_chapter_id'] = 0;
+            $tmp['last_chapter_name'] = '';
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
-            } else {
-                $tmp['last_chapter_id'] = 0;
-                $tmp['last_chapter_name'] = '';
+                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
+                    $tmp['last_chapter_read'] = true;
+                }
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -558,12 +562,15 @@ class Apiv1Controller extends Controller
         $data = array();
         foreach ($books as $book) {
             $tmp = $book->to_array(array('id','name', 'image', 'release_date'));
+            $tmp['last_chapter_read'] = false;
+            $tmp['last_chapter_id'] = 0;
+            $tmp['last_chapter_name'] = '';
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
-            } else {
-                $tmp['last_chapter_id'] = 0;
-                $tmp['last_chapter_name'] = '';
+                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
+                    $tmp['last_chapter_read'] = true;
+                }
             }
             $data[] = $tmp;
         }
@@ -1179,14 +1186,18 @@ class Apiv1Controller extends Controller
         $books = $books->all();
 
         $data = array();
+        $user=$this->check_user();
         foreach ($books as $book) {
             $tmp = $book->to_array();
+            $tmp['last_chapter_read'] = false;
+            $tmp['last_chapter_id'] = 0;
+            $tmp['last_chapter_name'] = '';
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
-            } else {
-                $tmp['last_chapter_id'] = 0;
-                $tmp['last_chapter_name'] = '';
+                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
+                    $tmp['last_chapter_read'] = true;
+                }
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -1275,16 +1286,20 @@ class Apiv1Controller extends Controller
         $books = $books->all();
 
         $data = array();
+        $user = $this->check_user();
         foreach ($books as $book) {
             $tmp = $book->to_array(array(
                 'id','name', 'image', 'release_date'
             ));
+            $tmp['last_chapter_read'] = false;
+            $tmp['last_chapter_id'] = 0;
+            $tmp['last_chapter_name'] = '';
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
-            } else {
-                $tmp['last_chapter_id'] = 0;
-                $tmp['last_chapter_name'] = '';
+                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
+                    $tmp['last_chapter_read'] = true;
+                }
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
@@ -1455,12 +1470,15 @@ class Apiv1Controller extends Controller
                 continue;
             }
             $tmp = $book->to_array(array('id','name', 'image', 'release_date'));
+            $tmp['last_chapter_read'] = false;
+            $tmp['last_chapter_id'] = 0;
+            $tmp['last_chapter_name'] = '';
             if(!empty($book->lastChapter)) {
                 $tmp['last_chapter_id'] = $book->lastChapter->id;
                 $tmp['last_chapter_name'] = $book->lastChapter->name;
-            } else {
-                $tmp['last_chapter_id'] = 0;
-                $tmp['last_chapter_name'] = '';
+                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
+                    $tmp['last_chapter_read'] = true;
+                }
             }
             $tmp['tags'] = array();
             $tmp['authors'] = array();
