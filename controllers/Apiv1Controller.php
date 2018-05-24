@@ -132,7 +132,7 @@ class Apiv1Controller extends Controller
             );
         }
         $fields = array(
-            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters'
+            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters','count_views'
         );
         $book = filter_values($book_data, $fields);
         $options = array(

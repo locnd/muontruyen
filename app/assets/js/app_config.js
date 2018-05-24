@@ -159,9 +159,6 @@ function checkLogin(is_need_login) {
 }
 function show_elements() {
     if (is_logined()) {
-        if(is_admin()) {
-            $('.for-admin').show();
-        }
         $('.logined').show();
     } else {
         $('.not_logined').show();
@@ -509,5 +506,10 @@ function check_header() {
     } else {
         $('#chapter-header').hide();
         $('#common-header').show();
+    }
+}
+function show_admin() {
+    if(is_admin()) {
+        $('.for-admin').show();
     }
 }
