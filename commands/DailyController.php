@@ -46,12 +46,7 @@ class DailyController extends Controller
         }
         $to_page = $page+1;
         if($page > 30) {
-            $page = $setting_model->get_setting('daily_finished');
-            if($page == '') {
-                $page = 0;
-            } else {
-                $page = (int) $page;
-            }
+            $page = (int) $setting_model->get_setting('daily_finished');
             $page++;
             $to_page = $page+1;
             $setting_model->set_setting('daily_finished', $to_page);

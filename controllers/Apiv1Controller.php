@@ -735,6 +735,9 @@ class Apiv1Controller extends Controller
                 $options['Cron'] = 'running';
             }
             $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
+
+            $options['Cronners'] = (int) $setting_model->get_setting('cronners');
+            $options['Book Crons'] = BookCron::find()->where(array('status'=>1))->count().' - '.BookCron::find()->where(array('status'=>0))->count();
         }
         return array(
             'success' => true,

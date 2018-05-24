@@ -16,6 +16,7 @@ use yii\console\ExitCode;
 
 use app\models\BookCron;
 use app\models\Book;
+use app\models\Setting;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -36,12 +37,15 @@ class ActionController extends Controller
     {
         ini_set('memory_limit', '-1');
 
-        $running = BookCron::find()->where(array('status'=>1))->count();
-        if($running >= 24) {
+        $setting_model = new Setting();
+        $cronners = (int) $setting_model->get_setting('cronners');
+        if($cronners >= 5) {
             return ExitCode::OK;
         }
+        $cronners++;
+        $setting_model->set_setting('cronners', $cronners);
 
-        $books_cron = BookCron::find()->limit(4)->where(array('status'=>0))->all();
+        $books_cron = BookCron::find()->limit(1)->where(array('status'=>0))->all();
 
         $book_urls = array();
         $db_books = array();
@@ -70,6 +74,9 @@ class ActionController extends Controller
                 $db_book_cron->save();
             }
         }
+        $cronners = (int) $setting_model->get_setting('cronners');
+        $cronners--;
+        $setting_model->set_setting('cronners', max($cronners,0));
         return ExitCode::OK;
     }
 }

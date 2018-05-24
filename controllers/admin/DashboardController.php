@@ -2,6 +2,7 @@
 
 namespace app\controllers\admin;
 
+use app\models\BookCron;
 use app\models\Scraper;
 use yii\web\Controller;
 use app\models\User;
@@ -45,6 +46,8 @@ class DashboardController extends Controller
         if ($setting_model->get_setting('cron_running') != '') {
             $options['Cron'] = 'running';
         }
+        $options['Cronners'] = (int) $setting_model->get_setting('cronners');
+        $options['Book Crons'] = BookCron::find()->where(array('status'=>1))->count().' - '.BookCron::find()->where(array('status'=>0))->count();
         if (Yii::$app->request->post()){
             $user_id = Yii::$app->request->post('user_id');
             $message = Yii::$app->request->post('message');
