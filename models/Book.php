@@ -126,13 +126,7 @@ class Book extends ModelCommon
             curl_exec($ch);
             curl_close($ch);
             fclose($fp);
-            if(file_exists($image_dir) && filesize($image_dir) == 0) {
-                $this->image = 'default.jpg';
-                $this->save();
-                unlink($image_dir);
-            } else {
-                $this->save();
-            }
+            $this->save();
         }
         return \Yii::$app->urlManager->createAbsoluteUrl(['/']) . 'uploads/books/default.jpg';
     }

@@ -7,6 +7,7 @@
 
 namespace app\commands;
 
+use app\models\BookCron;
 use Yii;
 
 use yii\console\Controller;
@@ -108,6 +109,27 @@ class CronController extends Controller
         $scraper->skip_chapter_existed = true;
         foreach ($servers as $server) {
             $scraper->parse_server($server, 1, 2);
+        }
+
+        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
+            $count_book = Book::find()->count();
+            $page=ceil($count_book/36);
+            if($count_book % 36 == 0) {
+                $page++;
+            }
+            $to_page = $page;
+            if($page > 30) {
+                $page = (int) $setting_model->get_setting('daily_finished');
+                $page++;
+                $to_page = $page;
+                $setting_model->set_setting('daily_finished', $to_page);
+            }
+            $scraper = new Scraper();
+            $scraper->skip_book_existed = true;
+            $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
+            foreach ($servers as $server) {
+                $scraper->parse_server($server, $page, $to_page, true);
+            }
         }
 
         $setting_model->set_setting('cron_running', '');
