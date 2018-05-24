@@ -182,71 +182,62 @@ class Apiv1Controller extends Controller
     {
         ini_set('memory_limit', '-1');
         $id = (int) Yii::$app->request->get('id',0);
-        $fields = array('id', 'book_id','name');
-        $chapter = Chapter::find()->select($fields)->where(array('id'=>$id, 'status'=>Chapter::ACTIVE))->one();
-        if(empty($chapter)) {
+        $data_chapter = get_chapter_detail($id);
+        if(empty($data_chapter)) {
             return array(
                 'success' => false,
                 'message' => 'Chương truyện này không khả dụng'
             );
         }
-        $book = $chapter->book;
-        $book_data = $chapter->book->to_array(array('id','name'));
+        $fields = array('id', 'book_id','name', 'images');
+        $chapter = filter_values($data_chapter, $fields);
         $user = $this->check_user();
-        if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter->id))->count() == 0) {
+        if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter['id']))->count() == 0) {
             $read = new Read();
             $read->user_id = $user->id;
-            $read->chapter_id = $chapter->id;
+            $read->chapter_id = $chapter['id'];
             $read->save();
         }
-        $book_data['make_read'] = false;
-        $book_data['is_following'] = false;
-        $book_data['unread'] = 0;
+        $book_data = get_book_detail($chapter['book_id']);
+        $fields = array('id', 'name','chapters');
+        $book = filter_values($book_data, $fields);
+        $book['is_following'] = false;
+        $book['make_read'] = false;
+        $book['unread'] = 0;
+
         $groups = array();
         if(!empty($user->id)) {
-            foreach ($user->groups as $group) {
-                if($group->status == Group::INACTIVE) { continue; }
-                $tmp_group = $group->to_array(array('id', 'name'));
-                $tmp_group['name'] .= ' ('.count($group->follows).')';
-                $groups[] = $tmp_group;
-            }
-            $follow = Follow::find()->where(array('book_id'=>$book->id,'user_id'=>$user->id))->one();
+            $groups = get_user_groups($user->id);
+            $follow = Follow::find()->where(array('book_id'=>$chapter['book_id'],'user_id'=>$user->id))->one();
             if(!empty($follow)) {
-                $book_data['is_following'] = true;
+                $book['is_following'] = true;
                 if($follow->status == Follow::UNREAD) {
                     $follow->status = Follow::READ;
                     $follow->save();
-                    $book_data['make_read'] = true;
-                    $books_ids = array();
-                    foreach ($user->follows as $u_follow) {
-                        if ($u_follow->status == Follow::UNREAD) {
-                            $books_ids[] = $u_follow->book_id;
-                        }
-                    }
-                    $book_data['unread'] = Book::find()->where(array('id'=>$books_ids,'status'=>Book::ACTIVE))->count();
+                    $book['make_read'] = true;
+                    $book['unread'] = Follow::find()->where(array('user_id' => $user->id, 'status' => Follow::UNREAD))->count();
                 }
             }
         }
-        $images = array();
-        foreach ($chapter->images as $image) {
-            $images[] = $image->to_array(array('id', 'image'));
-        }
-        $book->count_views = $book->count_views + 1;
-        $book->save();
+        $db_book = Book::find()->select(array('id', 'count_views'))->where(array('id'=>$chapter['book_id']))->one();
+        $db_book->count_views = $db_book->count_views + 1;
+        $db_book->save();
+
+        $images = $chapter['images'];
+        unset($chapter['images']);
+
         $check_bookmark = 0;
         if(!empty($user->id)) {
             $check_bookmark = Bookmark::find()->where(array(
                 'user_id' => $user->id, 'chapter_id' => $chapter->id, 'status' => 1))->count();
         }
-        $chapters = array();
-        foreach ($book->chapters as $chap) {
-            $chapters[] = $chap->to_array(array('id', 'name'));
-        }
+        $chapters = $book['chapters'];
+        unset($book['chapters']);
         return array(
             'success' => true,
             'data' => $chapter,
             'chapters' => $chapters,
-            'book' => $book_data,
+            'book' => $book,
             'images' => $images,
             'is_bookmark' => $check_bookmark > 0 ? true : false,
             'groups' => $groups

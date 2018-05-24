@@ -343,6 +343,7 @@ class Scraper
                 $db_chapters[$num]->will_reload = 1;
             }
             $db_chapters[$num]->save();
+            Yii::$app->cache->delete('chapter_detail_'.$db_chapters->id);
         }
     }
 

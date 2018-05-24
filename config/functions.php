@@ -257,3 +257,28 @@ function filter_values($data, $options) {
     }
     return $result;
 }
+function get_chapter_detail($id) {
+    $data = Yii::$app->cache->getOrSet('chapter_detail_'.$id, function () use ($id) {
+        $chapter = app\models\Chapter::find()->where(array('id'=>$id, 'status'=>1))->one();
+        if(empty($chapter)) {
+            return null;
+        }
+        $tmp = $chapter->to_array();
+        $tmp['book'] = array(
+            'id' => $chapter->book->id,
+            'name' => $chapter->book->name,
+            'make_read' => false,
+            'is_following' => false,
+            'unread' => 0
+        );
+        $tmp['images'] = array();
+        foreach ($chapter->images as $image) {
+            $tmp['images'][] = $image->to_array(array('id', 'image'));
+        }
+        return $tmp;
+    });
+    if(empty($data)) {
+        Yii::$app->cache->delete('chapter_detail_'.$id);
+    }
+    return $data;
+}
