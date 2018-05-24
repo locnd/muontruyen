@@ -239,11 +239,21 @@ function get_tags() {
         $tags = app\models\Tag::find()->select($tag_fields)->where(array('status' => 1))->orderBy(array('stt' => SORT_ASC, 'name' => SORT_ASC, 'id' => SORT_DESC))->all();
         $tag_data = array();
         foreach ($tags as $tag) {
-            $tmp = $tag->to_array(array('id', 'name', 'stt', 'type'));
+            $tmp = $tag->to_array(array('id', 'name', 'type'));
             $tmp['is_checked'] = false;
             $tmp['count'] = app\models\BookTag::find()->where(array('tag_id'=>$tag->id))->count();
             $tag_data[] = $tmp;
         }
         return $tag_data;
     });
+}
+function filter_values($data, $options) {
+    $result = array();
+    foreach ($data as $k => $v) {
+        if(!empty($options) && !in_array($k, $options)) {
+            continue;
+        }
+        $result[$k] = $v;
+    }
+    return $result;
 }

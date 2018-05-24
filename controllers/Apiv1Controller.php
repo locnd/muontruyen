@@ -100,7 +100,11 @@ class Apiv1Controller extends Controller
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
                 $data_book['last_chapter_read'] = true;
             }
-            $data[] = $data_book;
+            $fields = array(
+                'id', 'name', 'release_date', 'image', 'tags', 'authors',
+                'last_chapter_id', 'last_chapter_name', 'last_chapter_read'
+            );
+            $data[] = filter_values($data_book, $fields);
         }
 
         if(empty($data)) {
@@ -120,13 +124,17 @@ class Apiv1Controller extends Controller
     {
         ini_set('memory_limit', '-1');
         $id = (int) Yii::$app->request->get('id',0);
-        $book = get_book_detail($id);
-        if(empty($book)) {
+        $book_data = get_book_detail($id);
+        if(empty($book_data)) {
             return array(
                 'success' => false,
                 'message' => 'Truyện này không khả dụng'
             );
         }
+        $fields = array(
+            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters'
+        );
+        $book = filter_values($book_data, $fields);
         $options = array(
             'is_following' => false,
             'make_read' => false,
