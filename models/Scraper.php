@@ -63,7 +63,11 @@ class Scraper
             }
             if ($this->echo) echo '' . "\n";
 
+            $skip_books = 0;
             foreach ($list_books as $i => $book) {
+                if($skip_books > 5) {
+                    break 2;
+                }
                 $book_url = $this->get_full_href($server, $book->href);
                 if($this->skip_book_existed) {
                     if(Book::find()->where(array('url'=>$book_url))->count() > 0) {
@@ -74,7 +78,8 @@ class Scraper
                 $first_chapter = $book->parent()->parent()->find('li.chapter')[0]->find('a')[0];
                 $first_chapter_url = $this->get_full_href($server, $first_chapter->href);
                 if(Chapter::find()->where(array('url'=>$first_chapter_url))->count() > 0) {
-                    break 2;
+                    $skip_books++;
+                    continue;
                 }
                 if ($this->echo) {
                     echo ' ----- ' . $book_url . "\n";
