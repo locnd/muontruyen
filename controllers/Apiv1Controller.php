@@ -91,21 +91,11 @@ class Apiv1Controller extends Controller
         $sort_array['release_date'] = SORT_DESC;
         $sort_array['id'] = SORT_DESC;
         $books->orderBy($sort_array);
-        $cache_orders = $books = $books->all();
-
-        if($sort == 0) {
-            $cache_orders = Yii::$app->cache->getOrSet('list_new_books', function () use ($books) {
-                return $books;
-            });
-        }
+        $books = $books->all();
 
         $data = array();
         $user = $this->check_user();
-        foreach($books as $stt => $tmp_book) {
-            if($tmp_book->id != $cache_orders[$stt]->id) {
-                Yii::$app->cache->delete('book_detail_'.$tmp_book->id);
-            }
-
+        foreach($books as $tmp_book) {
             $data_book = get_book_detail($tmp_book->id);
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
                 $data_book['last_chapter_read'] = true;

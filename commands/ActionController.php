@@ -44,33 +44,30 @@ class ActionController extends Controller
         }
         $cronners++;
         $setting_model->set_setting('cronners', $cronners);
-        $books_cron = BookCron::find()->limit(1)->where(array('status'=>0))->orderBy(array('level'=>SORT_DESC))->all();
+        $book_cron = BookCron::find()->limit(1)->where(array('status'=>0))->orderBy(array('level'=>SORT_DESC))->one();
 
-        $book_urls = array();
-        $db_books = array();
-        $db_book_crons = array();
-        foreach ($books_cron as $book_cron) {
+        if(!empty($book_cron)) {
             $book = Book::find()->where(array('url' => $book_cron->book_url))->one();
             if (!empty($book) && $book->status == Book::INACTIVE && $book->will_reload == 0) {
                 $book_cron->status = 2;
                 $book_cron->save();
-                continue;
-            }
-            $book_cron->status = 1;
-            $book_cron->save();
-            $book_urls[] = $book_cron->book_url;
-            $db_books[] = $book;
-            $db_book_crons[] = $book_cron;
-        }
-        if(!empty($book_urls)) {
-            $server = Server::find()->where(array('status'=>1))->one();
-            $scraper = new Scraper();
-            $scraper->echo = false;
-            $scraper->parse_books($server, $book_urls, $db_books);
+            } else {
+                $book_cron->status = 1;
+                $book_cron->save();
 
-            foreach ($db_book_crons as $db_book_cron) {
-                $db_book_cron->status = 2;
-                $db_book_cron->save();
+                $server = Server::find()->where(array('status'=>1))->one();
+                $scraper = new Scraper();
+                $scraper->echo = false;
+                $scraper->parse_books($server, array($book_cron->book_url), array($book));
+
+                $book_cron->status = 2;
+                $book_cron->save();
+                if(!empty($book)) {
+                    Yii::$app->cache->delete('book_detail_'.$book->id);
+                } else {
+                    Yii::$app->cache->delete('tags_list');
+                    Yii::$app->cache->delete('book_searchs');
+                }
             }
         }
         $cronners = (int) $setting_model->get_setting('cronners');
