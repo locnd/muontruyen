@@ -189,9 +189,7 @@ function get_book_detail($id) {
         $tmp['last_chapter_name'] = '';
         foreach($book->bookTags as $book_tag) {
             $tmp_tag = $book_tag->tag;
-            if($tmp_tag->status == 0) {
-                continue;
-            }
+            if($tmp_tag->status == 0) { continue; }
             if($tmp_tag->type == 0) {
                 $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
             } else {
@@ -200,9 +198,7 @@ function get_book_detail($id) {
         }
         $tmp['chapters'] = array();
         foreach ($book->chapters as $stt => $chapter) {
-            if($chapter->status == 0) {
-                continue;
-            }
+            if($chapter->status == 0) { continue; }
             if($stt == 0) {
                 $tmp['last_chapter_id'] = $chapter->id;
                 $tmp['last_chapter_name'] = $chapter->name;
