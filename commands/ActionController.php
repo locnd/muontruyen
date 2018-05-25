@@ -59,15 +59,9 @@ class ActionController extends Controller
                 $scraper = new Scraper();
                 $scraper->echo = false;
                 $scraper->parse_books($server, array($book_cron->book_url), array($book));
-
+                usleep(100000);
                 $book_cron->status = 2;
                 $book_cron->save();
-                if(!empty($book)) {
-                    Yii::$app->cache->delete('book_detail_'.$book->id);
-                } else {
-                    Yii::$app->cache->delete('tags_list');
-                    Yii::$app->cache->delete('book_searchs');
-                }
             }
         }
         $cronners = (int) $setting_model->get_setting('cronners');

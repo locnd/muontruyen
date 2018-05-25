@@ -141,7 +141,9 @@ class Scraper
             } else {
                 $book = new Book();
             }
+            $is_new_book = false;
             if (empty($book->slug)) {
+                $is_new_book = true;
                 $title = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
                 $new_slug = $slug = $this->createSlug($title);
                 $tm = 1;
@@ -261,6 +263,11 @@ class Scraper
                 $book->will_reload = 1;
             }
             $book->save();
+            Yii::$app->cache->delete('book_detail_'.$book->id);
+            if($is_new_book) {
+                Yii::$app->cache->delete('tags_list');
+                Yii::$app->cache->delete('book_searchs');
+            }
         }
     }
     public function parse_chapters($server, $chapter_urls, $db_chapters, $book) {
@@ -343,6 +350,7 @@ class Scraper
                 $db_chapters[$num]->will_reload = 1;
             }
             $db_chapters[$num]->save();
+            Yii::$app->cache->delete('chapter_detail_'.$db_chapters[$num]->id);
         }
     }
 
