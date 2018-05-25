@@ -1083,6 +1083,7 @@ class Apiv1Controller extends Controller
                 'message' => 'Hãy chọn thông tin'
             );
         }
+        Yii::$app->cache->delete('book_detail_'.$book_id);
         return array(
             'success' => true
         );

@@ -207,11 +207,14 @@ class Scraper
             $db_chapters = array();
             $chapter_urls = array();
             $chapter_skip = 0;
-            $dem_new_chapter = 0;
+            $has_new_chapter = false;
             foreach ($chapters as $num => $chapter) {
                 if($chapter_skip > 2) { break; }
                 $chapter_url = $this->get_full_href($server, $chapter->href);
                 $db_chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
+                if(!empty($db_chapter) && $db_chapter->status == Chapter::INACTIVE && $chapter->will_reload == 0) {
+                    continue;
+                }
                 if(!empty($db_chapter) && $this->skip_chapter_existed) {
                     $chapter_skip++;
                     continue;
@@ -224,10 +227,10 @@ class Scraper
                     if (strpos($name, 'raw') !== false) {
                         continue;
                     }
-                    $dem_new_chapter++;
+                    $has_new_chapter = true;
                     $db_chapter = new Chapter();
                     $db_chapter->book_id = $book->id;
-                    $db_chapter->stt = count($chapters) - $num + 1;
+                    $db_chapter->stt = count($chapters) - $num + 1; // should not + 1
                     $db_chapter->url = $chapter_url;
                     $db_chapter->name = ucfirst($name);
                     $db_chapter->status = Chapter::INACTIVE;
@@ -244,7 +247,7 @@ class Scraper
             }
             $book->status = Book::ACTIVE;
             $book->will_reload = 0;
-            if($dem_new_chapter > 0) {
+            if($has_new_chapter) {
                 $book->release_date = date('Y-m-d H:i:s');
                 foreach ($book->follows as $follow) {
                     $follow->status = Follow::UNREAD;
