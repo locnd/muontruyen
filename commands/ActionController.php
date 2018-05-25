@@ -44,8 +44,7 @@ class ActionController extends Controller
         }
         $cronners++;
         $setting_model->set_setting('cronners', $cronners);
-
-        $books_cron = BookCron::find()->limit(1)->where(array('status'=>0))->all();
+        $books_cron = BookCron::find()->limit(1)->where(array('status'=>0))->orderBy(array('level'=>SORT_DESC))->all();
 
         $book_urls = array();
         $db_books = array();

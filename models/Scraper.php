@@ -94,6 +94,7 @@ class Scraper
                     $cron->save();
                 }
                 if($cron->status == 2) {
+                    $cron->level = 1;
                     $cron->status = 0;
                     $cron->save();
                 }

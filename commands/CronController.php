@@ -111,7 +111,7 @@ class CronController extends Controller
             $scraper->parse_server($server, 1, 2);
         }
 
-        if(BookCron::find()->where(array('status' => 0))->count() < 5) {
+        if(BookCron::find()->where(array('status' => 0))->count() < 3) {
             $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
             if($count_book % 36 == 0) {

@@ -226,7 +226,12 @@ function get_user_groups($user_id) {
         $groups = array();
         foreach ($db_groups as $group) {
             $tmp_group = $group->to_array(array('id', 'name'));
-            $tmp_group['name'] .= ' ('.count($group->follows).')';
+            $book_ids = array();
+            foreach ($group->follows as $follow) {
+                $book_ids[] = $follow->book_id;
+            }
+            $count = app\models\Book::find()->where(array('id'=>$book_ids,'status'=>1))->count();
+            $tmp_group['name'] .= ' ('.$count.')';
             $groups[] = $tmp_group;
         }
         return $groups;
@@ -241,7 +246,11 @@ function get_tags() {
         foreach ($tags as $tag) {
             $tmp = $tag->to_array(array('id', 'name', 'type'));
             $tmp['is_checked'] = false;
-            $tmp['count'] = app\models\BookTag::find()->where(array('tag_id'=>$tag->id))->count();
+            $book_ids = array();
+            foreach ($tag->bookTags as $book_tag) {
+                $book_ids[] = $book_tag->book_id;
+            }
+            $tmp['count'] = app\models\Book::find()->where(array('id'=>$book_ids,'status'=>1))->count();
             $tag_data[] = $tmp;
         }
         return $tag_data;

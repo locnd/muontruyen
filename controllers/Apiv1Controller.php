@@ -629,13 +629,12 @@ class Apiv1Controller extends Controller
     }
     public function actionTags() {
         $type = (int) Yii::$app->request->get('type',0);
-        $fields = array('id', 'name');
-        $tags = Tag::find()->select($fields)->where(array('status'=>Tag::ACTIVE, 'type'=>$type))->orderBy(array('stt'=>SORT_ASC,'slug' => SORT_ASC, 'id' => SORT_DESC))->all();
+        $tags = get_tags();
         $data = array();
         foreach ($tags as $tag) {
-            $tmp = $tag->to_array(array('id', 'name'));
-            $tmp['count'] = BookTag::find()->where(array('tag_id'=>$tag->id))->count();
-            $data[] = $tmp;
+            if($tag['type'] == $type) {
+                $data[] = $tag;
+            }
         }
         if(empty($data)) {
             return array(
