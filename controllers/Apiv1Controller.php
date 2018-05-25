@@ -132,9 +132,14 @@ class Apiv1Controller extends Controller
             );
         }
         $fields = array(
-            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters','count_views'
+            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters'
         );
         $book = filter_values($book_data, $fields);
+        $db_book = Book::find()->select(array('id', 'count_views'))->where(array('id'=>$id))->one();
+        $db_book->count_views = $db_book->count_views + 1;
+        $db_book->save();
+        $book['count_views'] = $db_book->count_views;
+
         $options = array(
             'is_following' => false,
             'make_read' => false,
