@@ -187,7 +187,7 @@ class Scraper
                 }
                 $author = $book_html_base->find($server->list_authors_key)[0];
                 $author_str = strtolower(trim($this->get_text($author->plaintext), ' .,-'));
-                if ($author_str != 'đang cập nhật') {
+                if ($author_str != 'đang cập nhật' && $author_str != 'chưa cập nhật') {
                     $authors = $author->find('a');
                     foreach ($authors as $author) {
                         $tags[] = 'author:' . trim($this->get_text($author->plaintext), ' .,-');
