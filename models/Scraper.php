@@ -212,9 +212,6 @@ class Scraper
                 if($chapter_skip > 2) { break; }
                 $chapter_url = $this->get_full_href($server, $chapter->href);
                 $db_chapter = Chapter::find()->where(array('url' => $chapter_url))->one();
-                if (!empty($db_chapter) && $db_chapter->status == Chapter::INACTIVE && $db_chapter->will_reload == 0) {
-                    continue;
-                }
                 if(!empty($db_chapter) && $this->skip_chapter_existed) {
                     $chapter_skip++;
                     continue;
