@@ -1386,12 +1386,19 @@ class Apiv1Controller extends Controller
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
                 $data_book['last_chapter_read'] = true;
             }
+            $chapters = array();
+            foreach ($data_book['chapters'] as $chapter) {
+                if (in_array($chapter['id'],$chapter_ids[$tmp_book->id])) {
+                    $chapters[] = $chapter;
+                }
+            }
+            $data_book['chapters'] = $chapters;
             $fields = array(
-                'id', 'name', 'release_date', 'image', 'tags', 'authors',
-                'chapters'
+                'id', 'name', 'release_date', 'image', 'tags', 'authors', 'chapters'
             );
             $data[] = filter_values($data_book, $fields);
         }
+
         if(empty($data)) {
             return array(
                 'success' => false,
