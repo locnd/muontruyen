@@ -529,18 +529,16 @@ function send_follow(book_id, is_following) {
     };
     send_api('POST', '/make-follow', params, function(res) {
         if (res.success) {
-            is_following = res.data;
-            if(is_following) {
+            if(res.data) {
                 dl_alert('success', 'Đã theo dõi', false);
                 $('#list_group').fadeOut( 500, function() {
                     $('.dl-overlay').fadeOut(1);
-                    if(group_id == 0) {
-                        display_groups(book_id, res.groups);
-                    }
+                    display_groups(book_id, res.groups);
                 });
                 $('#follow-btn').removeClass('btn-bookmark').addClass('btn-unbookmark');
                 $('#top_follow a').removeClass('btn-follow').addClass('btn-unfollow');
             } else {
+                display_groups(book_id, res.groups);
                 dl_alert('success', 'Đã bỏ theo dõi', false);
                 $('#follow-btn').removeClass('btn-unbookmark').addClass('btn-bookmark');
                 $('#top_follow a').removeClass('btn-unfollow').addClass('btn-follow');
@@ -575,9 +573,11 @@ function display_groups(book_id, groups) {
         html += '</div>';
     }
     html += '<div class="btn-send-follow" onclick="send_follow('+book_id+',false)">Theo dõi</div>';
-    html += '<div>';
-    html += '<label>Chỉ có thể tạo tối đa 5 nhóm</label>';
-    html += '</div>';
+    if(groups.length < 5) {
+        html += '<div>';
+        html += '<label>Chỉ có thể tạo tối đa 5 nhóm</label>';
+        html += '</div>';
+    }
     $('#list_group').html(html);
 }
 
@@ -712,7 +712,7 @@ function show_follow(tab, page, is_first) {
                 var html = '';
                 for (var i = 0; i < groups.length; i++) {
                     html += '<div id="group' + groups[i].id + '" onclick="show_follow(' + groups[i].id + ',1, false)" class="section-container a-book">';
-                    html += '<div>' + groups[i].name + ' (' + groups[i].count + ')</div>';
+                    html += '<div>' + groups[i].name + '</div>';
                     html += '</div>';
                 }
                 $('#list_groups').append(html);
