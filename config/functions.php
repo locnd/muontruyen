@@ -175,6 +175,7 @@ function remove_symbols($string, $is_number=true, $is_vietnamese=true, $is_lower
     $string = preg_replace( '/[^'.$basic . $utf8 . $special . '\s+]+/iu', '', $string );
     return $string;
 }
+
 function get_book_detail($id) {
     $data = Yii::$app->cache->getOrSet('book_detail_'.$id, function () use ($id) {
         $book = app\models\Book::find()->where(array('id'=>$id))->one();
@@ -278,6 +279,7 @@ function get_chapter_detail($id) {
         );
         $tmp['images'] = array();
         foreach ($chapter->images as $image) {
+            if($image->status == 0) { continue; }
             $tmp['images'][] = $image->to_array(array('id', 'image'));
         }
         return $tmp;

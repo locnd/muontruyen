@@ -250,7 +250,9 @@ class Apiv1Controller extends Controller
     }
     public function actionBookforsearch() {
         ini_set('memory_limit', '-1');
-        $books = Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->all();
+        $books = Yii::$app->cache->getOrSet('book_searchs', function () {
+            return Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->all();
+        });
         return array(
             'success' => true,
             'data' => $books
@@ -1389,6 +1391,7 @@ class Apiv1Controller extends Controller
             $chapters = array();
             foreach ($data_book['chapters'] as $chapter) {
                 if (in_array($chapter['id'],$chapter_ids[$tmp_book->id])) {
+                    $chapter['read'] = true;
                     $chapters[] = $chapter;
                 }
             }
