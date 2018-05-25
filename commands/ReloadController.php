@@ -56,8 +56,8 @@ class ReloadController extends Controller
                 $db_books[$server->id] = array();
                 $book_urls[$server->id] = array();
             }
-            $book_urls[$server->id][] = array($book->url);
-            $db_books[$server->id][] = array($book);
+            $book_urls[$server->id][] = $book->url;
+            $db_books[$server->id][] = $book;
             $db_servers[$server->id] = $book->server;
         }
         if($scraper->echo) {

@@ -39,7 +39,7 @@ class ActionController extends Controller
 
         $setting_model = new Setting();
         $cronners = (int) $setting_model->get_setting('cronners');
-        if($cronners >= 5) {
+        if($cronners >= 4) {
             return ExitCode::OK;
         }
         $cronners++;

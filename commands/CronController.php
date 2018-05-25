@@ -62,8 +62,8 @@ class CronController extends Controller
                 $db_books[$server->id] = array();
                 $book_urls[$server->id] = array();
             }
-            $book_urls[$server->id][] = array($book->url);
-            $db_books[$server->id][] = array($book);
+            $book_urls[$server->id][] = $book->url;
+            $db_books[$server->id][] = $book;
             $db_servers[$server->id] = $book->server;
         }
         if($scraper->echo) {
@@ -111,7 +111,7 @@ class CronController extends Controller
             $scraper->parse_server($server, 1, 2);
         }
 
-        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
+        if(BookCron::find()->where(array('status' => 0))->count() < 5) {
             $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
             if($count_book % 36 == 0) {
