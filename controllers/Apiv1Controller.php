@@ -868,6 +868,7 @@ class Apiv1Controller extends Controller
         $tmp2 = $chapters_data[$id1];
         $chapters_data[$id1] = $chapters_data[$id2];
         $chapters_data[$id2] = $tmp2;
+        Yii::$app->cache->delete('book_detail_'.$chapter->book_id);
         return array(
             'success' => true,
             'data' => $chapters_data
@@ -903,6 +904,7 @@ class Apiv1Controller extends Controller
             $tag->status = Tag::ACTIVE;
             $tag->save();
         }
+        Yii::$app->cache->delete('tags_list');
         return array(
             'success' => true,
             'data' => $tag
@@ -997,6 +999,7 @@ class Apiv1Controller extends Controller
         foreach ($imgs as $img) {
             $data[] = $img->to_array();
         }
+        Yii::$app->cache->delete('chapter_detail_'.$image->chapter_id);
         return array(
             'success' => true,
             'data' =>$data
@@ -1034,6 +1037,8 @@ class Apiv1Controller extends Controller
         }
         $chapter->name = $name;
         $chapter->save();
+        Yii::$app->cache->delete('book_detail_'.$chapter->book_id);
+        Yii::$app->cache->delete('chapter_detail_'.$chapter_id);
         return array(
             'success' => true
         );
@@ -1092,7 +1097,7 @@ class Apiv1Controller extends Controller
         ini_set('memory_limit', '-1');
         $keyword = Yii::$app->request->get('keyword','');
 
-        $fields = array('id','name', 'image', 'release_date', 'slug');
+        $fields = array('id');
         $books = Book::find()->select($fields)->where(array('status'=>Book::ACTIVE))->andFilterWhere([
             'or',
             ['like', 'name', $keyword],
@@ -1130,33 +1135,17 @@ class Apiv1Controller extends Controller
         $books = $books->all();
 
         $data = array();
-        $user=$this->check_user();
-        foreach ($books as $book) {
-            $tmp = $book->to_array();
-            $tmp['last_chapter_read'] = false;
-            $tmp['last_chapter_id'] = 0;
-            $tmp['last_chapter_name'] = '';
-            if(!empty($book->lastChapter)) {
-                $tmp['last_chapter_id'] = $book->lastChapter->id;
-                $tmp['last_chapter_name'] = $book->lastChapter->name;
-                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
-                    $tmp['last_chapter_read'] = true;
-                }
+        $user = $this->check_user();
+        foreach($books as $tmp_book) {
+            $data_book = get_book_detail($tmp_book->id);
+            if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
+                $data_book['last_chapter_read'] = true;
             }
-            $tmp['tags'] = array();
-            $tmp['authors'] = array();
-            foreach($book->bookTags as $book_tag) {
-                $tmp_tag = $book_tag->tag;
-                if($tmp_tag->status == Tag::INACTIVE) {
-                    continue;
-                }
-                if($tmp_tag->type == 0) {
-                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
-                } else {
-                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
-                }
-            }
-            $data[] = $tmp;
+            $fields = array(
+                'id', 'name', 'release_date', 'image', 'tags', 'authors',
+                'last_chapter_id', 'last_chapter_name', 'last_chapter_read'
+            );
+            $data[] = filter_values($data_book, $fields);
         }
         if(empty($data)) {
             return array(
@@ -1205,9 +1194,7 @@ class Apiv1Controller extends Controller
             $book_ids = $f_book_ids;
         }
 
-        $fields = array(
-            'id','name', 'image', 'release_date', 'slug'
-        );
+        $fields = array('id');
         $books = Book::find()->select($fields)->where(array('id'=>$book_ids, 'status'=>Book::ACTIVE));
 
         $total = $books->count();
@@ -1231,34 +1218,16 @@ class Apiv1Controller extends Controller
 
         $data = array();
         $user = $this->check_user();
-        foreach ($books as $book) {
-            $tmp = $book->to_array(array(
-                'id','name', 'image', 'release_date'
-            ));
-            $tmp['last_chapter_read'] = false;
-            $tmp['last_chapter_id'] = 0;
-            $tmp['last_chapter_name'] = '';
-            if(!empty($book->lastChapter)) {
-                $tmp['last_chapter_id'] = $book->lastChapter->id;
-                $tmp['last_chapter_name'] = $book->lastChapter->name;
-                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
-                    $tmp['last_chapter_read'] = true;
-                }
+        foreach($books as $tmp_book) {
+            $data_book = get_book_detail($tmp_book->id);
+            if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
+                $data_book['last_chapter_read'] = true;
             }
-            $tmp['tags'] = array();
-            $tmp['authors'] = array();
-            foreach($book->bookTags as $book_tag) {
-                $tmp_tag = $book_tag->tag;
-                if($tmp_tag->status == Tag::INACTIVE) {
-                    continue;
-                }
-                if($tmp_tag->type == 0) {
-                    $tmp['tags'][] = $tmp_tag->to_array(array('id', 'name'));
-                } else {
-                    $tmp['authors'][] = $tmp_tag->to_array(array('id', 'name'));
-                }
-            }
-            $data[] = $tmp;
+            $fields = array(
+                'id', 'name', 'release_date', 'image', 'tags', 'authors',
+                'last_chapter_id', 'last_chapter_name', 'last_chapter_read'
+            );
+            $data[] = filter_values($data_book, $fields);
         }
 
         if(empty($data)) {

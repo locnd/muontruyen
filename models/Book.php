@@ -51,7 +51,7 @@ class Book extends ModelCommon
 
     public function add_tag($tag_name) {
         $tag_name = strtolower($tag_name);
-        if($tag_name == 'chưa cập nhật') {
+        if($tag_name == 'chưa cập nhật' || $tag_name == 'đang cập nhật') {
             return true;
         }
         $type = 0;
