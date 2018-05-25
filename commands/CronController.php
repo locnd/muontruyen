@@ -74,6 +74,14 @@ class CronController extends Controller
             foreach ($db_servers as $i => $db_server) {
                 $scraper->parse_books($db_server, $book_urls[$i], $db_books[$i]);
             }
+            foreach ($db_books as $db_server_books) {
+                foreach ($db_server_books as $db_book) {
+                    Yii::$app->cache->delete('book_detail_'.$db_book->id);
+                    foreach ($db_book->chapters as $db_chapter) {
+                        Yii::$app->cache->delete('chapter_detail_'.$db_chapter->id);
+                    }
+                }
+            }
         }
 
         $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
@@ -97,6 +105,10 @@ class CronController extends Controller
         if(count($chapters) > 0) {
             foreach ($db_books as $i => $db_book) {
                 $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
+                Yii::$app->cache->delete('book_detail_'.$db_book->id);
+                foreach ($db_book->chapters as $db_chapter) {
+                    Yii::$app->cache->delete('chapter_detail_'.$db_chapter->id);
+                }
             }
         }
 
