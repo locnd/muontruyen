@@ -423,9 +423,12 @@ class Apiv1Controller extends Controller
             $follow->book->count_follows = max(0,$follow->book->count_follows-1);
             $follow->book->save();
             $follow->delete();
+            Yii::$app->cache->delete('user_groups_'.$user->id);
+            $groups = get_user_groups($user->id);
             return array(
                 'success' => true,
-                'data' => false
+                'data' => false,
+                'groups' => $groups
             );
         }
         $follow = new Follow();
@@ -451,11 +454,8 @@ class Apiv1Controller extends Controller
         $follow->save();
         $follow->book->count_follows = $follow->book->count_follows+1;
         $follow->book->save();
-        $groups = Group::find()->select(array('id', 'name'))->where(array('user_id'=>$user->id,'status'=>Group::ACTIVE))->all();
-        foreach ($groups as $i=>$group) {
-            $groups[$i]['name'] .= ' (' . count($group->follows) . ')';
-        }
         Yii::$app->cache->delete('user_groups_'.$user->id);
+        $groups = get_user_groups($user->id);
         return array(
             'success' => true,
             'data' => true,
@@ -491,7 +491,7 @@ class Apiv1Controller extends Controller
         $limit = get_limit('mobile_limit');
         $page = max((int) getParam('page', 1),1);
         if(!empty($books_ids)) {
-            $fields = array('id','name', 'image', 'release_date', 'slug');
+            $fields = array('id');
             $books = Book::find()->select($fields)->where(array('id' => $books_ids, 'status' => Book::ACTIVE));
             $total = $books->count();
             $total_page = ceil($total / $limit);
@@ -501,34 +501,18 @@ class Apiv1Controller extends Controller
             $books = $books->all();
         }
         $data = array();
-        foreach ($books as $book) {
-            $tmp = $book->to_array(array('id','name', 'image', 'release_date'));
-            $tmp['last_chapter_read'] = false;
-            $tmp['last_chapter_id'] = 0;
-            $tmp['last_chapter_name'] = '';
-            if(!empty($book->lastChapter)) {
-                $tmp['last_chapter_id'] = $book->lastChapter->id;
-                $tmp['last_chapter_name'] = $book->lastChapter->name;
-                if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$book->lastChapter->id))->count() > 0) {
-                    $tmp['last_chapter_read'] = true;
-                }
+        foreach($books as $tmp_book) {
+            $data_book = get_book_detail($tmp_book->id);
+            if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
+                $data_book['last_chapter_read'] = true;
             }
-            $data[] = $tmp;
-        }
-        $groups = array();
-        foreach ($user->groups as $group) {
-            $books_ids = array();
-            foreach ($user->follows as $follow) {
-                if ($follow->group_id == $group->id) {
-                    $books_ids[] = $follow->book_id;
-                }
-            }
-            $groups[] = array(
-                'id' => $group->id,
-                'name' => $group->name,
-                'count' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
+            $fields = array(
+                'id', 'name', 'release_date', 'image',
+                'last_chapter_id', 'last_chapter_name', 'last_chapter_read'
             );
+            $data[] = filter_values($data_book, $fields);
         }
+        $groups = get_user_groups($user->id);
         return array(
             'success' => true,
             'data' => $data,
