@@ -64,7 +64,7 @@ class Scraper
             if ($this->echo) echo '' . "\n";
 
             $skip_books = 0;
-            foreach ($list_books as $i => $book) {
+            foreach ($list_books as $book) {
                 if($skip_books > 5) {
                     break 2;
                 }

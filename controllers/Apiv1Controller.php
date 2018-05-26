@@ -245,7 +245,8 @@ class Apiv1Controller extends Controller
             'book' => $book,
             'images' => $images,
             'is_bookmark' => $check_bookmark > 0 ? true : false,
-            'groups' => $groups
+            'groups' => $groups,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionBookforsearch() {
@@ -262,12 +263,13 @@ class Apiv1Controller extends Controller
         $user_model = new User();
         $errors = $user_model->createUser(Yii::$app->request->post());
         if(!empty($errors->id)) {
+            unset($errors->password);
             return array(
                 'success' => true,
-                'data' => $errors
+                'data' => $errors,
+                'unread' => 0
             );
         }
-        unset($errors->password);
         return array(
             'success' => false,
             'data' => $errors,
@@ -278,18 +280,13 @@ class Apiv1Controller extends Controller
         $user_model = new User();
         $errors = $user_model->login(Yii::$app->request->post());
         if(!empty($errors->id)) {
-            $books_ids = array();
-            foreach ($errors->follows as $follow) {
-                if ($follow->status == Follow::UNREAD) {
-                    $books_ids[] = $follow->book_id;
-                }
-            }
+            unset($errors->password);
             return array(
                 'success' => true,
                 'data' => $errors,
+                'unread' => get_user_unread($errors)
             );
         }
-        unset($errors->password);
         return array(
             'success' => false,
             'data' => $errors,
@@ -413,16 +410,15 @@ class Apiv1Controller extends Controller
             }
         }
         $follow = Follow::find()->where(array('user_id'=>$user->id, 'book_id'=>$book_id))->one();
+        Yii::$app->cache->delete('user_groups_'.$user->id);
         if(!empty($follow)) {
             $follow->book->count_follows = max(0,$follow->book->count_follows-1);
             $follow->book->save();
             $follow->delete();
-            Yii::$app->cache->delete('user_groups_'.$user->id);
-            $groups = get_user_groups($user->id);
             return array(
                 'success' => true,
                 'data' => false,
-                'groups' => $groups
+                'groups' => get_user_groups($user->id)
             );
         }
         $follow = new Follow();
@@ -448,12 +444,10 @@ class Apiv1Controller extends Controller
         $follow->save();
         $follow->book->count_follows = $follow->book->count_follows+1;
         $follow->book->save();
-        Yii::$app->cache->delete('user_groups_'.$user->id);
-        $groups = get_user_groups($user->id);
         return array(
             'success' => true,
             'data' => true,
-            'groups' => $groups
+            'groups' => get_user_groups($user->id)
         );
     }
     public function actionFollow() {
@@ -543,6 +537,7 @@ class Apiv1Controller extends Controller
             }
             $book->status = Book::INACTIVE;
             $book->save();
+            clear_book_cache($book);
         }elseif($book_id == 0 && $chapter_id > 0) {
             $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
             if(empty($chapter)) {
@@ -553,6 +548,7 @@ class Apiv1Controller extends Controller
             }
             $chapter->status = Chapter::INACTIVE;
             $chapter->save();
+            clear_book_cache($chapter->book);
         } else {
             return array(
                 'success' => false,
@@ -706,7 +702,6 @@ class Apiv1Controller extends Controller
         if($setting_model->get_setting('cron_running') != '') {
             $setting_model->set_setting('cron_running', '');
         } else {
-            Yii::$app->cache->flush();
             $setting_model->set_setting('cron_running', 'yes');
         }
         return array(
@@ -1075,7 +1070,7 @@ class Apiv1Controller extends Controller
                 'message' => 'Hãy chọn thông tin'
             );
         }
-        Yii::$app->cache->delete('book_detail_'.$book_id);
+        Yii::$app->cache->delete('book_detail_'.$book->id);
         return array(
             'success' => true
         );
@@ -1420,12 +1415,6 @@ class Apiv1Controller extends Controller
         $errors = $user_model->login_facebook(Yii::$app->request->post());
         if(!empty($errors->id)) {
             unset($errors->password);
-            $books_ids = array();
-            foreach ($errors->follows as $follow) {
-                if ($follow->status == Follow::UNREAD) {
-                    $books_ids[] = $follow->book_id;
-                }
-            }
             return array(
                 'success' => true,
                 'data' => $errors,

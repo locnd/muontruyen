@@ -295,3 +295,15 @@ function get_user_unread($user) {
         return app\models\Book::find()->where(array('id'=>$books_ids,'status'=>1))->count();
     });
 }
+function clear_book_cache($book) {
+    if(empty($book)) {
+        return false;
+    }
+    Yii::$app->cache->delete('book_detail_'.$book->id);
+    Yii::$app->cache->delete('tags_list');
+    Yii::$app->cache->delete('book_searchs');
+    foreach ($book->follows as $follow) {
+        Yii::$app->cache->delete('user_groups_'.$follow->user_id);
+        Yii::$app->cache->delete('user_unread_'.$follow->user_id);
+    }
+}

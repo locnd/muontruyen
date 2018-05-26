@@ -120,7 +120,7 @@ class CronController extends Controller
             if($count_book % 36 == 0) {
                 $page++;
             }
-            if($page > 30) {
+            if($page > 20) {
                 $page = (int) $setting_model->get_setting('daily_finished');
                 $page++;
                 $setting_model->set_setting('daily_finished', $page);
