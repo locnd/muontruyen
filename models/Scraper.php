@@ -256,6 +256,7 @@ class Scraper
                     $follow->status = Follow::UNREAD;
                     $follow->save();
                     $this->send_push_notification($follow->user_id);
+                    Yii::$app->cache->delete('user_unread_'.$follow->user_id);
                 }
             }
             if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {

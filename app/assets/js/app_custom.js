@@ -226,9 +226,6 @@ function show_book(id) {
             display_book_info(res.data, is_following, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
-            if(res.options.make_read) {
-                show_unread(res.options.unread, true);
-            }
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "index.html";
@@ -601,9 +598,6 @@ function show_chapter(id) {
             var images = res.images;
             var chapters = res.chapters;
             display_groups(res.book.id, res.groups);
-            if(book.make_read) {
-                show_unread(book.unread, true);
-            }
             if(book.is_following) {
                 $('#top_follow a').addClass('btn-unfollow');
             } else {
@@ -762,7 +756,6 @@ function show_follow(tab, page, is_first) {
                 return true;
             }
             if(tab == 0) {
-                show_unread(books.length, true);
                 if (books.length > 0) {
                     $('#group0').show();
                 } else {
@@ -808,7 +801,6 @@ function login() {
             if(parseInt(res.data.is_admin) == 1) {
                 localStorage.setItem("is_admin", res.data.is_admin);
             }
-            show_unread(res.unread, true);
             dl_alert('success', 'Đăng nhập thành công', true);
             window.location.href = 'index.html';
         } else {
@@ -1731,11 +1723,11 @@ function bookmark() {
         if (res.success) {
             if(res.data) {
                 dl_alert('success', 'Đã đánh dấu', false);
-                $('#bookmark-btn').html('<icon class="fa fa-star"> Bỏ đánh dấu');
+                $('#bookmark-btn').html('<i class="fa fa-star"></i> Bỏ đánh dấu');
                 $('#bookmark-btn').removeClass('btn-bookmark-chap').addClass('btn-unbookmark-chap');
             } else {
                 dl_alert('success', 'Đã bỏ đánh dấu', false);
-                $('#bookmark-btn').html('<icon class="fa fa-star"> Đánh dấu');
+                $('#bookmark-btn').html('<i class="fa fa-star"></i> Đánh dấu');
                 $('#bookmark-btn').removeClass('btn-unbookmark-chap').addClass('btn-bookmark-chap');
             }
         } else {
@@ -1862,7 +1854,6 @@ function get_facebook_profile(){
                     if(parseInt(res.data.is_admin) == 1) {
                         localStorage.setItem("is_admin", res.data.is_admin);
                     }
-                    show_unread(res.unread, true);
                     dl_alert('success', 'Đăng nhập thành công', true);
                     window.location.href = 'index.html';
                 } else {

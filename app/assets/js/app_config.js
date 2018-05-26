@@ -20,8 +20,7 @@ function onDeviceReady() {
             //console.log("when the app is not active");
             //dl_alert('success', 'Truyện bạn đang theo dõi có cập nhật chương mới', false);
         }
-        localStorage.setItem("unread_time", '');
-        check_unread(false);
+        check_unread();
     });
 
     push.on('error', function(e) {
@@ -98,7 +97,6 @@ $(document).ready(function() {
     fullscreen(false);
     check_device_type();
     if($('#is_offline').length == 0) {
-        check_unread(true);
         get_book_list_for_search();
     } else {
         mark_reads();
@@ -165,23 +163,12 @@ function show_elements() {
     }
 }
 
-function check_unread(check_cache) {
+function check_unread() {
     if(!is_logined()) {
         return true;
     }
-    if(check_cache) {
-        var unread_time = localStorage.getItem("unread_time");
-        var unread = localStorage.getItem("unread");
-        if (unread !== null && unread !== ''
-            && unread_time !== null && unread_time !== '') {
-            if ($.now() < parseInt(unread_time) + 3600000) {
-                show_unread(unread, false);
-                return true;
-            }
-        }
-    }
     send_api('GET', '/unread', {}, function(res){
-        show_unread(res.data, true);
+        show_unread(res.data);
     });
 }
 
@@ -197,11 +184,7 @@ function mark_reads() {
     }
 }
 
-function show_unread(unread, set_cache) {
-    if(set_cache) {
-        localStorage.setItem("unread_time", $.now());
-        localStorage.setItem("unread", unread);
-    }
+function show_unread(unread) {
     if(parseInt(unread) > 0) {
         $('.dl-notify').html(unread);
         $('#btn-more-menu i.dl-notify').removeClass('hidden');
@@ -254,6 +237,9 @@ function send_api(method, url, params, callback) {
         data: params,
         dataType: 'json',
         success: function(result){
+            if(typeof(result.unread) != 'undefined') {
+                show_unread(result.unread);
+            }
             callback(result);
         },
         error: function( xhr ) {

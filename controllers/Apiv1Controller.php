@@ -111,24 +111,28 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => false,
                 'message' => 'Không có truyện',
-                'count_pages' => 0
+                'count_pages' => 0,
+                'unread' => get_user_unread($user)
             );
         }
         return array(
             'success' => true,
             'data' => $data,
-            'count_pages' => $total_page
+            'count_pages' => $total_page,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionBook()
     {
         ini_set('memory_limit', '-1');
+        $user = $this->check_user();
         $id = (int) Yii::$app->request->get('id',0);
         $book_data = get_book_detail($id);
         if(empty($book_data)) {
             return array(
                 'success' => false,
-                'message' => 'Truyện này không khả dụng'
+                'message' => 'Truyện này không khả dụng',
+                'unread' => get_user_unread($user)
             );
         }
         $fields = array(
@@ -141,12 +145,9 @@ class Apiv1Controller extends Controller
         $book['count_views'] = $db_book->count_views;
 
         $options = array(
-            'is_following' => false,
-            'make_read' => false,
-            'unread' => 0
+            'is_following' => false
         );
         $groups = array();
-        $user = $this->check_user();
         if(!empty($user->id)) {
             $groups = get_user_groups($user->id);
             $follow = Follow::find()->where(array('book_id'=>$id,'user_id'=>$user->id))->one();
@@ -155,8 +156,7 @@ class Apiv1Controller extends Controller
                 if($follow->status == Follow::UNREAD) {
                     $follow->status = Follow::READ;
                     $follow->save();
-                    $options['make_read'] = true;
-                    $options['unread'] = Follow::find()->where(array('user_id' => $user->id, 'status' => Follow::UNREAD))->count();
+                    Yii::$app->cache->delete('user_unread_'.$user->id);
                 }
             }
         }
@@ -180,26 +180,29 @@ class Apiv1Controller extends Controller
             'chapters' => $chapters,
             'options' => $options,
             'groups' => $groups,
-            'tags' => $tags
+            'tags' => $tags,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionChapter()
     {
         ini_set('memory_limit', '-1');
+        $user = $this->check_user();
         $id = (int) Yii::$app->request->get('id',0);
         $data_chapter = get_chapter_detail($id);
         if(empty($data_chapter)) {
             return array(
                 'success' => false,
-                'message' => 'Chương truyện này không khả dụng'
+                'message' => 'Chương truyện này không khả dụng',
+                'unread' => get_user_unread($user)
             );
         }
         $fields = array('id', 'book_id','name', 'images');
         $chapter = filter_values($data_chapter, $fields);
-        $user = $this->check_user();
         if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter['id']))->count() == 0) {
             $read = new Read();
             $read->user_id = $user->id;
+            $read->book_id = $chapter['book_id'];
             $read->chapter_id = $chapter['id'];
             $read->save();
         }
@@ -207,8 +210,6 @@ class Apiv1Controller extends Controller
         $fields = array('id', 'name','chapters');
         $book = filter_values($book_data, $fields);
         $book['is_following'] = false;
-        $book['make_read'] = false;
-        $book['unread'] = 0;
 
         $groups = array();
         if(!empty($user->id)) {
@@ -219,8 +220,7 @@ class Apiv1Controller extends Controller
                 if($follow->status == Follow::UNREAD) {
                     $follow->status = Follow::READ;
                     $follow->save();
-                    $book['make_read'] = true;
-                    $book['unread'] = Follow::find()->where(array('user_id' => $user->id, 'status' => Follow::UNREAD))->count();
+                    Yii::$app->cache->delete('user_unread_'.$user->id);
                 }
             }
         }
@@ -287,14 +287,14 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'data' => $errors,
-                'unread' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
             );
         }
         unset($errors->password);
         return array(
             'success' => false,
             'data' => $errors,
-            'message' => 'Đăng nhập thất bại'
+            'message' => 'Đăng nhập thất bại',
+            'unread' => 0
         );
     }
     private function check_user() {
@@ -331,15 +331,9 @@ class Apiv1Controller extends Controller
                 'message' => $user['message']
             );
         }
-        $books_ids = array();
-        foreach ($user->follows as $follow) {
-            if ($follow->status == Follow::UNREAD) {
-                $books_ids[] = $follow->book_id;
-            }
-        }
         return array(
             'success' => true,
-            'data' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
+            'data' => get_user_unread($user->id)
         );
     }
     public function actionMakebookmark() {
@@ -468,7 +462,8 @@ class Apiv1Controller extends Controller
         if(!empty($user['error'])) {
             return array(
                 'success' => false,
-                'message' => $user['message']
+                'message' => $user['message'],
+                'unread' => 0
             );
         }
         $books_ids = array();
@@ -517,7 +512,8 @@ class Apiv1Controller extends Controller
             'success' => true,
             'data' => $data,
             'groups' => $groups,
-            'count_pages' => $total_page
+            'count_pages' => $total_page,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionDisable()
@@ -617,6 +613,7 @@ class Apiv1Controller extends Controller
         $type = (int) Yii::$app->request->get('type',0);
         $tags = get_tags();
         $data = array();
+        $user = $this->check_user();
         foreach ($tags as $tag) {
             if($tag['type'] == $type) {
                 $data[] = $tag;
@@ -626,13 +623,15 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'message' => 'Không có thẻ tag',
-                'total' => 0
+                'total' => 0,
+                'unread' => get_user_unread($user)
             );
         }
         return array(
             'success' => true,
             'data' => $data,
-            'total' => count($data)
+            'total' => count($data),
+            'unread' => get_user_unread($user)
         );
     }
     public function actionProfile() {
@@ -640,7 +639,8 @@ class Apiv1Controller extends Controller
         if(!empty($user['error'])) {
             return array(
                 'success' => false,
-                'message' => $user['message']
+                'message' => $user['message'],
+                'unread' => 0
             );
         }
         $user_options = array();
@@ -684,7 +684,8 @@ class Apiv1Controller extends Controller
                 'is_admin' => $user->is_admin,
                 'options' => $user_options
             ),
-            'options' => $options
+            'options' => $options,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionChangecron() {
@@ -1139,19 +1140,22 @@ class Apiv1Controller extends Controller
                 'success' => false,
                 'message' => 'Không có truyện',
                 'total' => 0,
-                'count_pages' => 0
+                'count_pages' => 0,
+                'unread' => get_user_unread($user)
             );
         }
         return array(
             'success' => true,
             'data' => $data,
             'total' => $total,
-            'count_pages' => $total_page
+            'count_pages' => $total_page,
+            'unread' => get_user_unread($user)
         );
     }
 
     public function actionTag() {
         ini_set('memory_limit', '-1');
+        $user = $this->check_user();
         $tag_id = (int) Yii::$app->request->get('tag_id',0);
         $fields = array('id','name', 'type');
         $tag = Tag::find()->select($fields)->where(array(
@@ -1160,7 +1164,8 @@ class Apiv1Controller extends Controller
         if(empty($tag)) {
             return array(
                 'success' => false,
-                'message' => 'Thẻ tag không khả dụng'
+                'message' => 'Thẻ tag không khả dụng',
+                'unread' => get_user_unread($user)
             );
         }
         $book_ids = array();
@@ -1204,7 +1209,6 @@ class Apiv1Controller extends Controller
         $books = $books->all();
 
         $data = array();
-        $user = $this->check_user();
         foreach($books as $tmp_book) {
             $data_book = get_book_detail($tmp_book->id);
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
@@ -1222,7 +1226,8 @@ class Apiv1Controller extends Controller
                 'success' => true,
                 'message' => 'Không có truyện',
                 'tag' => $tag->to_array(array('name', 'type')),
-                'total' => 0
+                'total' => 0,
+                'unread' => get_user_unread($user)
             );
         }
         return array(
@@ -1230,7 +1235,8 @@ class Apiv1Controller extends Controller
             'data' => $data,
             'tag' => $tag->to_array(array('name', 'type')),
             'total' => $total,
-            'count_pages' => $total_page
+            'count_pages' => $total_page,
+            'unread' => get_user_unread($user)
         );
     }
 
@@ -1311,10 +1317,14 @@ class Apiv1Controller extends Controller
         $chapter_ids_arr = explode(',', $chapter_ids);
         foreach ($chapter_ids_arr as $chapter_id) {
             if(!empty($chapter_id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter_id))->count() == 0) {
-                $read = new Read();
-                $read->user_id = $user->id;
-                $read->chapter_id = $chapter_id;
-                $read->save();
+                $chapter = Chapter::find()->where(array('id'=>$chapter_id))->one();
+                if(!empty($chapter)) {
+                    $read = new Read();
+                    $read->user_id = $user->id;
+                    $read->book_id = $chapter->book_id;
+                    $read->chapter_id = $chapter_id;
+                    $read->save();
+                }
             }
         }
         return array(
@@ -1327,7 +1337,8 @@ class Apiv1Controller extends Controller
         if(!empty($user['error'])) {
             return array(
                 'success' => false,
-                'message' => $user['message']
+                'message' => $user['message'],
+                'unread' => 0
             );
         }
         $books_ids = array();
@@ -1392,14 +1403,16 @@ class Apiv1Controller extends Controller
                 'success' => false,
                 'message' => 'Không có truyện',
                 'total' => 0,
-                'count_pages' => 0
+                'count_pages' => 0,
+                'unread' => get_user_unread($user)
             );
         }
         return array(
             'success' => true,
             'data' => $data,
             'total' => $total,
-            'count_pages' => $total_page
+            'count_pages' => $total_page,
+            'unread' => get_user_unread($user)
         );
     }
     public function actionLoginfacebook() {
@@ -1416,7 +1429,7 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'data' => $errors,
-                'unread' => Book::find()->where(array('id' => $books_ids, 'status' => Book::ACTIVE))->count()
+                'unread' => get_user_unread($errors)
             );
         }
         return array(

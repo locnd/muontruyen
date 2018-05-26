@@ -281,3 +281,17 @@ function get_chapter_detail($id) {
         return $tmp;
     });
 }
+function get_user_unread($user) {
+    if(empty($user->id)) {
+        return 0;
+    }
+    return Yii::$app->cache->getOrSet('user_unread_'.$user->id, function () use ($user) {
+        $books_ids = array();
+        foreach ($user->follows as $follow) {
+            if ($follow->status == 1) {
+                $books_ids[] = $follow->book_id;
+            }
+        }
+        return app\models\Book::find()->where(array('id'=>$books_ids,'status'=>1))->count();
+    });
+}

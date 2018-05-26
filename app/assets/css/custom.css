@@ -236,14 +236,10 @@ ul.social-media-list li a {
     height: 33px;
     line-height: 33px;
     border: 1px solid lightblue;
-    font-weight: 600;
-    padding-right: 8px;
-}
-.btn-bookmark-chap {
-    width: 120px;
+    font-weight: inherit;
+    width: 125px;
 }
 .btn-unbookmark-chap {
-    width: 125px;
     border-color: lightgrey;
     color: black;
 }
