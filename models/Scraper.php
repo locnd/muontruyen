@@ -141,9 +141,7 @@ class Scraper
             } else {
                 $book = new Book();
             }
-            $is_new_book = false;
             if (empty($book->slug)) {
-                $is_new_book = true;
                 $title = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
                 $new_slug = $slug = $this->createSlug($title);
                 $tm = 1;
@@ -187,12 +185,11 @@ class Scraper
                 foreach ($tags_arr as $tag) {
                     $tags[] = strtolower(trim($this->get_text($tag->plaintext), ' .,-'));
                 }
-                $author = $book_html_base->find($server->list_authors_key)[0];
-                $author_str = strtolower(trim($this->get_text($author->plaintext), ' .,-'));
-                if ($author_str != 'đang cập nhật' && $author_str != 'chưa cập nhật') {
-                    $authors = $author->find('a');
-                    foreach ($authors as $author) {
-                        $tags[] = 'author:' . trim($this->get_text($author->plaintext), ' .,-');
+                $authors_arr = $book_html_base->find('ul.list-info li.author p.col-xs-8 a');
+                foreach ($authors_arr as $author) {
+                    $author_str = strtolower(trim($this->get_text($author->plaintext), ' .,-'));
+                    if ($author_str != 'đang cập nhật' && $author_str != 'chưa cập nhật') {
+                        $tags[] = 'author:' .$author_str;
                     }
                 }
                 $status = $book_html_base->find($server->status_key)[0];
@@ -248,8 +245,6 @@ class Scraper
             if(!empty($chapter_urls)) {
                 $this->parse_chapters($server, $chapter_urls, $db_chapters, $book);
             }
-            $book->status = Book::ACTIVE;
-            $book->will_reload = 0;
             if($has_new_chapter) {
                 $book->release_date = date('Y-m-d H:i:s');
                 foreach ($book->follows as $follow) {
@@ -259,13 +254,16 @@ class Scraper
                     Yii::$app->cache->delete('user_unread_'.$follow->user_id);
                 }
             }
+            $current_status = $book->status;
+            $book->status = Book::ACTIVE;
+            $book->will_reload = 0;
             if(Chapter::find()->where(array('book_id'=>$book->id, 'status'=>Chapter::ACTIVE))->count() == 0) {
                 $book->status = Book::INACTIVE;
                 $book->will_reload = 1;
             }
             $book->save();
             Yii::$app->cache->delete('book_detail_'.$book->id);
-            if($is_new_book) {
+            if($current_status != $book->status) {
                 Yii::$app->cache->delete('tags_list');
                 Yii::$app->cache->delete('book_searchs');
             }

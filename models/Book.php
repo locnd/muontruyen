@@ -51,13 +51,13 @@ class Book extends ModelCommon
 
     public function add_tag($tag_name) {
         $tag_name = strtolower($tag_name);
-        if($tag_name == 'chưa cập nhật' || $tag_name == 'đang cập nhật') {
-            return true;
-        }
         $type = 0;
         if(strpos($tag_name, 'author:') !== false) {
             $tag_name = str_replace('author:','',$tag_name);
             $type = 1;
+        }
+        if($tag_name == 'chưa cập nhật' || $tag_name == 'đang cập nhật') {
+            return true;
         }
         $new_name = '';
         $name_arr = explode(' ', $tag_name);
