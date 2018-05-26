@@ -9,7 +9,7 @@ namespace app\commands;
 
 use yii\console\Controller;
 use yii\console\ExitCode;
-
+use Yii;
 use app\models\Scraper;
 use app\models\Server;
 use app\models\Setting;
@@ -53,7 +53,9 @@ class DailyController extends Controller
         }
 
         $scraper = new Scraper();
-        $scraper->echo = false;
+        if(Yii::$app->params['debug']) {
+            $scraper->echo = false;
+        }
 
         $scraper->skip_book_existed = true;
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();

@@ -44,7 +44,7 @@ class ActionController extends Controller
         }
         $cronners++;
         $setting_model->set_setting('cronners', $cronners);
-        $book_cron = BookCron::find()->limit(1)->where(array('status'=>0))->orderBy(array('level'=>SORT_DESC))->one();
+        $book_cron = BookCron::find()->where(array('status'=>0))->orderBy(array('level'=>SORT_DESC))->one();
 
         if(!empty($book_cron)) {
             $book = Book::find()->where(array('url' => $book_cron->book_url))->one();
@@ -57,9 +57,12 @@ class ActionController extends Controller
 
                 $server = Server::find()->where(array('status'=>1))->one();
                 $scraper = new Scraper();
-                $scraper->echo = false;
+                if(!Yii::$app->params['debug']) {
+                    $scraper->echo = false;
+                }
                 $scraper->parse_books($server, array($book_cron->book_url), array($book));
                 usleep(100000);
+
                 $book_cron->status = 2;
                 $book_cron->save();
             }

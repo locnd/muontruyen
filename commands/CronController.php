@@ -45,7 +45,9 @@ class CronController extends Controller
         $setting_model->set_setting('cron_running', 'yes');
 
         $scraper = new Scraper();
-        $scraper->echo = false;
+        if(!Yii::$app->params['debug']) {
+            $scraper->echo = false;
+        }
 
         if($scraper->echo) {
             echo '---------- reload ---------'."\n";
@@ -67,7 +69,7 @@ class CronController extends Controller
             $db_servers[$server->id] = $book->server;
         }
         if($scraper->echo) {
-            echo 'reload books ' . count($books) . "\n";
+            echo '- reload books ' . count($books) . "\n";
         }
         if(count($books) > 0) {
             $scraper->skip_chapter_existed = false;
@@ -92,7 +94,7 @@ class CronController extends Controller
             $db_books[$book->id] = $book;
         }
         if($scraper->echo) {
-            echo 'reload chapters ' . count($chapters) . "\n";
+            echo '- reload chapters ' . count($chapters) . "\n";
         }
         if(count($chapters) > 0) {
             foreach ($db_books as $i => $db_book) {
@@ -112,23 +114,21 @@ class CronController extends Controller
             $scraper->parse_server($server, 1, 2);
         }
 
-        if(BookCron::find()->where(array('status' => 0))->count() < 3) {
+        if(BookCron::find()->where(array('status' => 0))->count() < 5) {
             $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
             if($count_book % 36 == 0) {
                 $page++;
             }
-            $to_page = $page;
             if($page > 30) {
                 $page = (int) $setting_model->get_setting('daily_finished');
                 $page++;
-                $to_page = $page;
-                $setting_model->set_setting('daily_finished', $to_page);
+                $setting_model->set_setting('daily_finished', $page);
             }
             $scraper->skip_book_existed = true;
             $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
             foreach ($servers as $server) {
-                $scraper->parse_server($server, $page, $to_page, true);
+                $scraper->parse_server($server, $page, $page, true);
             }
         }
 

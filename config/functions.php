@@ -177,7 +177,7 @@ function remove_symbols($string, $is_number=true, $is_vietnamese=true, $is_lower
 }
 
 function get_book_detail($id) {
-    $data = Yii::$app->cache->getOrSet('book_detail_'.$id, function () use ($id) {
+    return Yii::$app->cache->getOrSet('book_detail_'.$id, function () use ($id) {
         $book = app\models\Book::find()->where(array('id'=>$id))->one();
         if(empty($book)) {
             return null;
@@ -211,10 +211,6 @@ function get_book_detail($id) {
         }
         return $tmp;
     });
-    if(empty($data)) {
-        Yii::$app->cache->delete('book_detail_'.$id);
-    }
-    return $data;
 }
 
 function get_user_groups($user_id) {
@@ -264,7 +260,7 @@ function filter_values($data, $options) {
     return $result;
 }
 function get_chapter_detail($id) {
-    $data = Yii::$app->cache->getOrSet('chapter_detail_'.$id, function () use ($id) {
+    return Yii::$app->cache->getOrSet('chapter_detail_'.$id, function () use ($id) {
         $chapter = app\models\Chapter::find()->where(array('id'=>$id, 'status'=>1))->one();
         if(empty($chapter)) {
             return null;
@@ -284,8 +280,4 @@ function get_chapter_detail($id) {
         }
         return $tmp;
     });
-    if(empty($data)) {
-        Yii::$app->cache->delete('chapter_detail_'.$id);
-    }
-    return $data;
 }

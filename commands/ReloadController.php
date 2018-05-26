@@ -44,6 +44,9 @@ class ReloadController extends Controller
         $setting_model->set_setting('cron_running', 'yes');
 
         $scraper = new Scraper();
+        if(!Yii::$app->params['debug']) {
+            $scraper->echo = false;
+        }
 
         $books = Book::find()->where(array('will_reload' => 1))->all();
         $book_urls = array();
@@ -61,7 +64,7 @@ class ReloadController extends Controller
             $db_servers[$server->id] = $book->server;
         }
         if($scraper->echo) {
-            echo 'reload books ' . count($books) . "\n";
+            echo '- reload books ' . count($books) . "\n";
         }
         if(count($books) > 0) {
             $scraper->skip_chapter_existed = false;
@@ -86,11 +89,12 @@ class ReloadController extends Controller
             $db_books[$book->id] = $book;
         }
         if($scraper->echo) {
-            echo 'reload chapters ' . count($chapters) . "\n";
+            echo '- reload chapters ' . count($chapters) . "\n";
         }
         if(count($chapters) > 0) {
             foreach ($db_books as $i => $db_book) {
                 $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
+                Yii::$app->cache->delete('book_detail_'.$db_book->id);
             }
         }
 
