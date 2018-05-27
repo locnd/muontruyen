@@ -114,15 +114,19 @@ class CronController extends Controller
             $scraper->parse_server($server, 1, 2);
         }
 
-        if(BookCron::find()->where(array('status' => 0))->count() < 5) {
+        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
             $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
             if($count_book % 36 == 0) {
                 $page++;
             }
-            if($page > 20) {
+            if($page > 30) {
                 $page = (int) $setting_model->get_setting('daily_finished');
                 $page++;
+                if($page > 30) {
+                    $setting_model->set_setting('cron_running', '');
+                    return ExitCode::OK;
+                }
                 $setting_model->set_setting('daily_finished', $page);
             }
             $scraper->skip_book_existed = true;

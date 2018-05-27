@@ -449,6 +449,7 @@ class Scraper
             foreach ($dir_array as $i => $folder) {
                 $tmp_dir .= '/'.$folder;
                 if($i > 3 && !file_exists($tmp_dir)) {
+                    umask(0);
                     mkdir($tmp_dir, 0777);
                 }
             }
