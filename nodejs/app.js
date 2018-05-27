@@ -325,7 +325,7 @@ function create_image(chap, image, stt) {
     });
 }
 function clear_cache(book_id) {
-    if(count_skip_chap < total_chap) {
+    if(count_skip_chap == total_chap) {
         var sql = 'UPDATE dl_book_cron SET status=2, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
         con.query(sql, function (err, result) {
             console.log('---- done');
