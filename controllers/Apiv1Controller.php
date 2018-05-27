@@ -697,6 +697,7 @@ class Apiv1Controller extends Controller
         if($setting_model->get_setting('cron_running') != '') {
             $setting_model->set_setting('cron_running', '');
         } else {
+            Yii::$app->cache->flush();
             $setting_model->set_setting('cron_running', 'yes');
         }
         return array(
