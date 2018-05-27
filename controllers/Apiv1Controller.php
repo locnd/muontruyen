@@ -1452,6 +1452,8 @@ class Apiv1Controller extends Controller
             }
             $book->slug = $new_slug;
         }
+
+        /*
         if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
             $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
             $array = explode('?', $book->image_source);
@@ -1480,6 +1482,7 @@ class Apiv1Controller extends Controller
             curl_close($ch);
             fclose($fp);
         }
+        */
 
         $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
         foreach ($chapters as $chapter) {
