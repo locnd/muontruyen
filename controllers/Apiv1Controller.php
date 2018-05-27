@@ -1453,7 +1453,6 @@ class Apiv1Controller extends Controller
             $book->slug = $new_slug;
         }
 
-        /*
         if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
             $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
             $array = explode('?', $book->image_source);
@@ -1482,17 +1481,18 @@ class Apiv1Controller extends Controller
             curl_close($ch);
             fclose($fp);
         }
-        */
 
-        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id,'status'=>Chapter::INACTIVE))->all();
         foreach ($chapters as $chapter) {
-            $chapter->status = Chapter::ACTIVE;
-            $chapter->will_reload = 0;
-            if(Image::find()->where(array('chapter_id'=>$chapter->id, 'status'=>Image::ACTIVE))->count() == 0) {
-                $chapter->status = Chapter::INACTIVE;
-                $chapter->will_reload = 1;
+            if(strtotime($chapter->created_at) > time()-3600) {
+                $chapter->status = Chapter::ACTIVE;
+                $chapter->will_reload = 0;
+                if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
+                    $chapter->status = Chapter::INACTIVE;
+                    $chapter->will_reload = 1;
+                }
+                $chapter->save();
             }
-            $chapter->save();
         }
 
         $book->status = Book::ACTIVE;
