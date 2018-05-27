@@ -42,6 +42,14 @@ con.query(sql, function (err, result) {
     }
 });
 
+function finish_book_cron() {
+    var sql = 'UPDATE dl_book_cron SET status=2, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
+    con.query(sql, function (err, result) {
+        console.log('---- done');
+        process.exit();
+    });
+}
+
 function check_book(cron) {
     console.log('Kiem tra url '+cron.book_url);
     var sql = 'SELECT * FROM dl_books WHERE url="'+cron.book_url+'"';
@@ -53,11 +61,11 @@ function check_book(cron) {
             var book = result[0];
             if(book.status == 0) {
                 console.log('Book dang bi disable');
-                process.exit();
+                finish_book_cron();
             }
             if(book.will_reload == 1) {
                 console.log('Book dang duoc reload');
-                process.exit();
+                finish_book_cron();
             }
             console.log('Cap nhat book');
             cm_book_id = book.id;
@@ -72,7 +80,7 @@ function create_book(url) {
     request.get( url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
-            process.exit();
+            finish_book_cron();
         }
         var sql = "INSERT INTO dl_books (server_id, url, name, image_source, description, created_at, updated_at, release_date)";
         sql += " VALUES (";
@@ -109,13 +117,14 @@ function create_book(url) {
             con.query(sql, function (err, result) {
                 if(result.length == 0) {
                     console.log('Tao moi book khong thanh cong');
-                    process.exit();
+                    finish_book_cron();
                 } else {
                     console.log('Tao moi book thanh cong');
                     console.log('Cap nhat book');
                     var book = result[0];
                     cm_book_id = book.id;
                     update_book(book, dom);
+                    update_status_book(book, dom);
                     update_tags_book(book, dom);
                     update_authors_book(book, dom);
                 }
@@ -128,22 +137,35 @@ function update_book_without_dom(book) {
     request.get( book.url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
-            process.exit();
+            finish_book_cron();
         }
         var dom = parser.parseFromString(body);
         update_book(book, dom);
     });
 }
 
+function update_status_book(book, dom) {
+    var nodes = dom.getElementsByClassName('status row');
+    var str = nodes[0].innerHTML.trim().toLowerCase();
+    if(str.indexOf('hoàn thành') > -1) {
+        if(total_tag == -1) {
+            total_tag = 0;
+        }
+        total_tag += 1;
+        check_tag(book, 'Hoàn thành', 'hoan-thanh', 0);
+    }
+}
 function update_tags_book(book, dom) {
     var nodes = dom.getElementsByClassName('kind row');
     var tags = nodes[0].getElementsByTagName('a');
-    total_tag = 0;
+    if(total_tag == -1) {
+        total_tag = 0;
+    }
     if(typeof(tags) == 'undefined' || tags.length == 0) {
         check_done();
         return false;
     }
-    total_tag = tags.length;
+    total_tag += tags.length;
     for(var i=0;i<tags.length;i++) {
         var tag_name = ucfirst(tags[i].innerHTML.trim().toLowerCase());
         var tag_slug = generate_slug(tag_name);
@@ -303,7 +325,7 @@ function clone_chap(chap) {
         }
         total_image+=nodes.length;
         for(var i=0; i<nodes.length;i++) {
-            var image_str = nodes[0].innerHTML;
+            var image_str = nodes[i].innerHTML;
             image_str = image_str.replace('https:','http:').trim();
             var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
             var image = myRegex.exec(image_str)[1];
@@ -326,11 +348,7 @@ function create_image(chap, image, stt) {
 }
 function clear_cache(book_id) {
     if(count_skip_chap == total_chap) {
-        var sql = 'UPDATE dl_book_cron SET status=2, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
-        con.query(sql, function (err, result) {
-            console.log('---- done');
-            process.exit();
-        });
+        finish_book_cron();
     } else {
         var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
         console.log(url);
@@ -400,4 +418,3 @@ function generate_slug(str) {
         .replace(/\s+/g, '-') // collapse whitespace and replace by -
         .replace(/-+/g, '-'); // collapse dashes
 }
-
