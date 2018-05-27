@@ -77,7 +77,8 @@ function check_book(cron) {
 }
 
 function create_book(url) {
-    request.get( url, function(error, response, body){
+    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    proxiedRequest.get( url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
             finish_book_cron();
@@ -134,7 +135,8 @@ function create_book(url) {
 }
 
 function update_book_without_dom(book) {
-    request.get( book.url, function(error, response, body){
+    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    proxiedRequest.get( book.url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
             finish_book_cron();
@@ -311,10 +313,18 @@ function create_chap(book, chap_name, href, stt) {
         });
     });
 }
+var count_clone_chap = 0;
+function get_proxy_url() {
+    var port = Math.floor(Math.random() * 50);
+    if(port < 10) port = '0'+port;
+    return "http://galvin24x7:egor99@" + "199.115.116.233:10"+port;
+}
 function clone_chap(chap) {
-    request.get( chap.url, function(error, response, body){
+    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    proxiedRequest.get( chap.url, function(error, response, body){
+        count_clone_chap++;
         if (error){
-            console.log('Khong the lay html tu chapter url');
+            console.log('Khong the lay html tu chapter '+chap.url);
             return false;
         }
         var dom = parser.parseFromString(body);
@@ -325,12 +335,22 @@ function clone_chap(chap) {
         }
         total_image+=nodes.length;
         for(var i=0; i<nodes.length;i++) {
-            var image_str = nodes[i].innerHTML;
-            image_str = image_str.replace('https:','http:').trim();
+            var image_str = nodes[i].innerHTML.trim();
+            image_str = image_str.replace('https:','http:').replace('https:','http:');
+            image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
+
             var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
-            var image = myRegex.exec(image_str)[1];
-            var stt = i+1;
-            create_image(chap, image, stt);
+            var image_parser = myRegex.exec(image_str);
+            if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+                myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
+                image_parser = myRegex.exec(image_str);
+            }
+            if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+                count_image++;
+            } else {
+                var stt = i + 1;
+                create_image(chap, image_parser[1], stt);
+            }
         }
     });
 }
@@ -341,7 +361,7 @@ function create_image(chap, image, stt) {
     sql += ")";
     con.query(sql, function (err, result) {
         count_image++;
-        if(count_image == total_image) {
+        if(count_image == total_image && count_clone_chap+count_skip_chap == total_chap) {
             check_done();
         }
     });
@@ -351,7 +371,6 @@ function clear_cache(book_id) {
         finish_book_cron();
     } else {
         var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
-        console.log(url);
         request.get(url, function (error, response, body) {
             if (error) {
                 console.log('Khong the lay html tu clear cache url');

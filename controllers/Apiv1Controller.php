@@ -1490,7 +1490,6 @@ class Apiv1Controller extends Controller
                 $chapter->save();
             }
         }
-
         $book->status = Book::ACTIVE;
         $book->will_reload = 0;
         if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
@@ -1505,8 +1504,8 @@ class Apiv1Controller extends Controller
             send_push_notification($follow->user_id);
             Yii::$app->cache->delete('user_unread_' . $follow->user_id);
         }
-
         $book->save();
+
         $book_cron = BookCron::find()->where(array('book_url'=>$book->url, 'status'=>1))->one();
         if(!empty($book_cron)) {
             $book_cron->status = 2;
