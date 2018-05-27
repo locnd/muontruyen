@@ -1512,8 +1512,10 @@ class Apiv1Controller extends Controller
 
         $book->save();
         $book_cron = BookCron::find()->where(array('book_url'=>$book->url, 'status'=>1))->one();
-        $book_cron->status = 2;
-        $book_cron->save();
+        if(!empty($book_cron)) {
+            $book_cron->status = 2;
+            $book_cron->save();
+        }
 
         clear_book_cache($book);
         return array(
