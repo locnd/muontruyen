@@ -267,11 +267,14 @@ function check_chap(book, chap_name, href, stt) {
             console.log('Create '+ucfirst(chap_name));
             create_chap(book, chap_name, href, stt);
         } else {
-            count_skip_chap++;
-            if(count_skip_chap == total_chap) {
-                total_image = 0;
-                check_done();
-            }
+            var sql = 'UPDATE dl_book_cron SET stt='+stt+' WHERE id="'+result[0].id+'"';
+            con.query(sql, function (err, result) {
+                count_skip_chap++;
+                if(count_skip_chap == total_chap) {
+                    total_image = 0;
+                    check_done();
+                }
+            });
         }
     });
 }
@@ -325,6 +328,8 @@ function create_image(chap, image, stt) {
     });
 }
 function clear_cache(book_id) {
+    console.log('clear_cache');
+    console.log(count_skip_chap +' == '+ total_chap);
     if(count_skip_chap == total_chap) {
         var sql = 'UPDATE dl_book_cron SET status=2, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
         con.query(sql, function (err, result) {
@@ -333,6 +338,7 @@ function clear_cache(book_id) {
         });
     } else {
         var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
+        console.log(url);
         request.get(url, function (error, response, body) {
             if (error) {
                 console.log('Khong the lay html tu clear cache url');
