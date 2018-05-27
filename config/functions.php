@@ -40,6 +40,40 @@ function make_cache_key($key, $params=array(), $withs=array(), $pagging=array(),
     return generate_key($key);
 }
 
+function send_push_notification($user_id, $message = '') {
+    $api_key = 'AAAAJAcz9dM:APA91bHGhUo2vCU6p53zMD5_YnfIKnZbFkCf5eoaMghSufF7yHN0qPokC5dIBa5tIYjGh4crDXf2KCHpsB0A24D3GHYeVfSlNgYltud7z9UG5kvJ5lrnMdJcO4VSk2vkVb3jz7Bgphw3';
+    $device = app\models\Device::find()->where(array('user_id'=>$user_id))->one();
+    if(empty($device)) {
+        return true;
+    }
+    $device_id = $device->device_id;
+    if($message == '') {
+        $message = 'Truyện bạn đang theo dõi có cập nhật chương mới';
+    }
+    $fields = array(
+        'registration_ids' => array($device_id),
+        'data' => array(
+            'title' => 'Mượn Truyện',
+            'message' => $message,
+            'vibrate' => 1,
+            'sound' => 1
+        )
+    );
+    $headers = array(
+        'Authorization: key=' . $api_key,
+        'Content-Type: application/json'
+    );
+    $ch = curl_init();
+    curl_setopt( $ch,CURLOPT_URL, 'https://android.googleapis.com/gcm/send' );
+    curl_setopt( $ch,CURLOPT_POST, true );
+    curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+    curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+    curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
+    curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
+    curl_exec($ch);
+    curl_close($ch);
+}
+
 function generate_key($key, $special_char=true) {
     $key = trim(mb_strtolower($key));
     $key = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $key);
@@ -54,6 +88,20 @@ function generate_key($key, $special_char=true) {
         $key = preg_replace('/([\s]+)/', '-', $key);
     }
     return $key;
+}
+function createSlug($str, $delimiter = '-'){
+    $slug = trim(mb_strtolower($str));
+    $slug = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $slug);
+    $slug = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $slug);
+    $slug = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $slug);
+    $slug = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $slug);
+    $slug = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $slug);
+    $slug = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $slug);
+    $slug = preg_replace('/(đ)/', 'd', $slug);
+    $slug = preg_replace('/[^a-z0-9-\s]/', $delimiter, $slug);
+    $slug = preg_replace('/([\s]+)/', $delimiter, $slug);
+    $slug = preg_replace('/--/', $delimiter, $slug);
+    return trim($slug,$delimiter);
 }
 
 function echo_input($option = array(), $select_options = array(), $default = '') {

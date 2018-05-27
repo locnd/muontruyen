@@ -209,11 +209,10 @@ class AjaxController extends Controller
                 'message' => 'Không có báo lỗi nào cho truyện này'
             );
         }
-        $scraper = new Scraper();
         foreach ($reports as $report) {
             $report->status = Report::STATUS_FIXED;
             $report->save();
-            $scraper->send_push_notification($report->user_id, 'Truyện đã được sửa lỗi');
+            send_push_notification($report->user_id, 'Truyện đã được sửa lỗi');
         }
         return array(
             'success' => true

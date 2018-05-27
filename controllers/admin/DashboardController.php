@@ -57,8 +57,7 @@ class DashboardController extends Controller
             $user_id = Yii::$app->request->post('user_id');
             $message = Yii::$app->request->post('message');
             if(!empty($user_id) && !empty($message)) {
-                $scraper = new Scraper();
-                $scraper->send_push_notification($user_id, $message);
+                send_push_notification($user_id, $message);
             }
         }
 

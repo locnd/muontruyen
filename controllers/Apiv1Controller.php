@@ -1426,4 +1426,95 @@ class Apiv1Controller extends Controller
             'message' => empty($errors['message'])?'Đăng nhập thất bại':$errors['message']
         );
     }
+
+    public function actionClearcache() {
+        $token = Yii::$app->request->get('token','');
+        if($token != 'l2o4c0n7g1u9y8e8n') {
+            return array(
+                'success' => false,
+                'message' => 'invalid token'
+            );
+        }
+        $book_id = (int) Yii::$app->request->get('book_id',0);
+        $book = Book::find()->where(array('id'=>$book_id))->one();
+        if(empty($book)) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy truyện'
+            );
+        }
+        if(empty($book->slug)) {
+            $new_slug = $slug = createSlug($book->name);
+            $tm = 1;
+            while (Book::find()->where(array('slug' => $new_slug))->count() > 0) {
+                $tm++;
+                $new_slug = $slug . '-' . $tm;
+            }
+            $book->slug = $new_slug;
+        }
+        if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
+            $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
+            $array = explode('?', $book->image_source);
+            $tmp_extension = $array[0];
+            $array = explode('.', $tmp_extension);
+            $extension = strtolower(end($array));
+            if(!in_array($extension, array('jpg','png','jpeg','gif'))) {
+                $extension = 'jpg';
+            }
+            $book->image = 'cover.'.$extension;
+            $dir_array = explode('/', $image_dir);
+            $tmp_dir = '';
+            foreach ($dir_array as $i => $folder) {
+                $tmp_dir .= '/'.$folder;
+                if($i > 3 && !file_exists($tmp_dir)) {
+                    umask(0);
+                    mkdir($tmp_dir, 0777);
+                }
+            }
+            $image_dir = $image_dir.'/'.$book->image;
+            $ch = curl_init($book->image_source);
+            $fp = fopen($image_dir, 'wb');
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_exec($ch);
+            curl_close($ch);
+            fclose($fp);
+        }
+
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+        foreach ($chapters as $chapter) {
+            $chapter->status = Chapter::ACTIVE;
+            $chapter->will_reload = 0;
+            if(Image::find()->where(array('chapter_id'=>$chapter->id, 'status'=>Image::ACTIVE))->count() == 0) {
+                $chapter->status = Chapter::INACTIVE;
+                $chapter->will_reload = 1;
+            }
+            $chapter->save();
+        }
+
+        $book->status = Book::ACTIVE;
+        $book->will_reload = 0;
+        if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
+            $book->status = Book::INACTIVE;
+            $book->will_reload = 1;
+        }
+
+        $book->release_date = date('Y-m-d H:i:s');
+        foreach ($book->follows as $follow) {
+            $follow->status = Follow::UNREAD;
+            $follow->save();
+            send_push_notification($follow->user_id);
+            Yii::$app->cache->delete('user_unread_' . $follow->user_id);
+        }
+
+        $book->save();
+        $book_cron = BookCron::find()->where(array('book_url'=>$book->url, 'status'=>1))->one();
+        $book_cron->status = 2;
+        $book_cron->save();
+
+        clear_book_cache($book);
+        return array(
+            'success' => true
+        );
+    }
 }
