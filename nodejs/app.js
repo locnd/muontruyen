@@ -374,7 +374,8 @@ function clear_cache(book_id) {
         finish_book_cron();
     } else {
         var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
-        request.get(url, function (error, response, body) {
+        var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+        proxiedRequest.get( url, function(error, response, body){
             if (error) {
                 console.log('Khong the lay html tu clear cache url');
                 return false;
