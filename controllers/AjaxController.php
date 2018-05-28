@@ -81,7 +81,11 @@ class AjaxController extends Controller
         }
         $book->$key = $value;
         $book->save();
-        Yii::$app->cache->delete('book_detail_'.$book->id);
+        if($key == 'name' || $key == 'status') {
+            clear_book_cache($book);
+        } else {
+            Yii::$app->cache->delete('book_detail_'.$book->id);
+        }
         return array(
             'success' => true
         );
@@ -107,6 +111,9 @@ class AjaxController extends Controller
         $chapter->$key = $value;
         $chapter->save();
         Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+        if($key == 'name' || $key == 'status') {
+            Yii::$app->cache->delete('book_detail_'.$chapter->book_id);
+        }
         return array(
             'success' => true
         );
@@ -146,17 +153,20 @@ class AjaxController extends Controller
         if($tmp_name != '') {
             $book_name = $tmp_name;
         }
+        $check = false;
         foreach ($book->chapters as$chapter) {
             $chapter_name = str_replace($book_name, '', trim(strtolower($chapter->name)));
             $chapter_name = trim($chapter_name, ' -–');
             if($chapter->name != $chapter_name) {
                 $chapter->name = $chapter_name;
                 $chapter->save();
+                $check = true;
                 Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
             }
         }
-        Yii::$app->cache->delete('book_detail_'.$book->id);
-
+        if($check) {
+            Yii::$app->cache->delete('book_detail_' . $book->id);
+        }
         return array(
             'success' => true
         );

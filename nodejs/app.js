@@ -352,7 +352,7 @@ function clone_chap(chap) {
                 count_image++;
             } else {
                 var stt = i + 1;
-                create_image(chap, image_parser[1], stt);
+                create_image(chap, image, stt);
             }
         }
     });
