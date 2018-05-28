@@ -151,32 +151,9 @@ class Scraper
                 if ($this->echo) echo '----- ' . $book->slug . "\n";
 
                 if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
-                    $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
-                    $array = explode('?', $book->image_source);
-                    $tmp_extension = $array[0];
-                    $array = explode('.', $tmp_extension);
-                    $extension = strtolower(end($array));
-                    if(!in_array($extension, array('jpg','png','jpeg','gif'))) {
-                        $extension = 'jpg';
-                    }
-                    $book->image = 'cover.'.$extension;
-                    $dir_array = explode('/', $image_dir);
-                    $tmp_dir = '';
-                    foreach ($dir_array as $i => $folder) {
-                        $tmp_dir .= '/'.$folder;
-                        if($i > 3 && !file_exists($tmp_dir)) {
-                            umask(0);
-                            mkdir($tmp_dir, 0777);
-                        }
-                    }
-                    $image_dir = $image_dir.'/'.$book->image;
-                    $ch = curl_init($book->image_source);
-                    $fp = fopen($image_dir, 'wb');
-                    curl_setopt($ch, CURLOPT_FILE, $fp);
-                    curl_setopt($ch, CURLOPT_HEADER, 0);
-                    curl_exec($ch);
-                    curl_close($ch);
-                    fclose($fp);
+                    $image_src = $book->image_source;
+                    $image_dir = Yii::$app->params['app'] . '/web/uploads/books/' . $book->slug;
+                    $book->image = $this->save_image($image_src, $image_dir);
                     $book->save();
                 }
             } else {

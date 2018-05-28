@@ -94,14 +94,8 @@ function create_book(url) {
 
         var nodes = dom.getElementsByClassName('col-xs-4 col-image');
         var image_str = nodes[0].innerHTML.trim();
-        image_str = image_str.replace('src="//','src="http://');
-        image_str = image_str.replace('https:','http:');
-        var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
-        var image_parse = myRegex.exec(image_str);
-        var image = '';
-        if(typeof(image_parse[1]) != 'undefined') {
-            image = image_parse[1];
-        }
+
+        var image = get_image_url(image_str);
         sql += ',"'+image+'"';
 
         var nodes = dom.getElementsByClassName('detail-content');
@@ -250,6 +244,21 @@ function check_done() {
         clear_cache(cm_book_id);
     }
 }
+function get_image_url(image_str) {
+    image_str = image_str.replace('https:','http:').replace('https:','http:').replace('https:','http:');
+    image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
+
+    var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
+    var image_parser = myRegex.exec(image_str);
+    if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+        myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
+        image_parser = myRegex.exec(image_str);
+    }
+    if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+        return '';
+    }
+    return image_parser[1];
+}
 function update_book(book, dom) {
     var nodes = dom.getElementsByClassName('col-xs-5 chapter');
     total_chap = nodes.length;
@@ -336,16 +345,8 @@ function clone_chap(chap) {
         total_image+=nodes.length;
         for(var i=0; i<nodes.length;i++) {
             var image_str = nodes[i].innerHTML.trim();
-            image_str = image_str.replace('https:','http:').replace('https:','http:');
-            image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
-
-            var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
-            var image_parser = myRegex.exec(image_str);
-            if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
-                myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
-                image_parser = myRegex.exec(image_str);
-            }
-            if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+            var image = get_image_url(image_str);
+            if(image == '') {
                 count_image++;
             } else {
                 var stt = i + 1;

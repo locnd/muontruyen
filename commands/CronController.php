@@ -50,6 +50,45 @@ class CronController extends Controller
         }
 
         if($scraper->echo) {
+            echo '---------- scraper ---------'."\n";
+        }
+        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
+
+        $scraper->skip_book_existed = false;
+        foreach ($servers as $server) {
+            $scraper->parse_server($server, 1, 2);
+        }
+
+        if($scraper->echo) {
+            echo '---------- daily ---------'."\n";
+        }
+
+        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
+            $count_book = BookCron::find()->count();
+            $page=ceil($count_book/36);
+            if($count_book % 36 == 0) {
+                $page++;
+            }
+            $run_daily = true;
+            if($page > 30) {
+                $page = (int) $setting_model->get_setting('daily_finished');
+                $page++;
+                if($page > 30) {
+                    $run_daily = false;
+                } else{
+                    $setting_model->set_setting('daily_finished', $page);
+                }
+            }
+            if($run_daily) {
+                $scraper->skip_book_existed = true;
+                $servers = Server::find()->where(array('status' => Server::ACTIVE))->all();
+                foreach ($servers as $server) {
+                    $scraper->parse_server($server, $page, $page, true);
+                }
+            }
+        }
+
+        if($scraper->echo) {
             echo '---------- reload ---------'."\n";
         }
 
@@ -100,42 +139,6 @@ class CronController extends Controller
             foreach ($db_books as $i => $db_book) {
                 $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
                 Yii::$app->cache->delete('book_detail_'.$db_book->id);
-            }
-        }
-
-        if($scraper->echo) {
-            echo '---------- scraper ---------'."\n";
-        }
-        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
-
-        $scraper->skip_book_existed = false;
-        $scraper->skip_chapter_existed = true;
-        foreach ($servers as $server) {
-            $scraper->parse_server($server, 1, 2);
-        }
-
-        if($scraper->echo) {
-            echo '---------- daily ---------'."\n";
-        }
-        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
-            $count_book = BookCron::find()->count();
-            $page=ceil($count_book/36);
-            if($count_book % 36 == 0) {
-                $page++;
-            }
-            if($page > 30) {
-                $page = (int) $setting_model->get_setting('daily_finished');
-                $page++;
-                if($page > 30) {
-                    $setting_model->set_setting('cron_running', '');
-                    return ExitCode::OK;
-                }
-                $setting_model->set_setting('daily_finished', $page);
-            }
-            $scraper->skip_book_existed = true;
-            $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
-            foreach ($servers as $server) {
-                $scraper->parse_server($server, $page, $page, true);
             }
         }
 

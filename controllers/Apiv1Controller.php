@@ -1480,15 +1480,13 @@ class Apiv1Controller extends Controller
 
         $chapters = Chapter::find()->where(array('book_id'=>$book_id,'status'=>Chapter::INACTIVE))->all();
         foreach ($chapters as $chapter) {
-            if(strtotime($chapter->created_at) > time()-3600) {
-                $chapter->status = Chapter::ACTIVE;
-                $chapter->will_reload = 0;
-                if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
-                    $chapter->status = Chapter::INACTIVE;
-                    $chapter->will_reload = 1;
-                }
-                $chapter->save();
+            $chapter->status = Chapter::ACTIVE;
+            $chapter->will_reload = 0;
+            if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
+                $chapter->status = Chapter::INACTIVE;
+                $chapter->will_reload = 1;
             }
+            $chapter->save();
         }
         $book->status = Book::ACTIVE;
         $book->will_reload = 0;
