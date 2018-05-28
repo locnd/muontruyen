@@ -46,7 +46,6 @@ class DashboardController extends Controller
         if ($setting_model->get_setting('cron_running') != '') {
             $options['Cron'] = 'running';
         }
-        $options['Cronners'] = (int) $setting_model->get_setting('cronners');
         $options['Book Crons'] = BookCron::find()->where(array('status'=>1))->count().' - '.BookCron::find()->where(array('status'=>0))->count();
 
         if (Yii::$app->request->post()){
@@ -55,6 +54,10 @@ class DashboardController extends Controller
             if(!empty($user_id) && !empty($message)) {
                 send_push_notification($user_id, $message);
             }
+        }
+
+        if(getParam('clear_cache','') == 'ok') {
+            Yii::$app->cache->flush();
         }
 
         return $this->render('index', array(
