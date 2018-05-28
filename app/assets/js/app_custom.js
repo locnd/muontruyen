@@ -524,7 +524,11 @@ function send_follow(book_id, is_following) {
         group_id: group_id,
         group_name: group_name
     };
+    $('.btn-send-follow').hide();
+    $('.btn-loading-send-follow').show();
     send_api('POST', '/make-follow', params, function(res) {
+        $('.btn-send-follow').show();
+        $('.btn-loading-send-follow').hide();
         if (res.success) {
             if(res.data) {
                 dl_alert('success', 'Đã theo dõi', false);
@@ -570,6 +574,7 @@ function display_groups(book_id, groups) {
         html += '</div>';
     }
     html += '<div class="btn-send-follow" onclick="send_follow('+book_id+',false)">Theo dõi</div>';
+    html += '<div class="btn-loading-send-follow" style="display:none"><img style="width:20px" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" /></div>';
     if(groups.length < 5) {
         html += '<div>';
         html += '<label>Chỉ có thể tạo tối đa 5 nhóm</label>';
@@ -1873,11 +1878,13 @@ function change_cron() {
         dl_alert('danger', 'Không có quyền thực hiện', false);
         return true;
     }
-    send_api('GET', '/changecron', {}, function(res) {
-        if (res.success) {
-            window.location.reload();
-        } else {
-            dl_alert('danger', res.message, false);
-        }
-    });
+    if(confirm('Bạn muốn thay đổi giá trị cron ?')) {
+        send_api('GET', '/changecron', {}, function (res) {
+            if (res.success) {
+                window.location.reload();
+            } else {
+                dl_alert('danger', res.message, false);
+            }
+        });
+    }
 }

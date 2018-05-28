@@ -56,8 +56,11 @@ class DashboardController extends Controller
             }
         }
 
-        if(getParam('clear_cache','') == 'ok') {
+        $clear_cache = trim(getParam('clear_cache',''));
+        if($clear_cache == 'all') {
             Yii::$app->cache->flush();
+        } elseif ($clear_cache != '') {
+            Yii::$app->cache->delete('book_detail_'.$clear_cache);
         }
 
         return $this->render('index', array(
