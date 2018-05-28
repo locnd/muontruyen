@@ -665,6 +665,30 @@ class Apiv1Controller extends Controller
             $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
 
             $options['Book Crons'] = BookCron::find()->where(array('status'=>1))->count().' - '.BookCron::find()->where(array('status'=>0))->count();
+
+            if(BookCron::find()->where(array('status'=>1))->count() > 0) {
+                $book_crons = BookCron::find()->where(array('status'=>1))->all();
+                foreach ($book_crons as  $book_cron) {
+                    $book = Book::find()->where(array('url'=>$book_cron->book_url))->one();
+                    $need_check = true;
+                    if(!empty($book)) {
+                        $chapters = Chapter::find()->where(array('book_id'=>$book->id,'status'=>Chapter::INACTIVE))->all();
+                        foreach ($chapters as $chapter) {
+                            if(Image::find()->where(array('chapter_id'=>$chapter->id))->count() == 0) {
+                                $need_check = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        $need_check = false;
+                    }
+                    if($need_check) {
+                        $options['Inactive #'.$book->id] = '<a target="_blank" href="http://muontruyen.tk/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id='.$book->id.'">Active</a>';
+                    } else {
+                        $options['Inactive #'.$book->id] = 'Cronning';
+                    }
+                }
+            }
         }
         return array(
             'success' => true,

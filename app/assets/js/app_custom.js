@@ -7,6 +7,7 @@ function show_home(page, sort) {
     if(page == 1 && !is_admin()) {
         var time_cache = localStorage.getItem("time_cache_home_"+sort);
         if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 900000) {
+            check_unread();
             get_cache_home(sort);
             return true;
         }
@@ -856,7 +857,6 @@ function register() {
 function logout() {
     localStorage.setItem("token", '');
     localStorage.setItem("is_admin", '');
-    localStorage.setItem("unread", '');
     window.location.href = 'index.html';
 }
 
