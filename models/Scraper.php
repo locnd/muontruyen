@@ -133,13 +133,56 @@ class Scraper
 
             if (!empty($db_books[$stt])) {
                 $book = $db_books[$stt];
-                if ($db_books[$stt]->status == Book::INACTIVE && $db_books[$stt]->will_reload == 0) {
+                if ($book->status == Book::INACTIVE && $book->will_reload == 0) {
                     continue;
                 }
-                if ($this->echo) echo '----- ' . $db_books[$stt]->slug . "\n";
+
+                if(empty($book->slug)) {
+                    $new_slug = $slug = createSlug($book->name);
+                    $tm = 1;
+                    while (Book::find()->where(array('slug' => $new_slug))->count() > 0) {
+                        $tm++;
+                        $new_slug = $slug . '-' . $tm;
+                    }
+                    $book->slug = $new_slug;
+                    $book->save();
+                }
+
+                if ($this->echo) echo '----- ' . $book->slug . "\n";
+
+                if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
+                    $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
+                    $array = explode('?', $book->image_source);
+                    $tmp_extension = $array[0];
+                    $array = explode('.', $tmp_extension);
+                    $extension = strtolower(end($array));
+                    if(!in_array($extension, array('jpg','png','jpeg','gif'))) {
+                        $extension = 'jpg';
+                    }
+                    $book->image = 'cover.'.$extension;
+                    $dir_array = explode('/', $image_dir);
+                    $tmp_dir = '';
+                    foreach ($dir_array as $i => $folder) {
+                        $tmp_dir .= '/'.$folder;
+                        if($i > 3 && !file_exists($tmp_dir)) {
+                            umask(0);
+                            mkdir($tmp_dir, 0777);
+                        }
+                    }
+                    $image_dir = $image_dir.'/'.$book->image;
+                    $ch = curl_init($book->image_source);
+                    $fp = fopen($image_dir, 'wb');
+                    curl_setopt($ch, CURLOPT_FILE, $fp);
+                    curl_setopt($ch, CURLOPT_HEADER, 0);
+                    curl_exec($ch);
+                    curl_close($ch);
+                    fclose($fp);
+                    $book->save();
+                }
             } else {
                 $book = new Book();
             }
+
             if (empty($book->slug)) {
                 $title = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
                 $new_slug = $slug = createSlug($title);
