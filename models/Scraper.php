@@ -136,69 +136,52 @@ class Scraper
                 if ($book->status == Book::INACTIVE && $book->will_reload == 0) {
                     continue;
                 }
-
-                if(empty($book->slug)) {
-                    $new_slug = $slug = createSlug($book->name);
-                    $tm = 1;
-                    while (Book::find()->where(array('slug' => $new_slug))->count() > 0) {
-                        $tm++;
-                        $new_slug = $slug . '-' . $tm;
-                    }
-                    $book->slug = $new_slug;
-                    $book->save();
-                }
-
-                if ($this->echo) echo '----- ' . $book->slug . "\n";
-
-                if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
-                    $image_src = $book->image_source;
-                    $image_dir = Yii::$app->params['app'] . '/web/uploads/books/' . $book->slug;
-                    $book->image = $this->save_image($image_src, $image_dir);
-                    $book->save();
-                }
             } else {
                 $book = new Book();
+                $book->server_id = $server->id;
+                $book->url = $book_urls[$stt];
+                $book->release_date = date('Y-m-d H:i:s');
             }
 
-            if (empty($book->slug)) {
-                $title = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
-                $new_slug = $slug = createSlug($title);
+            if(empty($book->name)) {
+                $book->name = $this->get_text($book_html_base->find($server->title_key)[0]->plaintext);
+            }
+            if(empty($book->slug)) {
+                $new_slug = $slug = createSlug($book->name);
                 $tm = 1;
                 while (Book::find()->where(array('slug' => $new_slug))->count() > 0) {
                     $tm++;
                     $new_slug = $slug . '-' . $tm;
                 }
-                $slug = $new_slug;
+                $book->slug = $new_slug;
+            }
+            if(strpos($book->slug,'raw') !== false) {
+                if ($this->echo) echo '----- ----- skip for RAW'. "\n";
+                continue;
+            }
+            if ($this->echo) echo '----- ' . $book->slug . "\n";
 
-                if ($this->echo) echo '----- ' . $slug . "\n";
-
-                if(strpos($slug,'raw') !== false) {
-                    if ($this->echo) echo '----- ----- skip for RAW'. "\n";
-                    continue;
+            if(empty($book->image)|| $book->image == 'default.jpg') {
+                $image_dir = Yii::$app->params['app'] . '/web/uploads/books/' . $book->slug;
+                if(!empty($book->image_source)) {
+                    $image_src = $book->image_source;
+                } else {
+                    $image_src = $book_html_base->find($server->image_key)[0]->src;
+                    if (substr($image_src, 0, 2) == '//') {
+                        $image_src = 'http:' . $image_src;
+                    }
+                    $image_src = str_replace('https:', 'http:', $image_src);
+                    $book->image_source = $image_src;
                 }
+                $book->image = $this->save_image($image_src, $image_dir);
+            }
+            if(empty($book->description)) {
+                $book->description = $this->get_text($book_html_base->find($server->description_key)[0]->plaintext);
+            }
 
-                $image_src = $book_html_base->find($server->image_key)[0]->src;
-                $image_dir = Yii::$app->params['app'] . '/web/uploads/books/' . $slug;
-                if (substr($image_src, 0, 2) == '//') {
-                    $image_src = 'http:' . $image_src;
-                }
-                $image_src = str_replace('https:', 'http:', $image_src);
-                $image = $this->save_image($image_src, $image_dir);
+            $book->save();
 
-                $description = $this->get_text($book_html_base->find($server->description_key)[0]->plaintext);
-
-                $book->status = Book::INACTIVE;
-                $book->will_reload = 0;
-                $book->server_id = $server->id;
-                $book->url = $book_urls[$stt];
-                $book->image_source = $image_src;
-                $book->image = $image;
-                $book->name = $title;
-                $book->slug = $slug;
-                $book->description = $description;
-                $book->release_date = date('Y-m-d H:i:s');
-                $book->save();
-
+            if(BookTag::find()->where(array('book_id'=>$book->id))->count() == 0) {
                 $tags_arr = $book_html_base->find($server->list_tags_key);
                 $tags = array();
                 foreach ($tags_arr as $tag) {

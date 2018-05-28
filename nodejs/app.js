@@ -250,11 +250,13 @@ function get_image_url(image_str) {
 
     var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
     var image_parser = myRegex.exec(image_str);
-    if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+    if(image_parser == null || typeof(image_parser) == 'undefined') {
+        console.log('undefined1');
         myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
         image_parser = myRegex.exec(image_str);
     }
-    if(image_parser == null || typeof(image_parser) == 'undefined' || typeof(image_parser[1]) == 'undefined') {
+    if(image_parser == null || typeof(image_parser) == 'undefined') {
+        console.log('undefined2');
         return '';
     }
     return image_parser[1];

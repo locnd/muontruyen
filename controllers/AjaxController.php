@@ -81,6 +81,7 @@ class AjaxController extends Controller
         }
         $book->$key = $value;
         $book->save();
+        Yii::$app->cache->delete('book_detail_'.$book->id);
         return array(
             'success' => true
         );
@@ -105,6 +106,7 @@ class AjaxController extends Controller
         }
         $chapter->$key = $value;
         $chapter->save();
+        Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
         return array(
             'success' => true
         );
@@ -124,6 +126,7 @@ class AjaxController extends Controller
             $chapter->stt = $stt+1;
             $chapter->save();
         }
+        Yii::$app->cache->delete('book_detail_'.$book->id);
         return array(
             'success' => true
         );
@@ -149,8 +152,10 @@ class AjaxController extends Controller
             if($chapter->name != $chapter_name) {
                 $chapter->name = $chapter_name;
                 $chapter->save();
+                Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
             }
         }
+        Yii::$app->cache->delete('book_detail_'.$book->id);
 
         return array(
             'success' => true
@@ -191,6 +196,8 @@ class AjaxController extends Controller
                 DELETE FROM dl_images 
                 WHERE chapter_id = '$item->id'
             ")->execute();
+            Yii::$app->cache->delete('chapter_detail_'.$item->id);
+            Yii::$app->cache->delete('book_detail_'.$item->book_id);
         }
         $item->delete();
         return array(
@@ -296,6 +303,7 @@ class AjaxController extends Controller
             $new_image->stt = $id;
             $new_image->save();
         }
+        Yii::$app->cache->delete('chapter_detail_'.$chapter_id);
         return array(
             'success' => true
         );
@@ -324,6 +332,7 @@ class AjaxController extends Controller
         $book->status = Book::INACTIVE;
         $book->will_reload = 0;
         $book->save();
+        clear_book_cache($book);
         return array(
             'success' => true
         );
