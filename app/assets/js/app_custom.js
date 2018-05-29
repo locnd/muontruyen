@@ -1021,7 +1021,7 @@ function show_profile() {
                 var html ='<div class="section-container a-book" id="admin-cp">';
                 html += '<div class="a-profile"><h3>Dành cho quản trị</h3></div>';
                 html += '<div class="clear5"></div>';
-                html += '<a style="margin-left:20px" href="http://muontruyen.tk">Administrator Backend</a>';
+                html += '<a style="margin-left:20px" href="http://34.219.200.77">Administrator Backend</a>';
                 html += '<div class="clear5"></div>';
                 html += '<hr>';
                 html += '<div class="clear5"></div>';

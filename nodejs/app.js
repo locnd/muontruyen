@@ -9,7 +9,7 @@ var con = mysql.createConnection({
     password: "l!o@c#n$g%u^y&e*n",
     database: "muontruyen"
 });
-var server_url = 'http://muontruyen.tk';
+var server_url = 'http://34.219.200.77';
 
 var cm_book_id = 0;
 var cm_book_cron_id = 0;

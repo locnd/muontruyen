@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function(){
 var APP_VERSION = '1.0.1';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
-var API_URL = 'http://muontruyen.tk/api/v1';
+var API_URL = 'http://34.219.200.77/api/v1';
 
 function getParam(name) {
     var url = window.location.href;
