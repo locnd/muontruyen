@@ -329,15 +329,13 @@ class AjaxController extends Controller
         }
         $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
         foreach ($chapters as $stt =>$chapter) {
-            Yii::$app->db->createCommand("
-                DELETE FROM dl_images 
-                WHERE chapter_id = '$chapter->id'
-            ")->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_images', ['chapter_id' => $chapter->id])
+                ->execute();
         }
-        Yii::$app->db->createCommand("
-                DELETE FROM dl_chapters 
-                WHERE book_id = '$book_id'
-            ")->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_chapters', ['book_id' => $book_id])
+            ->execute();
 
         $book->status = Book::INACTIVE;
         $book->will_reload = 0;

@@ -1450,7 +1450,7 @@ class Apiv1Controller extends Controller
     public function actionClearcache() {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
-        
+
         $token = Yii::$app->request->get('token','');
         if($token != 'l2o4c0n7g1u9y8e8n') {
             return array(

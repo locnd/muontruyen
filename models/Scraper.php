@@ -317,6 +317,10 @@ class Scraper
                 $image_urls[$id] = str_replace('https:','http:', $image_src);
             }
 
+            Yii::$app->db->createCommand()
+                ->update('dl_images', ['status' => Image::INACTIVE], 'chapter_id = '.$db_chapters[$num]->id)
+                ->execute();
+
             $current_images = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id))->all();
             foreach ($current_images as $current_image) {
                 $current_image->status = Image::INACTIVE;
@@ -339,10 +343,9 @@ class Scraper
             }
             if($this->echo) echo ' - ' . $dem . ' images' . "\n";
 
-            $inactive_images = Image::find()->where(array('chapter_id'=>$db_chapters[$num]->id, 'status'=>Image::INACTIVE))->all();
-            foreach ($inactive_images as $inactive_image) {
-                $inactive_image->delete();
-            }
+            Yii::$app->db->createCommand()
+                ->delete('dl_images', ['chapter_id' => $db_chapters[$num]->id, 'status'=>Image::INACTIVE])
+                ->execute();
 
             $db_chapters[$num]->status = Chapter::ACTIVE;
             $db_chapters[$num]->will_reload = 0;
