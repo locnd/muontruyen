@@ -70,20 +70,22 @@ class CronController extends Controller
             if($count_book % 36 == 0) {
                 $page++;
             }
+            $to_page = $page+1;
             $run_daily = true;
             if($page > 30) {
                 $page = (int) $setting_model->get_setting('daily_finished');
                 $page++;
+                $to_page = $page+1;
                 if($page > 30) {
                     $run_daily = false;
                 } else{
-                    $setting_model->set_setting('daily_finished', $page);
+                    $setting_model->set_setting('daily_finished', $to_page);
                 }
             }
             if($run_daily) {
                 $scraper->skip_book_existed = true;
                 foreach ($servers as $server) {
-                    $scraper->parse_server($server, $page, $page, true);
+                    $scraper->parse_server($server, $page, $to_page, true);
                 }
             }
         }
