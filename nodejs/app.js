@@ -10,6 +10,7 @@ var con = mysql.createConnection({
     database: "muontruyen"
 });
 var server_url = 'http://muontruyen.tk';
+var use_proxy = false;
 
 var cm_book_id = 0;
 var cm_book_cron_id = 0;
@@ -77,7 +78,7 @@ function check_book(cron) {
 }
 
 function create_book(url) {
-    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    var proxiedRequest = get_request();
     proxiedRequest.get( url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
@@ -129,7 +130,7 @@ function create_book(url) {
 }
 
 function update_book_without_dom(book) {
-    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    var proxiedRequest = get_request();
     proxiedRequest.get( book.url, function(error, response, body){
         if (error) {
             console.log('Khong the lay html tu book url');
@@ -325,13 +326,17 @@ function create_chap(book, chap_name, href, stt) {
     });
 }
 var count_clone_chap = 0;
-function get_proxy_url() {
-    var port = Math.floor(Math.random() * 50);
-    if(port < 10) port = '0'+port;
-    return "http://galvin24x7:egor99@" + "199.115.116.233:10"+port;
+function get_request() {
+    if(use_proxy) {
+        var port = Math.floor(Math.random() * 50);
+        if(port < 10) port = '0'+port;
+        var proxy_url = "http://galvin24x7:egor99@" + "199.115.116.233:10"+port;
+        return request.defaults({'proxy': proxy_url})
+    }
+    return request;
 }
 function clone_chap(chap) {
-    var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+    var proxiedRequest = get_request();
     proxiedRequest.get( chap.url, function(error, response, body){
         count_clone_chap++;
         if (error){
@@ -374,7 +379,7 @@ function clear_cache(book_id) {
         finish_book_cron();
     } else {
         var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
-        var proxiedRequest = request.defaults({'proxy': get_proxy_url()});
+        var proxiedRequest = get_request();
         proxiedRequest.get( url, function(error, response, body){
             if (error) {
                 console.log('Khong the lay html tu clear cache url');
