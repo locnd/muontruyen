@@ -31,6 +31,7 @@ class DailyController extends Controller
      */
     public function actionIndex()
     {
+        ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
@@ -53,9 +54,6 @@ class DailyController extends Controller
         }
 
         $scraper = new Scraper();
-        if(Yii::$app->params['debug']) {
-            $scraper->echo = false;
-        }
 
         $scraper->skip_book_existed = true;
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();

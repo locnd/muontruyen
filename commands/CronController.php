@@ -36,6 +36,7 @@ class CronController extends Controller
      */
     public function actionIndex()
     {
+        ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
@@ -81,7 +82,6 @@ class CronController extends Controller
             }
             if($run_daily) {
                 $scraper->skip_book_existed = true;
-                $servers = Server::find()->where(array('status' => Server::ACTIVE))->all();
                 foreach ($servers as $server) {
                     $scraper->parse_server($server, $page, $page, true);
                 }

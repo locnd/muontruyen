@@ -683,9 +683,9 @@ class Apiv1Controller extends Controller
                         $need_check = false;
                     }
                     if($need_check) {
-                        $options['Inactive #'.$book->id] = '<a target="_blank" href="http://34.219.200.77/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id='.$book->id.'">Active</a>';
+                        $options['Inactive #'.$book->id] = '<a target="_blank" href="http://muontruyen.tk/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id='.$book->id.'">Active</a>';
                     } else {
-                        $options['Inactive #'.$book->id] = 'Cronning <a target="_blank" href="http://34.219.200.77/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id='.$book->id.'">Active</a>';
+                        $options['Inactive #'.$book->id] = 'Cronning <a target="_blank" href="http://muontruyen.tk/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id='.$book->id.'">Active</a>';
                     }
                 }
             }
@@ -1448,6 +1448,9 @@ class Apiv1Controller extends Controller
     }
 
     public function actionClearcache() {
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
+        
         $token = Yii::$app->request->get('token','');
         if($token != 'l2o4c0n7g1u9y8e8n') {
             return array(

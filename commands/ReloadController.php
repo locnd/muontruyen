@@ -35,6 +35,7 @@ class ReloadController extends Controller
      */
     public function actionIndex()
     {
+        ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
 
         $setting_model = new Setting();
@@ -44,9 +45,6 @@ class ReloadController extends Controller
         $setting_model->set_setting('cron_running', 'yes');
 
         $scraper = new Scraper();
-        if(!Yii::$app->params['debug']) {
-            $scraper->echo = false;
-        }
 
         $books = Book::find()->where(array('will_reload' => 1))->all();
         $book_urls = array();
