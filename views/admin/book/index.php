@@ -38,8 +38,8 @@
                                             <td><a href="<?php echo $book->url; ?>" target="_blank"><?php echo $book->url; ?></a></td>
                                             <td><?php echo count($book->chapters); ?></td>
                                             <td><?php echo $book->status == 1 ? 'Active' : 'Inactive'; ?></td>
-                                            <td><?php echo date('d-m-Y H:i:s',strtotime($book->created_at)); ?></td>
                                             <td><?php echo date('d-m-Y H:i:s',strtotime($book->release_date)); ?></td>
+                                            <td><?php echo date('d-m-Y H:i:s',strtotime($book->created_at)); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
