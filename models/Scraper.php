@@ -7,7 +7,7 @@ use Sunra\PhpSimple\HtmlDomParser;
 
 class Scraper
 {
-    public $via_proxy = false;
+    public $via_proxy = true;
     public $proxyAuth = 'galvin24x7:egor99';
     public $echo = true;
     public $skip_book_existed = false;
