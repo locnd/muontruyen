@@ -14,8 +14,6 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 use app\models\Scraper;
-use app\models\Book;
-use app\models\Chapter;
 use app\models\Setting;
 use app\models\Server;
 
@@ -39,31 +37,20 @@ class CronController extends Controller
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
 
-        $setting_model = new Setting();
-        if($setting_model->get_setting('cron_running') != '') {
-            return ExitCode::OK;
-        }
-        $setting_model->set_setting('cron_running', 'yes');
-
         $scraper = new Scraper();
         if(!Yii::$app->params['debug']) {
             $scraper->echo = false;
         }
-
         if($scraper->echo) {
             echo '---------- scraper ---------'."\n";
         }
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
-
-        $scraper->skip_book_existed = false;
         foreach ($servers as $server) {
             $scraper->parse_server($server, 1, 2);
         }
-
         if($scraper->echo) {
             echo '---------- daily ---------'."\n";
         }
-
         if(BookCron::find()->where(array('status' => 0))->count() < 10) {
             $count_book = BookCron::find()->count();
             $page=ceil($count_book/36);
@@ -71,11 +58,14 @@ class CronController extends Controller
                 $page++;
             }
             $to_page = $page+1;
+            $is_daily=1;
             $run_daily = true;
             if($page > 30) {
+                $setting_model = new Setting();
                 $page = (int) $setting_model->get_setting('daily_finished');
                 $page++;
                 $to_page = $page+1;
+                $is_daily=2;
                 if($page > 30) {
                     $run_daily = false;
                 } else{
@@ -83,68 +73,11 @@ class CronController extends Controller
                 }
             }
             if($run_daily) {
-                $scraper->skip_book_existed = true;
                 foreach ($servers as $server) {
-                    $scraper->parse_server($server, $page, $to_page, true);
+                    $scraper->parse_server($server, $page, $to_page, $is_daily);
                 }
             }
         }
-
-        if($scraper->echo) {
-            echo '---------- reload ---------'."\n";
-        }
-
-        $books = Book::find()->where(array('will_reload' => 1))->all();
-        $book_urls = array();
-        $db_books = array();
-        $db_servers = array();
-        foreach ($books as $book) {
-            $server = $book->server;
-            if(empty($db_servers[$server->id])) {
-                $db_servers[$server->id] = '';
-                $db_books[$server->id] = array();
-                $book_urls[$server->id] = array();
-            }
-            $book_urls[$server->id][] = $book->url;
-            $db_books[$server->id][] = $book;
-            $db_servers[$server->id] = $book->server;
-        }
-        if($scraper->echo) {
-            echo '- reload books ' . count($books) . "\n";
-        }
-        if(count($books) > 0) {
-            $scraper->skip_chapter_existed = false;
-            foreach ($db_servers as $i => $db_server) {
-                $scraper->parse_books($db_server, $book_urls[$i], $db_books[$i]);
-            }
-        }
-
-        $chapters = Chapter::find()->where(array('will_reload' => 1))->all();
-        $chapter_urls = array();
-        $db_chapters = array();
-        $db_books = array();
-        foreach ($chapters as $chapter) {
-            $book = $chapter->book;
-            if(empty($db_books[$book->id])) {
-                $db_books[$book->id] = '';
-                $db_chapters[$book->id] = array();
-                $chapter_urls[$book->id] = array();
-            }
-            $db_chapters[$book->id][] = $chapter;
-            $chapter_urls[$book->id][] = $chapter->url;
-            $db_books[$book->id] = $book;
-        }
-        if($scraper->echo) {
-            echo '- reload chapters ' . count($chapters) . "\n";
-        }
-        if(count($chapters) > 0) {
-            foreach ($db_books as $i => $db_book) {
-                $scraper->parse_chapters($db_book->server, $chapter_urls[$i], $db_chapters[$i], $db_book);
-                Yii::$app->cache->delete('book_detail_'.$db_book->id);
-            }
-        }
-
-        $setting_model->set_setting('cron_running', '');
         return ExitCode::OK;
     }
 }

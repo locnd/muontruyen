@@ -2,6 +2,7 @@ var request = require("request");
 var mysql = require('mysql');
 var DomParser = require('dom-parser');
 var parser = new DomParser();
+var exec = require('child_process').exec;
 
 var con = mysql.createConnection({
     host: "localhost",
@@ -10,6 +11,7 @@ var con = mysql.createConnection({
     database: "muontruyen"
 });
 var server_url = 'http://muontruyen.tk';
+var command_exit = 'php /var/www/muontruyen/yii done ';
 var use_proxy = false;
 
 var cm_book_id = 0;
@@ -52,7 +54,7 @@ function finish_book_cron() {
 }
 
 function check_book(cron) {
-    console.log('Kiem tra url '+cron.book_url);
+    console.log('url = '+cron.book_url);
     var sql = 'SELECT * FROM dl_books WHERE url="'+cron.book_url+'"';
     con.query(sql, function (err, result) {
         if(result.length == 0) {
@@ -252,12 +254,10 @@ function get_image_url(image_str) {
     var myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
     var image_parser = myRegex.exec(image_str);
     if(image_parser == null || typeof(image_parser) == 'undefined') {
-        console.log('undefined1');
         myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
         image_parser = myRegex.exec(image_str);
     }
     if(image_parser == null || typeof(image_parser) == 'undefined') {
-        console.log('undefined2');
         return '';
     }
     return image_parser[1];
@@ -369,6 +369,7 @@ function create_image(chap, image, stt) {
     sql += ")";
     con.query(sql, function (err, result) {
         count_image++;
+        console.log(count_image +'=='+ total_image +' && '+ (count_clone_chap+count_skip_chap) +'=='+ total_chap);
         if(count_image == total_image && count_clone_chap+count_skip_chap == total_chap) {
             check_done();
         }
@@ -378,16 +379,24 @@ function clear_cache(book_id) {
     if(count_skip_chap == total_chap) {
         finish_book_cron();
     } else {
-        var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
-        var proxiedRequest = get_request();
-        proxiedRequest.get( url, function(error, response, body){
-            if (error) {
-                console.log('Khong the lay html tu clear cache url');
-                return false;
+        console.log(command_exit + "" + book_id);
+        dir = exec(command_exit + "" + book_id, function(err, stdout, stderr) {
+            if (err) {
+                console.log('running url');
+                var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
+                var proxiedRequest = get_request();
+                proxiedRequest.get( url, function(error, response, body){
+                    if (error) {
+                        console.log('Khong the lay html tu clear cache url');
+                        return false;
+                    }
+                    console.log(body);
+                    console.log('---- done');
+                    process.exit();
+                });
+            } else {
+                process.exit();
             }
-            console.log(body);
-            console.log('---- done');
-            process.exit();
         });
     }
 }
