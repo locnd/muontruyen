@@ -1222,7 +1222,7 @@ class Apiv1Controller extends Controller
             return array(
                 'success' => true,
                 'message' => 'Không có truyện',
-                'tag' => $tag->to_array(array('name', 'type')),
+                'tag' => $tag->to_array(array('id','name', 'type')),
                 'total' => 0,
                 'unread' => get_user_unread($user)
             );
@@ -1230,7 +1230,7 @@ class Apiv1Controller extends Controller
         return array(
             'success' => true,
             'data' => $data,
-            'tag' => $tag->to_array(array('name', 'type')),
+            'tag' => $tag->to_array(array('id','name', 'type')),
             'total' => $total,
             'count_pages' => $total_page,
             'unread' => get_user_unread($user)

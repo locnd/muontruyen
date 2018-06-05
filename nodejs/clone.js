@@ -10,68 +10,69 @@ var con = mysql.createConnection({
     password: "l!o@c#n$g%u^y&e*n",
     database: "muontruyen"
 });
-var server_url = 'http://muontruyen.tk';
 var command_exit = 'php /var/www/muontruyen/yii done ';
 var use_proxy = true;
-var proxies = ["209.205.212.34:222",
-    "209.205.212.35:222",
-    "209.205.212.36:222",
-    "209.205.212.37:222",
-    "209.205.212.38:222",
-    "209.205.212.34:1200",
-    "209.205.212.34:1201",
-    "209.205.212.34:1202",
-    "209.205.212.34:1203",
-    "209.205.212.34:1204",
-    "209.205.212.34:1205",
-    "209.205.212.34:1206",
-    "209.205.212.34:1207",
-    "209.205.212.34:1208",
-    "209.205.212.34:1209",
-    "209.205.212.34:1210",
-    "209.205.212.34:1211",
-    "209.205.212.34:1212",
-    "209.205.212.34:1213",
-    "209.205.212.34:1214",
-    "209.205.212.34:1215",
-    "209.205.212.34:1216",
-    "209.205.212.34:1217",
-    "209.205.212.34:1218",
-    "209.205.212.34:1219",
-    "209.205.212.34:1220",
-    "209.205.212.34:1221",
-    "209.205.212.34:1222",
-    "209.205.212.34:1223",
-    "209.205.212.34:1224",
-    "209.205.212.34:1225",
-    "209.205.212.34:1226",
-    "209.205.212.34:1227",
-    "209.205.212.34:1228",
-    "209.205.212.34:1229",
-    "209.205.212.34:1230",
-    "209.205.212.34:1231",
-    "209.205.212.34:1232",
-    "209.205.212.34:1233",
-    "209.205.212.34:1234",
-    "209.205.212.34:1235",
-    "209.205.212.34:1236",
-    "209.205.212.34:1237",
-    "209.205.212.34:1238",
-    "209.205.212.34:1239",
-    "209.205.212.34:1240",
-    "209.205.212.34:1241",
-    "209.205.212.34:1242",
-    "209.205.212.34:1243",
-    "209.205.212.34:1244",
-    "209.205.212.34:1245",
-    "209.205.212.34:1246",
-    "209.205.212.34:1247",
-    "209.205.212.34:1248",
-    "209.205.212.34:1249",
-    "209.205.212.34:1250"]
+var proxies = [
+"209.205.212.34:222",
+"209.205.212.35:222",
+"209.205.212.36:222",
+"209.205.212.37:222",
+"209.205.212.38:222",
+"209.205.212.34:1200",
+"209.205.212.34:1201",
+"209.205.212.34:1202",
+"209.205.212.34:1203",
+"209.205.212.34:1204",
+"209.205.212.34:1205",
+"209.205.212.34:1206",
+"209.205.212.34:1207",
+"209.205.212.34:1208",
+"209.205.212.34:1209",
+"209.205.212.34:1210",
+"209.205.212.34:1211",
+"209.205.212.34:1212",
+"209.205.212.34:1213",
+"209.205.212.34:1214",
+"209.205.212.34:1215",
+"209.205.212.34:1216",
+"209.205.212.34:1217",
+"209.205.212.34:1218",
+"209.205.212.34:1219",
+"209.205.212.34:1220",
+"209.205.212.34:1221",
+"209.205.212.34:1222",
+"209.205.212.34:1223",
+"209.205.212.34:1224",
+"209.205.212.34:1225",
+"209.205.212.34:1226",
+"209.205.212.34:1227",
+"209.205.212.34:1228",
+"209.205.212.34:1229",
+"209.205.212.34:1230",
+"209.205.212.34:1231",
+"209.205.212.34:1232",
+"209.205.212.34:1233",
+"209.205.212.34:1234",
+"209.205.212.34:1235",
+"209.205.212.34:1236",
+"209.205.212.34:1237",
+"209.205.212.34:1238",
+"209.205.212.34:1239",
+"209.205.212.34:1240",
+"209.205.212.34:1241",
+"209.205.212.34:1242",
+"209.205.212.34:1243",
+"209.205.212.34:1244",
+"209.205.212.34:1245",
+"209.205.212.34:1246",
+"209.205.212.34:1247",
+"209.205.212.34:1248",
+"209.205.212.34:1249",
+"209.205.212.34:1250"
+];
 
-var cm_book_id = 0;
 var cm_book_cron_id = 0;
+var cm_book_id = 0;
 
 var total_image = -1;
 var count_image = 0;
@@ -86,20 +87,42 @@ con.connect(function(err) {
     console.log("Da ket noi database MySQL");
 });
 
-var sql = 'SELECT * FROM dl_book_cron WHERE status=0 LIMIT 1';
-con.query(sql, function (err, result) {
-    if(result.length > 0) {
-        var book_cron = result[0];
-        cm_book_cron_id = book_cron.id;
-        var sql = 'UPDATE dl_book_cron SET status=1, updated_at="'+current_time()+'" WHERE id="'+book_cron.id+'"';
-        con.query(sql, function (err, result) {
-            check_book(book_cron);
-        });
-    } else {
-        console.log('Khong co book cron');
-        process.exit();
+var start_time = Math.round(+new Date()/1000);
+
+get_book_cron();
+
+var point_count_clone_chap = -1;
+var interval = setInterval(function() {
+    if(cm_book_id > 0) {
+        if (point_count_clone_chap < count_clone_chap) {
+            point_count_clone_chap = count_clone_chap;
+        } else {
+            console.log('cloned chap = ' + count_clone_chap + ' / ' + (total_chap-count_skip_chap));
+            clearInterval(interval);
+            exec(command_exit + "" + cm_book_id + " " +start_time, function (err, stdout, stderr) {
+                console.log('---- Done');
+                process.exit();
+            });
+        }
     }
-});
+}, 60000);
+
+function get_book_cron() {
+    var sql = 'SELECT * FROM dl_book_cron WHERE status=0 LIMIT 1';
+    con.query(sql, function (err, result) {
+        if (result.length > 0) {
+            var book_cron = result[0];
+            cm_book_cron_id = book_cron.id;
+            var sql = 'UPDATE dl_book_cron SET status=1, updated_at="' + current_time() + '" WHERE id="' + book_cron.id + '"';
+            con.query(sql, function (err, result) {
+                check_book(book_cron);
+            });
+        } else {
+            console.log('Khong co book cron');
+            process.exit();
+        }
+    });
+}
 
 function finish_book_cron() {
     var sql = 'UPDATE dl_book_cron SET status=2, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
@@ -122,10 +145,6 @@ function check_book(cron) {
                 console.log('Book dang bi disable');
                 finish_book_cron();
             }
-            if(book.will_reload == 1) {
-                console.log('Book dang duoc reload');
-                finish_book_cron();
-            }
             console.log('Cap nhat book');
             cm_book_id = book.id;
             total_author = 0;
@@ -135,67 +154,88 @@ function check_book(cron) {
     });
 }
 
+function parse_book(url, body) {
+    var dom = parser.parseFromString(body);
+    if(dom == null || typeof(dom) == 'undefined') {
+        create_book(url);
+    } else {
+        var nodes = dom.getElementsByClassName('title-detail');
+        if(typeof(nodes) == 'undefined' || nodes==null || nodes.length == 0 ) {
+            create_book(url);
+        } else {
+            var sql = "INSERT INTO dl_books (server_id, url, name, image_source, description, created_at, updated_at, release_date)";
+            sql += " VALUES (";
+            sql += '"1","'+url+'"';
+            var name = nodes[0].innerHTML.trim();
+            sql += ',"' + addslashes(name) + '"';
+
+            var nodes = dom.getElementsByClassName('col-xs-4 col-image');
+            var image_str = nodes[0].innerHTML.trim();
+
+            var image = get_image_url(image_str);
+            sql += ',"' + image + '"';
+
+            var nodes = dom.getElementsByClassName('detail-content');
+            var description = nodes[0].getElementsByTagName('p')[0].innerHTML.trim();
+            sql += ',"' + addslashes(description) + '"';
+
+            sql += ',"' + current_time() + '"';
+            sql += ',"' + current_time() + '"';
+            sql += ',"' + current_time() + '"';
+
+            sql += ")";
+            con.query(sql, function (err, result) {
+                var sql = 'SELECT * FROM dl_books WHERE url="' + url + '"';
+                con.query(sql, function (err, result) {
+                    if (result.length == 0) {
+                        console.log('Tao moi book khong thanh cong');
+                        finish_book_cron();
+                    } else {
+                        console.log('Tao moi book thanh cong');
+                        console.log('Cap nhat book');
+                        var book = result[0];
+                        cm_book_id = book.id;
+                        update_book(book, dom);
+                        update_status_book(book, dom);
+                        update_tags_book(book, dom);
+                        update_authors_book(book, dom);
+                    }
+                });
+            });
+        }
+    }
+}
+
 function create_book(url) {
     var proxiedRequest = get_request();
     proxiedRequest.get( url, function(error, response, body){
         if (error) {
-            console.log('Khong the lay html tu book url');
-            finish_book_cron();
+            console.log('Khong the lay html tu book url. Thu lai..');
+            create_book(url);
+        } else {
+            parse_book(url, body);
         }
-        var sql = "INSERT INTO dl_books (server_id, url, name, image_source, description, created_at, updated_at, release_date)";
-        sql += " VALUES (";
-        sql += '"1","'+url+'"';
-        var dom = parser.parseFromString(body);
-
-        var nodes = dom.getElementsByClassName('title-detail');
-        var name = nodes[0].innerHTML.trim();
-        sql += ',"'+addslashes(name)+'"';
-
-        var nodes = dom.getElementsByClassName('col-xs-4 col-image');
-        var image_str = nodes[0].innerHTML.trim();
-
-        var image = get_image_url(image_str);
-        sql += ',"'+image+'"';
-
-        var nodes = dom.getElementsByClassName('detail-content');
-        var description = nodes[0].getElementsByTagName('p')[0].innerHTML.trim();
-        sql += ',"'+addslashes(description)+'"';
-
-        sql += ',"'+current_time()+'"';
-        sql += ',"'+current_time()+'"';
-        sql += ',"'+current_time()+'"';
-
-        sql += ")";
-        con.query(sql, function (err, result) {
-            var sql = 'SELECT * FROM dl_books WHERE url="'+url+'"';
-            con.query(sql, function (err, result) {
-                if(result.length == 0) {
-                    console.log('Tao moi book khong thanh cong');
-                    finish_book_cron();
-                } else {
-                    console.log('Tao moi book thanh cong');
-                    console.log('Cap nhat book');
-                    var book = result[0];
-                    cm_book_id = book.id;
-                    update_book(book, dom);
-                    update_status_book(book, dom);
-                    update_tags_book(book, dom);
-                    update_authors_book(book, dom);
-                }
-            });
-        });
     });
+}
+
+function parse_existed_book(book, body) {
+    var dom = parser.parseFromString(body);
+    if(dom == null || typeof(dom) == 'undefined') {
+        update_book_without_dom(book);
+    } else {
+        update_book(book, dom);
+    }
 }
 
 function update_book_without_dom(book) {
     var proxiedRequest = get_request();
     proxiedRequest.get( book.url, function(error, response, body){
         if (error) {
-            console.log('Khong the lay html tu book url');
-            finish_book_cron();
+            console.log('Khong the lay html tu book url. Thu lai...');
+            update_book_without_dom(book);
+        } else {
+            parse_existed_book(book, body)
         }
-        var dom = parser.parseFromString(body);
-        update_book(book, dom);
     });
 }
 
@@ -208,6 +248,8 @@ function update_status_book(book, dom) {
         }
         total_tag += 1;
         check_tag(book, 'Hoàn thành', 'hoan-thanh', 0);
+    } else {
+        check_done();
     }
 }
 function update_tags_book(book, dom) {
@@ -299,8 +341,11 @@ function set_book_tag(book_id, tag_id, type) {
     });
 }
 function check_done() {
-    if(total_image == count_image && total_author == count_author && total_tag == count_tag) {
-        clear_cache(cm_book_id);
+    if(total_image == count_image
+        && total_author == count_author
+        && total_tag == count_tag
+        && count_skip_chap+count_clone_chap==total_chap) {
+        clear_cache();
     }
 }
 function get_image_url(image_str) {
@@ -376,7 +421,7 @@ function create_chap(book, chap_name, href, stt) {
         var sql = 'SELECT * FROM dl_chapters WHERE book_id="'+book.id+'" AND url="'+href+'"';
         con.query(sql, function (err, result) {
             if(result.length > 0) {
-                clone_chap(result[0]);
+                clone_chap(result[0], true);
             }
         });
     });
@@ -391,30 +436,44 @@ function get_request() {
     }
     return request;
 }
-function clone_chap(chap) {
+function parse_chap(chap, body) {
+    var dom = parser.parseFromString(body);
+    if(dom == null || typeof(dom) == 'undefined') {
+        clone_chap(chap, false);
+    } else {
+        var nodes = dom.getElementsByClassName('page-chapter');
+        if(nodes.length == 0) {
+            clone_chap(chap, false);
+        } else {
+            if (total_image == -1) {
+                total_image = 0;
+            }
+            total_image += nodes.length;
+            for (var i = 0; i < nodes.length; i++) {
+                var image_str = nodes[i].innerHTML.trim();
+                var image = get_image_url(image_str);
+                if (image == '') {
+                    count_image++;
+                } else {
+                    var stt = i + 1;
+                    create_image(chap, image, stt);
+                }
+            }
+        }
+    }
+}
+function clone_chap(chap, inc_count_chap) {
     var proxiedRequest = get_request();
     proxiedRequest.get( chap.url, function(error, response, body){
-        count_clone_chap++;
         if (error){
-            console.log('Khong the lay html tu chapter '+chap.url);
-            return false;
-        }
-        var dom = parser.parseFromString(body);
-
-        var nodes = dom.getElementsByClassName('page-chapter');
-        if(total_image == -1) {
-            total_image = 0;
-        }
-        total_image+=nodes.length;
-        for(var i=0; i<nodes.length;i++) {
-            var image_str = nodes[i].innerHTML.trim();
-            var image = get_image_url(image_str);
-            if(image == '') {
-                count_image++;
-            } else {
-                var stt = i + 1;
-                create_image(chap, image, stt);
+            console.log('Can not get html '+ chap.url +'. Try again....');
+            clone_chap(chap, inc_count_chap);
+        } else {
+            if(inc_count_chap) {
+                count_clone_chap++;
+                console.log('count clone chap = '+ count_clone_chap);
             }
+            parse_chap(chap, body);
         }
     });
 }
@@ -425,34 +484,17 @@ function create_image(chap, image, stt) {
     sql += ")";
     con.query(sql, function (err, result) {
         count_image++;
-        console.log(count_image +'=='+ total_image +' && '+ (count_clone_chap+count_skip_chap) +'=='+ total_chap);
-        if(count_image == total_image && count_clone_chap+count_skip_chap == total_chap) {
-            check_done();
-        }
+        check_done();
     });
 }
-function clear_cache(book_id) {
+function clear_cache() {
     if(count_skip_chap == total_chap) {
         finish_book_cron();
     } else {
-        console.log(command_exit + "" + book_id);
-        dir = exec(command_exit + "" + book_id, function(err, stdout, stderr) {
-            if (err) {
-                console.log('running url');
-                var url = server_url + "/api/v1/clearcache?token=l2o4c0n7g1u9y8e8n&book_id=" + book_id;
-                var proxiedRequest = get_request();
-                proxiedRequest.get( url, function(error, response, body){
-                    if (error) {
-                        console.log('Khong the lay html tu clear cache url');
-                        return false;
-                    }
-                    console.log(body);
-                    console.log('---- done');
-                    process.exit();
-                });
-            } else {
-                process.exit();
-            }
+        console.log(command_exit + "" + cm_book_id + " " +start_time);
+        exec(command_exit + "" + cm_book_id + " " +start_time, function (err, stdout, stderr) {
+            console.log('---- Done');
+            process.exit();
         });
     }
 }

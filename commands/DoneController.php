@@ -31,7 +31,7 @@ class DoneController extends Controller
      * @param string $message the message to be echoed.
      * @return int Exit code
      */
-    public function actionIndex($book_id)
+    public function actionIndex($book_id, $time_start)
     {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
@@ -79,7 +79,8 @@ class DoneController extends Controller
             fclose($fp);
         }
 
-        $chapters = Chapter::find()->where(array('book_id'=>$book_id,'status'=>Chapter::INACTIVE))->all();
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id))
+            ->where(array('>=', 'created_at', date('Y-m-d H:i:s', $time_start)))->all();
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
             $chapter->will_reload = 0;
@@ -90,26 +91,22 @@ class DoneController extends Controller
             $chapter->save();
         }
         $book->status = Book::ACTIVE;
-        $book->will_reload = 0;
         if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
             $book->status = Book::INACTIVE;
-            $book->will_reload = 1;
         }
 
         $book->release_date = date('Y-m-d H:i:s');
         foreach ($book->follows as $follow) {
             $follow->status = Follow::UNREAD;
             $follow->save();
-            send_push_notification($follow->user_id);
             Yii::$app->cache->delete('user_unread_' . $follow->user_id);
+            send_push_notification($follow->user_id);
         }
         $book->save();
 
-        $book_cron = BookCron::find()->where(array('book_url'=>$book->url, 'status'=>1))->one();
-        if(!empty($book_cron)) {
-            $book_cron->status = 2;
-            $book_cron->save();
-        }
+        $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
+        $book_cron->status = 2;
+        $book_cron->save();
 
         clear_book_cache($book);
         return ExitCode::OK;

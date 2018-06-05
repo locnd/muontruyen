@@ -9,17 +9,18 @@ class Scraper
 {
     public $via_proxy = true;
     public $proxyAuth = 'galvin24x7:egor99';
-    public $echo = true;
-    public $skip_book_existed = false;
-    public $skip_chapter_existed = true;
 
-    public function parse_server($server, $page=1, $to_page=1, $is_daily=0) {
+    public function parse_server($server, $page=1, $to_page=1, $is_daily=false) {
         $url = $server->url;
         if(!empty($server->list_items_url)) {
             $url = $server->list_items_url;
         }
-        if($is_daily==2 && !empty($server->daily_url)) {
-            $url = $server->daily_url;
+        if($is_daily) {
+            if(!empty($server->daily_url)) {
+                $url = $server->daily_url;
+            } else {
+                return true;
+            }
         }
         $page_urls = array();
         for($i=$page;$i<=$to_page;$i++) {
@@ -36,14 +37,14 @@ class Scraper
     {
         $pages_data = $this->run_curl_multiple($page_urls);
         foreach ($pages_data as $stt => $page_html) {
-            if ($this->echo) echo $server->slug . ' - page ' . $stt;
+            echo $server->slug . ' - page ' . $stt;
             $html_base = HtmlDomParser::str_get_html($page_html);
             unset($page_html);
             $pages_data[$stt] = '';
             if (empty($html_base)) {
                 $html_base = $this->get_html_base($page_urls[$stt], '', true);
                 if (empty($html_base)) {
-                    if ($this->echo) echo ' - can not get html1'."\n";
+                    echo ' - can not get html1'."\n";
                     continue;
                 }
             }
@@ -53,16 +54,16 @@ class Scraper
                 unset($html_base);
                 $html_base = $this->get_html_base($page_urls[$stt], 'phantom', true);
                 if (empty($html_base)) {
-                    if ($this->echo) echo ' - can not get html2'."\n";
+                    echo ' - can not get html2'."\n";
                     continue;
                 }
                 $list_books = $html_base->find($server->list_items_key);
             }
             if (count($list_books) == 0) {
-                if ($this->echo) echo ' - can not get html3'."\n";
+                echo ' - can not get html3'."\n";
                 continue;
             }
-            if ($this->echo) echo '' . "\n";
+            echo '' . "\n";
             foreach ($list_books as $book) {
                 $first_chapter = $book->parent()->parent()->find('li.chapter')[0]->find('a')[0];
                 $first_chapter_url = $this->get_full_href($server, $first_chapter->href);
@@ -70,9 +71,7 @@ class Scraper
                     continue;
                 }
                 $book_url = $this->get_full_href($server, $book->href);
-                if ($this->echo) {
-                    echo ' ----- ' . $book_url . "\n";
-                }
+                echo ' ----- ' . $book_url . "\n";
                 $cron = BookCron::find()->where(array(
                     'book_url'=>$book_url
                 ))->one();
@@ -80,6 +79,9 @@ class Scraper
                     $cron = new BookCron();
                     $cron->book_url = $book_url;
                     $cron->status = 0;
+                    if(substr($book_url,-4) == '-raw') {
+                        $cron->status = 3;
+                    }
                     $cron->save();
                 }
                 if($cron->status == 2) {
@@ -220,7 +222,7 @@ page.open("%s", function (status) {
                 unset($file_html);
             }
         }
-        if($show_way && $this->echo) {
+        if($show_way) {
             echo ' - '.$still_way.' ';
         }
         return $html_base;

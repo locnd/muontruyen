@@ -8,10 +8,10 @@ class Setting extends ModelCommon
         return 'dl_settings';
     }
 
-    public function get_setting($key) {
+    public function get_setting($key, $default = '') {
         $setting = Setting::find()->where(array('name'=> $key))->one();
         if(empty($setting->value)) {
-            return '';
+            return $default;
         }
         return $setting->value;
     }

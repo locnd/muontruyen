@@ -38,45 +38,21 @@ class CronController extends Controller
         ini_set('memory_limit', '-1');
 
         $scraper = new Scraper();
-        if(!Yii::$app->params['debug']) {
-            $scraper->echo = false;
-        }
-        if($scraper->echo) {
-            echo '---------- scraper ---------'."\n";
-        }
+        echo '---------- scraper new ---------'."\n";
         $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
         foreach ($servers as $server) {
-            $scraper->parse_server($server, 1, 2);
+            $scraper->parse_server($server, 1, 1);
         }
-        if($scraper->echo) {
-            echo '---------- daily ---------'."\n";
-        }
-        if(BookCron::find()->where(array('status' => 0))->count() < 10) {
-            $count_book = BookCron::find()->count();
-            $page=ceil($count_book/36);
-            if($count_book % 36 == 0) {
-                $page++;
+        echo '---------- daily ---------'."\n";
+        $setting_model = new Setting();
+        $page = (int) $setting_model->get_setting('daily_page');
+        $page++;
+        if($page < 30) {
+            foreach ($servers as $server) {
+                $scraper->parse_server($server, $page, $page);
+                $scraper->parse_server($server, $page, $page, true);
             }
-            $to_page = $page+1;
-            $is_daily=1;
-            $run_daily = true;
-            if($page > 30) {
-                $setting_model = new Setting();
-                $page = (int) $setting_model->get_setting('daily_finished');
-                $page++;
-                $to_page = $page+1;
-                $is_daily=2;
-                if($page > 30) {
-                    $run_daily = false;
-                } else{
-                    $setting_model->set_setting('daily_finished', $to_page);
-                }
-            }
-            if($run_daily) {
-                foreach ($servers as $server) {
-                    $scraper->parse_server($server, $page, $to_page, $is_daily);
-                }
-            }
+            $setting_model->set_setting('daily_page', $page);
         }
         return ExitCode::OK;
     }
