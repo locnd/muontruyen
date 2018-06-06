@@ -105,7 +105,7 @@ var interval = setInterval(function() {
 
 var sql = 'SELECT * FROM dl_book_cron WHERE status=1';
 con.query(sql, function (err, result) {
-    if (result.length < 3) {
+    if (result.length < 1) {
         get_book_cron();
     } else {
         console.log('So cron dang chay = '+result.length);
