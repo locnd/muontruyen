@@ -87,14 +87,33 @@ var interval = setInterval(function() {
             console.log('cloned chap = ' + count_chapter + ' / ' + total_chapter);
             clearInterval(interval);
             exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
-                console.log('---- Done');
-                process.exit();
+                var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
+                con.query(sql, function (err, result) {
+                    console.log('---- Done');
+                    process.exit();
+                });
             });
         }
     }
 }, 60000);
 
-get_chapter_reload();
+var sql = 'SELECT * FROM dl_settings WHERE name="reloading" LIMIT 1';
+con.query(sql, function (err, result) {
+    if (result.length > 0) {
+        if(result[0].value=='') {
+            var sql = 'UPDATE dl_settings SET value="yes", updated_at="' + current_time() + '" WHERE name="reloading"';
+            con.query(sql, function (err, result) {
+                get_chapter_reload();
+            });
+        } else {
+            console.log('----- reloading');
+            process.exit();
+        }
+    } else {
+        console.log('Khong co setting reloading');
+        process.exit();
+    }
+});
 
 function get_chapter_reload() {
     var sql = 'SELECT * FROM dl_chapters WHERE will_reload=1 LIMIT 1';
@@ -195,8 +214,11 @@ function create_image(chap, image, stt) {
             count_chapter++;
             if(total_chapter == count_chapter) {
                 exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
-                    console.log('---- Done');
-                    process.exit();
+                    var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
+                    con.query(sql, function (err, result) {
+                        console.log('---- Done');
+                        process.exit();
+                    });
                 });
             }
         }
