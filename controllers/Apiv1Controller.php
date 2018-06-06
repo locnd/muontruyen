@@ -653,16 +653,6 @@ class Apiv1Controller extends Controller
             $options['Số ảnh'] = Image::find()->count();
             $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 
-            $options['Số báo lỗi'] = Report::find()->count();
-            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
-
-            $options['Cron'] = 'stop';
-            $setting_model = new Setting();
-            if($setting_model->get_setting('cron_running') != '') {
-                $options['Cron'] = 'running';
-            }
-            $options['Cron'] .= '<br><input class="dl-btn-default" type="button" value="Change" onclick="change_cron()">';
-
             $cronning_book = BookCron::find()->where(array('status'=>1))->count();
             $options['Book Crons'] = $cronning_book.' - '.BookCron::find()->where(array('status'=>0))->count();
 
@@ -675,6 +665,11 @@ class Apiv1Controller extends Controller
                     $options['Book #'.$book->id] = 'Cronning';
                 }
             }
+
+            $options['Số báo lỗi'] = Report::find()->count();
+            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
+
+            $options['Clear cache'] = '<input class="dl-btn-default" type="button" value="Clear" onclick="change_cron()">';
         }
         return array(
             'success' => true,
@@ -703,13 +698,7 @@ class Apiv1Controller extends Controller
                 'message' => 'Không có quyền thực hiện'
             );
         }
-        $setting_model = new Setting();
-        if($setting_model->get_setting('cron_running') != '') {
-            $setting_model->set_setting('cron_running', '');
-        } else {
-            Yii::$app->cache->flush();
-            $setting_model->set_setting('cron_running', 'yes');
-        }
+        Yii::$app->cache->flush();
         return array(
             'success' => true
         );
