@@ -87,8 +87,6 @@ con.connect(function(err) {
     console.log("Da ket noi database MySQL");
 });
 
-var start_time = Math.round(+new Date()/1000);
-
 get_book_cron();
 
 var point_count_clone_chap = -1;
@@ -99,7 +97,7 @@ var interval = setInterval(function() {
         } else {
             console.log('cloned chap = ' + count_clone_chap + ' / ' + (total_chap-count_skip_chap));
             clearInterval(interval);
-            exec(command_exit + "" + cm_book_id + " " +start_time, function (err, stdout, stderr) {
+            exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
                 console.log('---- Done');
                 process.exit();
             });
@@ -492,7 +490,7 @@ function clear_cache() {
         finish_book_cron();
     } else {
         console.log(command_exit + "" + cm_book_id + " " +start_time);
-        exec(command_exit + "" + cm_book_id + " " +start_time, function (err, stdout, stderr) {
+        exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
             console.log('---- Done');
             process.exit();
         });

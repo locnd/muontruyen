@@ -32,7 +32,7 @@ class DoneController extends Controller
      * @param string $message the message to be echoed.
      * @return int Exit code
      */
-    public function actionIndex($book_id, $time_start)
+    public function actionIndex($book_id)
     {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
@@ -82,11 +82,8 @@ class DoneController extends Controller
             curl_exec($ch);
             curl_close($ch);
             fclose($fp);
-            $book->save();
         }
-
-        $chapters = Chapter::find()->where(array('book_id'=>$book->id))
-            ->andWhere(array('>=', 'created_at', date('Y-m-d H:i:s', $time_start)))->all();
+        $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->all();
         echo "----- chapters ".count($chapters)."\n";
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;

@@ -9,6 +9,7 @@ var con = mysql.createConnection({
     password: "l!o@c#n$g%u^y&e*n",
     database: "muontruyen"
 });
+var command_exit = 'php /var/www/muontruyen/yii done ';
 var use_proxy = true;
 var proxies = [
 "209.205.212.34:222",
@@ -77,8 +78,6 @@ con.connect(function(err) {
 });
 
 var point_count_clone_chap = -1;
-var chapters = [];
-var finished_chapter = [];
 var interval = setInterval(function() {
     if(cm_book_id > 0) {
         if (point_count_clone_chap < count_chapter) {
@@ -86,12 +85,10 @@ var interval = setInterval(function() {
         } else {
             console.log('cloned chap = ' + count_chapter + ' / ' + total_chapter);
             clearInterval(interval);
-            for(i=0;i<chapters.length;i++) {
-                var chap = chapters[i];
-                if(finished_chapter.indexOf(chap.id) == -1) {
-                    finish_chap(chap);
-                }
-            }
+            exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
+                console.log('---- Done');
+                process.exit();
+            });
         }
     }
 }, 60000);
@@ -131,37 +128,6 @@ function update_chapter(chapter) {
     var sql = 'UPDATE dl_chapters SET will_reload=0, updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
     con.query(sql, function (err, result) {
         delete_images(chapter);
-    });
-}
-
-function finish_chap(chapter) {
-    finished_chapter.push(chapter.id);
-    var sql = 'SELECT id FROM dl_images WHERE chapter_id="'+chapter.id+'"';
-    con.query(sql, function (err, result) {
-        if(result.length > 0) {
-            console.log('active chapter');
-            var sql = 'UPDATE dl_chapters SET will_reload=0,status=1,updated_at="'+current_time()+'" WHERE id="'+chapter.id+'"';
-            con.query(sql, function (err, result) {
-                var sql = 'UPDATE dl_books SET status=1 WHERE id="'+chapter.book_id+'"';
-                con.query(sql, function (err, result) {
-                    count_chapter++;
-                    if(total_chapter == count_chapter) {
-                        console.log('---- Done');
-                        process.exit();
-                    }
-                });
-            });
-        } else {
-            console.log('inactive chapter');
-            var sql = 'UPDATE dl_chapters SET will_reload=1,status=0,updated_at="'+current_time()+'" WHERE id="'+chapter.id+'"';
-            con.query(sql, function (err, result) {
-                count_chapter++;
-                if(total_chapter == count_chapter) {
-                    console.log('---- Done');
-                    process.exit();
-                }
-            });
-        }
     });
 }
 
@@ -225,7 +191,13 @@ function create_image(chap, image, stt) {
     con.query(sql, function (err, result) {
         chap.count_image++;
         if(chap.count_image == chap.total_image) {
-            finish_chap(chap);
+            count_chapter++;
+            if(total_chapter == count_chapter) {
+                exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
+                    console.log('---- Done');
+                    process.exit();
+                });
+            }
         }
     });
 }
