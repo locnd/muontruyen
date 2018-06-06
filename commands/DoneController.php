@@ -85,8 +85,8 @@ class DoneController extends Controller
             $book->save();
         }
 
-        $chapters = Chapter::find()->where(array('book_id'=>$book_id))
-            ->where(array('>=', 'created_at', date('Y-m-d H:i:s', $time_start)))->all();
+        $chapters = Chapter::find()->where(array('book_id'=>$book->id))
+            ->andWhere(array('>=', 'created_at', date('Y-m-d H:i:s', $time_start)))->all();
         echo "----- chapters ".count($chapters)."\n";
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
