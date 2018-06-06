@@ -497,7 +497,7 @@ function clear_cache() {
     if(count_skip_chap == total_chap) {
         finish_book_cron();
     } else {
-        console.log(command_exit + "" + cm_book_id + " " +start_time);
+        console.log(command_exit + "" + cm_book_id);
         exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
             console.log('---- Done');
             process.exit();
