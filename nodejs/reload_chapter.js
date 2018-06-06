@@ -2,6 +2,7 @@ var request = require("request");
 var mysql = require('mysql');
 var DomParser = require('dom-parser');
 var parser = new DomParser();
+var exec = require('child_process').exec;
 
 var con = mysql.createConnection({
     host: "localhost",
