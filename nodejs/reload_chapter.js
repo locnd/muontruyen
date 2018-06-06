@@ -84,7 +84,7 @@ var interval = setInterval(function() {
         if (point_count_clone_chap < count_chapter) {
             point_count_clone_chap = count_chapter;
         } else {
-            console.log('cloned chap = ' + count_chapter + ' / ' + total_chap);
+            console.log('cloned chap = ' + count_chapter + ' / ' + total_chapter);
             clearInterval(interval);
             for(i=0;i<chapters.length;i++) {
                 var chap = chapters[i];
