@@ -87,8 +87,6 @@ con.connect(function(err) {
     console.log("Da ket noi database MySQL");
 });
 
-get_book_cron();
-
 var point_count_clone_chap = -1;
 var interval = setInterval(function() {
     if(cm_book_id > 0) {
@@ -104,6 +102,16 @@ var interval = setInterval(function() {
         }
     }
 }, 60000);
+
+var sql = 'SELECT * FROM dl_book_cron WHERE status=1';
+con.query(sql, function (err, result) {
+    if (result.length < 3) {
+        get_book_cron();
+    } else {
+        console.log('So cron dang chay = '+result.length);
+        process.exit();
+    }
+});
 
 function get_book_cron() {
     var sql = 'SELECT * FROM dl_book_cron WHERE status=0 LIMIT 1';
