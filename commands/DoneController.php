@@ -51,7 +51,9 @@ class DoneController extends Controller
                 $new_slug = $slug . '-' . $tm;
             }
             $book->slug = $new_slug;
+            $book->save();
         }
+        echo "----- ".$book->slug."\n";
 
         if((empty($book->image) || $book->image == 'default.jpg') && !empty($book->image_source)) {
             $image_dir = Yii::$app->params['app'].'/web/uploads/books/'.$book->slug;
@@ -80,10 +82,12 @@ class DoneController extends Controller
             curl_exec($ch);
             curl_close($ch);
             fclose($fp);
+            $book->save();
         }
 
         $chapters = Chapter::find()->where(array('book_id'=>$book_id))
             ->where(array('>=', 'created_at', date('Y-m-d H:i:s', $time_start)))->all();
+        echo "----- chapters ".count($chapters)."\n";
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
             $chapter->will_reload = 0;
@@ -92,6 +96,7 @@ class DoneController extends Controller
                 $chapter->will_reload = 1;
             }
             $chapter->save();
+            echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
         }
         $book->status = Book::ACTIVE;
         if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
