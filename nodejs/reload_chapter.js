@@ -110,8 +110,11 @@ con.query(sql, function (err, result) {
             process.exit();
         }
     } else {
-        console.log('Khong co setting reloading');
-        process.exit();
+        var sql = "INSERT INTO dl_settings (name, value, created_at, updated_at)";
+        sql += " VALUES ('reloading','yes','"+current_time()+"','"+current_time()+"')";
+        con.query(sql, function (err, result) {
+            get_chapter_reload();
+        });
     }
 });
 
@@ -131,7 +134,7 @@ function get_chapter_reload() {
     });
 }
 function get_list_chapter_reload(chapter) {
-    var sql = 'SELECT * FROM dl_chapters WHERE will_reload=1 AND book_id='+chapter.book_id+' LIMIT 20';
+    var sql = 'SELECT * FROM dl_chapters WHERE will_reload=1 AND book_id='+chapter.book_id;
     con.query(sql, function (err, result) {
         if (result.length > 0) {
             chapters = result;
