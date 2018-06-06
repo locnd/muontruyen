@@ -122,13 +122,16 @@ function get_chapter_reload() {
             cm_book_id = result[0].book_id;
             get_list_chapter_reload(result[0]);
         } else {
-            console.log('Khong co chapter reload');
-            process.exit();
+            var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
+            con.query(sql, function (err, result) {
+                console.log('---- Done');
+                process.exit();
+            });
         }
     });
 }
 function get_list_chapter_reload(chapter) {
-    var sql = 'SELECT * FROM dl_chapters WHERE will_reload=1 AND book_id='+chapter.book_id;
+    var sql = 'SELECT * FROM dl_chapters WHERE will_reload=1 AND book_id='+chapter.book_id+' LIMIT 20';
     con.query(sql, function (err, result) {
         if (result.length > 0) {
             chapters = result;
