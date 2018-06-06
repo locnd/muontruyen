@@ -16,6 +16,7 @@ use app\models\Book;
 use app\models\BookCron;
 use app\models\Chapter;
 use app\models\Image;
+use app\models\Follow;
 /**
  * This command echoes the first argument that you have entered.
  *
