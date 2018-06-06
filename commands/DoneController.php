@@ -36,6 +36,8 @@ class DoneController extends Controller
     {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '-1');
+        ini_set('mysql.connect_timeout', 3600);
+        ini_set('default_socket_timeout', 3600);
 
         $book = Book::find()->where(array('id'=>$book_id))->one();
         if(empty($book)) {
