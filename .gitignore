@@ -14,3 +14,4 @@ tests/_support/_generated
 
 web/uploads/*
 phantom/*
+vendor/*

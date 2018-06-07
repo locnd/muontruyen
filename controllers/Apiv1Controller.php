@@ -330,7 +330,7 @@ class Apiv1Controller extends Controller
         }
         return array(
             'success' => true,
-            'data' => get_user_unread($user->id)
+            'data' => get_user_unread($user)
         );
     }
     public function actionMakebookmark() {
