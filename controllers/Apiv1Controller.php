@@ -252,7 +252,7 @@ class Apiv1Controller extends Controller
     public function actionBookforsearch() {
         ini_set('memory_limit', '-1');
         $books = Yii::$app->cache->getOrSet('book_searchs', function () {
-            return Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->all();
+            return Book::find()->select(['id','name'])->where(array('status'=>Book::ACTIVE))->orderBy(['name' => SORT_ASC])->all();
         });
         return array(
             'success' => true,
