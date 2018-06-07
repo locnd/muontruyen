@@ -355,6 +355,10 @@ function check_done() {
     }
 }
 function get_image_url(image_str) {
+    var is_https = false;
+    if(image_str.indexOf('https://') > -1) {
+        is_https= true;
+    }
     image_str = image_str.replace('https:','http:').replace('https:','http:').replace('https:','http:');
     image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
 
@@ -366,6 +370,9 @@ function get_image_url(image_str) {
     }
     if(image_parser == null || typeof(image_parser) == 'undefined') {
         return '';
+    }
+    if(is_https) {
+        return image_parser[1].replace('http://','https://');
     }
     return image_parser[1];
 }
