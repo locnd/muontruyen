@@ -85,23 +85,19 @@ class DoneController extends Controller
         }
         $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->all();
         echo "----- chapters ".count($chapters)."\n";
-        $is_updated = false;
+        $fail = 0;
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
             $chapter->will_reload = 0;
             if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
                 $chapter->status = Chapter::INACTIVE;
                 $chapter->will_reload = 1;
-                $is_updated = true;
+                $fail++;
             }
             $chapter->save();
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
         }
-        $book->status = Book::ACTIVE;
-        if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
-            $book->status = Book::INACTIVE;
-        }
-        if($is_updated) {
+        if($fail < count($chapters)) {
             $book->release_date = date('Y-m-d H:i:s');
             foreach ($book->follows as $follow) {
                 $follow->status = Follow::UNREAD;
@@ -109,6 +105,10 @@ class DoneController extends Controller
                 Yii::$app->cache->delete('user_unread_' . $follow->user_id);
                 send_push_notification($follow->user_id);
             }
+        }
+        $book->status = Book::ACTIVE;
+        if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
+            $book->status = Book::INACTIVE;
         }
         $book->save();
 
