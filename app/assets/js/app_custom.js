@@ -1879,7 +1879,7 @@ function change_cron() {
         dl_alert('danger', 'Không có quyền thực hiện', false);
         return true;
     }
-    if(confirm('Bạn muốn thay đổi giá trị cron ?')) {
+    if(confirm('Bạn muốn xóa toàn bộ cache ?')) {
         send_api('GET', '/changecron', {}, function (res) {
             if (res.success) {
                 window.location.reload();

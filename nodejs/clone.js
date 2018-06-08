@@ -355,31 +355,32 @@ function check_done() {
     }
 }
 function get_image_url(image_str) {
-    var is_https = false;
-    if(image_str.indexOf('https://') > -1) {
-        is_https= true;
-    }
-    image_str = image_str.replace('https:','http:').replace('https:','http:').replace('https:','http:');
     image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
+    if(image_str.indexOf('original="') > -1) {
+        var image_parser = image_str.split('original="');
+        image_str = image_parser[1];
+        image_parser = image_str.split('"');
 
-    var myRegex = /<img[^>]+original="(http:\/\/[^">]+)"/g;
-    var image_parser = myRegex.exec(image_str);
-    if(image_parser == null || typeof(image_parser) == 'undefined') {
-        myRegex = /<img[^>]+src="(http:\/\/[^">]+)"/g;
-        image_parser = myRegex.exec(image_str);
+        var img = image_parser[0];
+        if(img.indexOf('=http') > -1) {
+            image_parser = img.split('=http');
+            img = decodeURIComponent('http'+image_parser[1]);
+        }
+        return img;
     }
-    if(image_parser == null || typeof(image_parser) == 'undefined') {
-        return '';
+    if(image_str.indexOf('src="') > -1) {
+        var image_parser = image_str.split('src="');
+        image_str = image_parser[1];
+        image_parser = image_str.split('"');
+
+        var img = image_parser[0];
+        if(img.indexOf('=http') > -1) {
+            image_parser = img.split('=http');
+            img = decodeURIComponent('http'+image_parser[1]);
+        }
+        return img;
     }
-    var img = image_parser[1];
-    if(img.indexOf('=http') > -1) {
-        image_parser = img.split('=http');
-        img = decodeURIComponent('http'+image_parser[1]);
-    }
-    if(is_https) {
-        return img.replace('http://','https://');
-    }
-    return img;
+    return '';
 }
 function update_book(book, dom) {
     var nodes = dom.getElementsByClassName('col-xs-5 chapter');
