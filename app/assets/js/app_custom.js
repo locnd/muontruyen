@@ -757,6 +757,7 @@ function show_follow(tab, page, is_first) {
                     html += '</div>';
                 }
             }
+            $('#list_follows').html(html);
             if(groups.length == 0) {
                 $('#list_groups').hide();
                 $('.dl-content').css('width','100%');
@@ -777,7 +778,6 @@ function show_follow(tab, page, is_first) {
                     }
                 }
             }
-            $('#list_follows').html(html);
             $('.a-book.active').removeClass('active');
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);

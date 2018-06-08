@@ -730,3 +730,6 @@ div#list-books .a-book {
 #profile {
     display:none;
 }
+i.fa-arrows-alt {
+    color:black !important;
+}

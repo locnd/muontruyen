@@ -85,12 +85,14 @@ class DoneController extends Controller
         }
         $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->all();
         echo "----- chapters ".count($chapters)."\n";
+        $is_updated = false;
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
             $chapter->will_reload = 0;
             if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
                 $chapter->status = Chapter::INACTIVE;
                 $chapter->will_reload = 1;
+                $is_updated = true;
             }
             $chapter->save();
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
@@ -99,19 +101,22 @@ class DoneController extends Controller
         if(Chapter::find()->where(array('book_id'=>$book_id, 'status'=>Chapter::ACTIVE))->count() == 0) {
             $book->status = Book::INACTIVE;
         }
-
-        $book->release_date = date('Y-m-d H:i:s');
-        foreach ($book->follows as $follow) {
-            $follow->status = Follow::UNREAD;
-            $follow->save();
-            Yii::$app->cache->delete('user_unread_' . $follow->user_id);
-            send_push_notification($follow->user_id);
+        if($is_updated) {
+            $book->release_date = date('Y-m-d H:i:s');
+            foreach ($book->follows as $follow) {
+                $follow->status = Follow::UNREAD;
+                $follow->save();
+                Yii::$app->cache->delete('user_unread_' . $follow->user_id);
+                send_push_notification($follow->user_id);
+            }
         }
         $book->save();
 
         $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
-        $book_cron->status = 2;
-        $book_cron->save();
+        if($book_cron->status == 1) {
+            $book_cron->status = 2;
+            $book_cron->save();
+        }
 
         clear_book_cache($book);
         return ExitCode::OK;
