@@ -535,9 +535,39 @@ class Apiv1Controller extends Controller
                     'message' => 'Không tìm thấy truyện'
                 );
             }
-            $book->status = Book::INACTIVE;
-            $book->save();
+            $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
+            if(!empty($book_cron)) {
+                $book_cron->status = 3;
+                $book_cron->save();
+            }
+            $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+            $chapter_ids = array();
+            foreach ($chapters as $stt =>$chapter) {
+                $chapter_ids[] = $chapter->id;
+            }
+            Yii::$app->db->createCommand()
+                ->delete('dl_images', ['chapter_id' => $chapter_ids])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_chapters', ['book_id' => $book_id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_bookmarks', ['book_id' => $book_id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_reports', ['book_id' => $book_id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_book_tag', ['book_id' => $book_id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_follows', ['book_id' => $book_id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_readed', ['book_id' => $book_id])
+                ->execute();
             clear_book_cache($book);
+            $book->delete();
         }elseif($book_id == 0 && $chapter_id > 0) {
             $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
             if(empty($chapter)) {
@@ -548,7 +578,14 @@ class Apiv1Controller extends Controller
             }
             $chapter->status = Chapter::INACTIVE;
             $chapter->save();
+            Yii::$app->db->createCommand()
+                ->delete('dl_images', ['chapter_id' => $chapter->id])
+                ->execute();
+            Yii::$app->db->createCommand()
+                ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
+                ->execute();
             clear_book_cache($chapter->book);
+            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
         } else {
             return array(
                 'success' => false,
@@ -583,8 +620,11 @@ class Apiv1Controller extends Controller
                     'message' => 'Không tìm thấy truyện'
                 );
             }
-            $book->will_reload = 1;
-            $book->save();
+            $chapters = Chapter::find()->where(array('book_id'=>$book_id))->one();
+            foreach($chapters as $chapter) {
+                $chapter->will_reload = 1;
+                $chapter->save();
+            }
         }elseif($book_id == 0 && $chapter_id > 0) {
             $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
             if(empty($chapter)) {
@@ -656,9 +696,7 @@ class Apiv1Controller extends Controller
             $cronning_book = BookCron::find()->where(array('status'=>1))->count();
             $options['Book Crons'] = $cronning_book.' - '.BookCron::find()->where(array('status'=>0))->count();
 
-            $options['Cronning'] = '-';
             if($cronning_book > 0) {
-                unset($options['Cronning']);
                 $book_crons = BookCron::find()->where(array('status'=>1))->all();
                 foreach ($book_crons as  $book_cron) {
                     $book = Book::find()->where(array('url'=>$book_cron->book_url))->one();
@@ -669,7 +707,7 @@ class Apiv1Controller extends Controller
             $options['Số báo lỗi'] = Report::find()->count();
             $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
 
-            $options['Clear cache'] = '<input class="dl-btn-default" type="button" value="Clear" onclick="change_cron()">';
+            $options['Clear cache'] = '<input class="dl-btn-default" type="button" value="Clear" onclick="clear_cache()">';
         }
         return array(
             'success' => true,
@@ -684,7 +722,7 @@ class Apiv1Controller extends Controller
             'unread' => get_user_unread($user)
         );
     }
-    public function actionChangecron() {
+    public function actionClearcache() {
         $user = $this->check_user();
         if(!empty($user['error'])) {
             return array(

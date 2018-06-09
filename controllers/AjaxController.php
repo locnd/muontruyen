@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\BookCron;
 use app\models\Report;
 use app\models\Scraper;
 use app\models\Setting;
@@ -327,20 +328,40 @@ class AjaxController extends Controller
                 'message' => 'Book not found'
             );
         }
-        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
-        foreach ($chapters as $stt =>$chapter) {
-            Yii::$app->db->createCommand()
-                ->delete('dl_images', ['chapter_id' => $chapter->id])
-                ->execute();
+        $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
+        if(!empty($book_cron)) {
+            $book_cron->status = 3;
+            $book_cron->save();
         }
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+        $chapter_ids = array();
+        foreach ($chapters as $stt =>$chapter) {
+            $chapter_ids[] = $chapter->id;
+        }
+        Yii::$app->db->createCommand()
+            ->delete('dl_images', ['chapter_id' => $chapter_ids])
+            ->execute();
         Yii::$app->db->createCommand()
             ->delete('dl_chapters', ['book_id' => $book_id])
             ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_bookmarks', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_reports', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_book_tag', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_follows', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_readed', ['book_id' => $book_id])
+            ->execute();
 
-        $book->status = Book::INACTIVE;
-        $book->will_reload = 0;
-        $book->save();
         clear_book_cache($book);
+        $book->delete();
         return array(
             'success' => true
         );

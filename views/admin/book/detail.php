@@ -361,7 +361,7 @@
                 dataType: 'json',
                 success: function(result){
                     if(result.success) {
-                        window.location.reload();
+                        window.location.href = "/admin/book";
                     } else {
                         alert(result.message);
                     }

@@ -6,7 +6,7 @@ function show_home(page, sort) {
     $('#paging').html('');
     if(page == 1 && !is_admin()) {
         var time_cache = localStorage.getItem("time_cache_home_"+sort);
-        if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 900000) {
+        if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 600000) {
             check_unread();
             get_cache_home(sort);
             return true;
@@ -873,14 +873,18 @@ function disable() {
     if($('#loading-btn').is(":visible")) {
         return true;
     }
-    if(confirm('Bạn có chắc là muốn ẩn truyện này không ?')) {
+
+    var message = 'Bạn có chắc là muốn xóa truyện này không ?';
+    var book_id = $('#book_id').val();
+    var chapter_id = 0;
+    if($('#chapter_id').length > 0) {
+        book_id = 0;
+        chapter_id = $('#chapter_id').val();
+        message = 'Bạn có chắc là muốn ẩn chương truyện này không ?';
+    }
+
+    if(confirm(message)) {
         $('#loading-btn').show();
-        var book_id = $('#book_id').val();
-        var chapter_id = 0;
-        if($('#chapter_id').length > 0) {
-            book_id = 0;
-            chapter_id = $('#chapter_id').val();
-        }
         var params = {
             book_id: book_id,
             chapter_id: chapter_id
@@ -1870,7 +1874,7 @@ function get_facebook_profile(){
     );
 }
 
-function change_cron() {
+function clear_cache() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
         return true;
@@ -1880,7 +1884,7 @@ function change_cron() {
         return true;
     }
     if(confirm('Bạn muốn xóa toàn bộ cache ?')) {
-        send_api('GET', '/changecron', {}, function (res) {
+        send_api('GET', '/clearcache', {}, function (res) {
             if (res.success) {
                 window.location.reload();
             } else {
