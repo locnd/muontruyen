@@ -10,7 +10,7 @@ var con = mysql.createConnection({
     password: "l!o@c#n$g%u^y&e*n",
     database: "muontruyen"
 });
-var command_exit = 'php /mnt/www/muontruyen/yii done ';
+var command_exit = 'php /var/www/muontruyen/yii done ';
 
 var use_proxy = true;
 var proxies = [
@@ -128,6 +128,7 @@ function get_chapter_reload() {
         } else {
             var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
             con.query(sql, function (err, result) {
+                console.log('Khong co chapter reload');
                 console.log('---- Done');
                 process.exit();
             });
@@ -224,6 +225,7 @@ function create_image(chap, image, stt) {
         if(chap.count_image == chap.total_image) {
             count_chapter++;
             if(total_chapter == count_chapter) {
+                console.log(command_exit + "" + cm_book_id);
                 exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
                     var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
                     con.query(sql, function (err, result) {
