@@ -95,6 +95,7 @@ class DoneController extends Controller
                 $fail++;
             }
             $chapter->save();
+            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
         }
         if($fail < count($chapters)) {
