@@ -46,8 +46,8 @@ class CronController extends Controller
         echo '---------- daily ---------'."\n";
         $setting_model = new Setting();
         $page = (int) $setting_model->get_setting('daily_page');
-        $page++;
-        if($page < 30) {
+        if($page < 35) {
+            $page++;
             foreach ($servers as $server) {
                 $scraper->parse_server($server, $page, $page);
                 $scraper->parse_server($server, $page, $page, true);
