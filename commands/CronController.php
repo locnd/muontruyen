@@ -38,15 +38,16 @@ class CronController extends Controller
         ini_set('memory_limit', '-1');
 
         $scraper = new Scraper();
-        echo '---------- scraper new ---------'."\n";
-        $servers = Server::find()->where(array('status'=>Server::ACTIVE))->all();
+        echo '---------- scraper new ---------' . "\n";
+        $servers = Server::find()->where(array('status' => Server::ACTIVE))->all();
         foreach ($servers as $server) {
             $scraper->parse_server($server, 1, 1);
         }
-        echo '---------- daily ---------'."\n";
-        $setting_model = new Setting();
-        $page = (int) $setting_model->get_setting('daily_page');
-        if($page < 35) {
+
+        if ((int)date('H') == 1 && (int)date('i') < 30) {
+            echo '---------- daily ---------' . "\n";
+            $setting_model = new Setting();
+            $page = (int)$setting_model->get_setting('daily_page');
             $page++;
             foreach ($servers as $server) {
                 $scraper->parse_server($server, $page, $page);
