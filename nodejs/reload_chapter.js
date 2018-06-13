@@ -171,7 +171,7 @@ function update_chapter(chapter) {
 }
 
 function delete_images(chapter) {
-    var sql = 'Delete FROM dl_images WHERE id="'+chapter.id+'"';
+    var sql = 'Delete FROM dl_images WHERE chapter_id="'+chapter.id+'"';
     con.query(sql, function (err, result) {
         clone_chap(chapter);
     });
