@@ -80,8 +80,9 @@ con.connect(function(err) {
 });
 
 var point_count_clone_chap = -1;
+var dem_delay = 0;
 var interval = setInterval(function() {
-    if(cm_book_id > 0) {
+    if(cm_book_id > 0 || dem_delay > 2) {
         if (point_count_clone_chap < count_chapter) {
             point_count_clone_chap = count_chapter;
         } else {
@@ -95,6 +96,8 @@ var interval = setInterval(function() {
                 });
             });
         }
+    } else {
+        dem_delay++;
     }
 }, 60000);
 
