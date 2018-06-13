@@ -355,3 +355,9 @@ function clear_book_cache($book) {
         Yii::$app->cache->delete('user_unread_'.$follow->user_id);
     }
 }
+function clear_chapter_cache($chapter) {
+    if(empty($chapter)) {
+        return false;
+    }
+    Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+}

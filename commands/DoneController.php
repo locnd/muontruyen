@@ -95,15 +95,14 @@ class DoneController extends Controller
                 $fail++;
             }
             $chapter->save();
-            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
+            clear_chapter_cache($chapter);
         }
         if($fail < count($chapters)) {
             $book->release_date = date('Y-m-d H:i:s');
             foreach ($book->follows as $follow) {
                 $follow->status = Follow::UNREAD;
                 $follow->save();
-                Yii::$app->cache->delete('user_unread_' . $follow->user_id);
                 send_push_notification($follow->user_id);
             }
         }

@@ -98,9 +98,9 @@ var interval = setInterval(function() {
         }
     } else {
         if(dem_delay > 3) {
-            var sql = 'UPDATE dl_book_cron SET status=0, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
+            var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
             con.query(sql, function (err, result) {
-                console.log('---- done');
+                console.log('---- Done');
                 process.exit();
             });
         } else {
@@ -157,8 +157,12 @@ function get_list_chapter_reload(chapter) {
                 update_chapter(result[i]);
             }
         } else {
-            console.log('Khong co chapter reload');
-            process.exit();
+            var sql = 'UPDATE dl_settings SET value="", updated_at="' + current_time() + '" WHERE name="reloading"';
+            con.query(sql, function (err, result) {
+                console.log('Khong co chapter reload');
+                console.log('---- Done');
+                process.exit();
+            });
         }
     });
 }
