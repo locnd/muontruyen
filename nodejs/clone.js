@@ -91,7 +91,7 @@ con.connect(function(err) {
 var point_count_clone_chap = -1;
 var dem_delay = 0;
 var interval = setInterval(function() {
-    if(cm_book_id > 0 || dem_delay > 2) {
+    if(cm_book_id > 0) {
         if (point_count_clone_chap < count_clone_chap) {
             point_count_clone_chap = count_clone_chap;
         } else {
@@ -103,7 +103,15 @@ var interval = setInterval(function() {
             });
         }
     } else {
-        dem_delay++;
+        if(dem_delay > 3) {
+            var sql = 'UPDATE dl_book_cron SET status=0, updated_at="'+current_time()+'" WHERE id="'+cm_book_cron_id+'"';
+            con.query(sql, function (err, result) {
+                console.log('---- done');
+                process.exit();
+            });
+        } else {
+            dem_delay++;
+        }
     }
 }, 60000);
 
