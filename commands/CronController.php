@@ -44,16 +44,20 @@ class CronController extends Controller
             $scraper->parse_server($server, 1, 1);
         }
 
-        if ((int)date('H') == 1 && (int)date('i') < 30) {
+        if ((int)date('H') == 0 && (int)date('i') < 30) {
+            $max_page = 79;
             echo '---------- daily ---------' . "\n";
             $setting_model = new Setting();
             $page = (int)$setting_model->get_setting('daily_page');
             $page++;
-            foreach ($servers as $server) {
-                $scraper->parse_server($server, $page, $page);
-                $scraper->parse_server($server, $page, $page, true);
+            if($page <= $max_page) {
+                $to_page = min($page + 1, $max_page);
+                foreach ($servers as $server) {
+                    $scraper->parse_server($server, $page, $to_page);
+                    $scraper->parse_server($server, $page, $to_page, true);
+                }
+                $setting_model->set_setting('daily_page', $to_page);
             }
-            $setting_model->set_setting('daily_page', $page);
         }
         return ExitCode::OK;
     }
