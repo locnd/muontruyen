@@ -782,7 +782,7 @@ class Apiv1Controller extends Controller
             'user_id' => $user->id,
             'book_id' => $book_id,
             'chapter_id' => $chapter_id,
-        ))->count();
+        ))->andWhere(['>', 'created_at', date('Y-m-d H:i:s', strtotime('-10 minutes'))])->count();
         if($count > 3) {
             return array(
                 'success' => false,
