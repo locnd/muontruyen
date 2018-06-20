@@ -168,7 +168,7 @@ function get_list_chapter_reload(chapter) {
 }
 
 function update_chapter(chapter) {
-    var sql = 'UPDATE dl_chapters SET will_reload=0, updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
+    var sql = 'UPDATE dl_chapters SET will_reload=0,status=0, updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
     con.query(sql, function (err, result) {
         delete_images(chapter);
     });

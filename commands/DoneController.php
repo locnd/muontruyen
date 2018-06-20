@@ -96,7 +96,7 @@ class DoneController extends Controller
             }
             $chapter->save();
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
-            clear_chapter_cache($chapter);
+            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
         }
         if($fail < count($chapters)) {
             $book->release_date = date('Y-m-d H:i:s');
