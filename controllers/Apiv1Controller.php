@@ -1462,10 +1462,10 @@ class Apiv1Controller extends Controller
     public function actionClearbookcron() {
         $book_cron = BookCron::find()->where(array('status'=>1))->one();
         if(empty($_GET['action'])) {
-            exit(json_encode($book_cron));
+            return $book_cron;
         }
         $book_cron->status = 0;
         $book_cron->save();
-        exit('Clear');
+        return 'Clear';
     }
 }
