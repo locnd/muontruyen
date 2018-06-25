@@ -511,10 +511,11 @@ function send_follow(book_id, is_following) {
             dl_alert('danger', 'Hãy điền tên nhóm', false);
             return true;
         }
-        if(group_id > 0) {
+        if(group_id == 0) {
             var groups = $('.dl-group-name');
             for (var i = 0; i < groups.length - 1; i++) {
-                if (group_name == $.trim($(groups[i]).html())) {
+                var tmp_name = $.trim($(groups[i]).html()).split(' (');
+                if (group_name == tmp_name[0]) {
                     dl_alert('danger', 'Tên nhóm đã tồn tại', false);
                     return true;
                 }

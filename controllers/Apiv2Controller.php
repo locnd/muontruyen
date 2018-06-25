@@ -24,7 +24,7 @@ use app\models\BookTag;
 use app\models\Device;
 use app\models\BookCron;
 
-class Apiv1Controller extends Controller
+class Apiv2Controller extends Controller
 {
     public function beforeAction($action)
     {
@@ -106,15 +106,6 @@ class Apiv1Controller extends Controller
             );
             $data[] = filter_values($data_book, $fields);
         }
-
-        if(empty($data)) {
-            return array(
-                'success' => false,
-                'message' => 'Không có truyện',
-                'count_pages' => 0,
-                'unread' => get_user_unread($user)
-            );
-        }
         return array(
             'success' => true,
             'data' => $data,
@@ -144,22 +135,8 @@ class Apiv1Controller extends Controller
         $db_book->save();
         $book['count_views'] = $db_book->count_views;
 
-        $options = array(
-            'is_following' => false
-        );
-        $groups = array();
-        if(!empty($user->id)) {
-            $groups = get_user_groups($user->id);
-            $follow = Follow::find()->where(array('book_id'=>$id,'user_id'=>$user->id))->one();
-            if(!empty($follow)) {
-                $options['is_following'] = true;
-                if($follow->status == Follow::UNREAD) {
-                    $follow->status = Follow::READ;
-                    $follow->save();
-                    Yii::$app->cache->delete('user_unread_'.$user->id);
-                }
-            }
-        }
+        $book['is_following'] = false;
+
         foreach ($book['chapters'] as $stt => $chapter) {
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter['id']))->count() > 0) {
                 $book['chapters'][$stt]['read'] = true;
@@ -168,17 +145,33 @@ class Apiv1Controller extends Controller
         $chapters = $book['chapters'];
         unset($book['chapters']);
 
-        $tags = get_tags();
-        foreach ($tags as $stt => $tag) {
-            if (BookTag::find()->where(array('tag_id' => $tag['id'], 'book_id' => $id))->count() > 0) {
-                $tags[$stt]['is_checked'] = true;
+        $groups = array();
+        $tags = array();
+        if(!empty($user->id)) {
+            $groups = get_user_groups($user->id);
+            $follow = Follow::find()->where(array('book_id'=>$id,'user_id'=>$user->id))->one();
+            if(!empty($follow)) {
+                $book['is_following'] = true;
+                if($follow->status == Follow::UNREAD) {
+                    $follow->status = Follow::READ;
+                    $follow->save();
+                    Yii::$app->cache->delete('user_unread_'.$user->id);
+                }
+            }
+            if($user->is_admin == 1) {
+                $tags = get_tags();
+                foreach ($tags as $stt => $tag) {
+                    if (BookTag::find()->where(array('tag_id' => $tag['id'], 'book_id' => $id))->count() > 0) {
+                        $tags[$stt]['is_checked'] = true;
+                    }
+                }
             }
         }
+
         return array(
             'success' => true,
             'data' => $book,
             'chapters' => $chapters,
-            'options' => $options,
             'groups' => $groups,
             'tags' => $tags,
             'unread' => get_user_unread($user)
@@ -295,15 +288,15 @@ class Apiv1Controller extends Controller
         );
     }
     private function check_user() {
-        $token = trim(Yii::$app->request->post('token',''));
+        $headers = apache_request_headers();
+        if(!empty($headers['Authorization']) && substr($headers['Authorization'], 0,6) == 'Basic ') {
+            $token = trim(substr($headers['Authorization'],5));
+        }
         if(empty($token)) {
-            $token = trim(Yii::$app->request->get('token',''));
-            if(empty($token)) {
-                return array(
-                    'error' => 1,
-                    'message' => 'Vui lòng đăng nhập'
-                );
-            }
+            return array(
+                'error' => 1,
+                'message' => 'Vui lòng đăng nhập'
+            );
         }
         $user = User::find()->where(array('token'=>$token))->one();
         if(empty($user)) {
@@ -417,8 +410,7 @@ class Apiv1Controller extends Controller
             $follow->delete();
             return array(
                 'success' => true,
-                'data' => false,
-                'groups' => get_user_groups($user->id)
+                'data' => false
             );
         }
         $follow = new Follow();
@@ -1458,14 +1450,5 @@ class Apiv1Controller extends Controller
             'success' => false,
             'message' => empty($errors['message'])?'Đăng nhập thất bại':$errors['message']
         );
-    }
-    public function actionClearbookcron() {
-        $book_cron = BookCron::find()->where(array('status'=>1))->one();
-        if(empty($_GET['action'])) {
-            exit(json_encode($book_cron));
-        }
-        $book_cron->status = 0;
-        $book_cron->save();
-        exit('Clear');
     }
 }

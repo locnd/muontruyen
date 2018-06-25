@@ -63,6 +63,7 @@ $config = [
             //'suffix' => '.html',
             'rules' => [
                 'api/v1/<action:\w+>' => 'apiv1/<action>',
+                'api/v2/<action:\w+>' => 'apiv2/<action>',
                 'ajax/<action:\w+>' => 'ajax/<action>',
 
                 'admin' => 'admin/dashboard/index',
