@@ -410,7 +410,8 @@ class Apiv2Controller extends Controller
             $follow->delete();
             return array(
                 'success' => true,
-                'data' => false
+                'data' => false,
+                'groups' => get_user_groups($user->id)
             );
         }
         $follow = new Follow();
