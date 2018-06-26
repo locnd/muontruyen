@@ -18721,7 +18721,7 @@ $( function() {
                 var keyword = $('input.ui-autocomplete-input').val();
                 $('#search').val($.trim(keyword));
             });
-            $('input.ui-autocomplete-input').attr('placeholder','Tìm truyện');
+            $('input.ui-autocomplete-input').attr('placeholder','Tìm truyện (ít nhất 3 ký tự)');
             var wid = $('#content').width();
             if(wid > 1200) {
                 wid = 1010;
@@ -18798,8 +18798,13 @@ $( function() {
         },
 
         _source: function( request, response ) {
-            $('ul.navbar-right li a').addClass('disable_a');
-            var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+            if($('.search-form input.ui-autocomplete-input').val().length > 2) {
+                $('ul.navbar-right li a').addClass('disable_a');
+                var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+            } else {
+                $('ul.navbar-right li a').removeClass('disable_a');
+                var matcher = /_dl_/i;
+            }
             response( this.element.children( "option" ).map(function() {
                 var text = $( this ).text();
                 if ( this.value && ( !request.term || matcher.test(text) ) )

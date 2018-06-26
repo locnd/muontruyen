@@ -120,8 +120,18 @@ con.query(sql, function (err, result) {
     if (result.length < 1) {
         get_book_cron();
     } else {
-        console.log('So cron dang chay = '+result.length);
-        process.exit();
+        var book_cron = result[0];
+        var diff = Math.abs(new Date(current_time()) - new Date(book_cron.updated_at));
+        var minutes = Math.floor((diff/1000)/60);
+        if(minutes > 31) {
+            var sql = 'UPDATE dl_book_cron SET status=0, updated_at="' + current_time() + '" WHERE id="' + book_cron.id + '"';
+            con.query(sql, function (err, result) {
+                process.exit();
+            });
+        } else {
+            console.log('So cron dang chay = ' + result.length);
+            process.exit();
+        }
     }
 });
 

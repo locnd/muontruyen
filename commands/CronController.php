@@ -45,7 +45,7 @@ class CronController extends Controller
         }
 
         if ((int)date('H') == 0 && (int)date('i') < 30) {
-            $max_page = 79;
+            $max_page = 50; //79;
             echo '---------- daily ---------' . "\n";
             $setting_model = new Setting();
             $page = (int)$setting_model->get_setting('daily_page');
