@@ -288,15 +288,15 @@ class Apiv2Controller extends Controller
         );
     }
     private function check_user() {
-        $headers = apache_request_headers();
-        if(!empty($headers['Authorization']) && substr($headers['Authorization'], 0,6) == 'Basic ') {
-            $token = trim(substr($headers['Authorization'],5));
-        }
+        $token = trim(Yii::$app->request->post('token',''));
         if(empty($token)) {
-            return array(
-                'error' => 1,
-                'message' => 'Vui lòng đăng nhập'
-            );
+            $token = trim(Yii::$app->request->get('token',''));
+            if(empty($token)) {
+                return array(
+                    'error' => 1,
+                    'message' => 'Vui lòng đăng nhập'
+                );
+            }
         }
         $user = User::find()->where(array('token'=>$token))->one();
         if(empty($user)) {
@@ -1451,5 +1451,14 @@ class Apiv2Controller extends Controller
             'success' => false,
             'message' => empty($errors['message'])?'Đăng nhập thất bại':$errors['message']
         );
+    }
+    public function actionClearbookcron() {
+        $book_cron = BookCron::find()->where(array('status'=>1))->one();
+        if(empty($_GET['action'])) {
+            return $book_cron;
+        }
+        $book_cron->status = 0;
+        $book_cron->save();
+        return 'Clear';
     }
 }
