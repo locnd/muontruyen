@@ -288,15 +288,15 @@ class Apiv2Controller extends Controller
         );
     }
     private function check_user() {
-        $token = trim(Yii::$app->request->post('token',''));
+        $headers = apache_request_headers();
+        if(!empty($headers['Authorization'])) {
+            $token = str_replace('Token ','',$headers['Authorization']);
+        }
         if(empty($token)) {
-            $token = trim(Yii::$app->request->get('token',''));
-            if(empty($token)) {
-                return array(
-                    'error' => 1,
-                    'message' => 'Vui lòng đăng nhập'
-                );
-            }
+            return array(
+                'error' => 1,
+                'message' => 'Vui lòng đăng nhập'
+            );
         }
         $user = User::find()->where(array('token'=>$token))->one();
         if(empty($user)) {
