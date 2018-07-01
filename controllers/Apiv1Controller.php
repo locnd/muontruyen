@@ -167,10 +167,16 @@ class Apiv1Controller extends Controller
         }
         $chapters = $book['chapters'];
         unset($book['chapters']);
-
+        $tag_ids = array();
+        foreach ($book['tags'] as $tag) {
+            $tag_ids[] = $tag['id'];
+        }
+        foreach ($book['authors'] as $tag) {
+            $tag_ids[] = $tag['id'];
+        }
         $tags = get_tags();
         foreach ($tags as $stt => $tag) {
-            if (BookTag::find()->where(array('tag_id' => $tag['id'], 'book_id' => $id))->count() > 0) {
+            if (in_array($tag['id'], $tag_ids)) {
                 $tags[$stt]['is_checked'] = true;
             }
         }

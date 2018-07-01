@@ -85,20 +85,21 @@ class DoneController extends Controller
         }
         $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->all();
         echo "----- chapters ".count($chapters)."\n";
-        $fail = 0;
+        $success = false;
         foreach ($chapters as $chapter) {
             $chapter->status = Chapter::ACTIVE;
             $chapter->will_reload = 0;
             if (Image::find()->where(array('chapter_id' => $chapter->id, 'status' => Image::ACTIVE))->count() == 0) {
                 $chapter->status = Chapter::INACTIVE;
                 $chapter->will_reload = 1;
-                $fail++;
+            } else {
+                $success = true;
             }
             $chapter->save();
             echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
             Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
         }
-        if($fail < count($chapters)) {
+        if($success) {
             $book->release_date = date('Y-m-d H:i:s');
             foreach ($book->follows as $follow) {
                 $follow->status = Follow::UNREAD;
