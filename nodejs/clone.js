@@ -456,18 +456,12 @@ function check_chap(book, chap_name, href, stt) {
             if(result[0].stt != stt) {
                 var sql = 'UPDATE dl_chapters SET stt='+stt+', updated_at="'+current_time()+'" WHERE id="'+result[0].id+'"';
                 con.query(sql, function (err, result) {
-                    count_skip_chap++;
-                    if (count_skip_chap == total_chap) {
-                        total_image = 0;
-                        check_done();
-                    }
                 });
-            } else {
-                count_skip_chap++;
-                if (count_skip_chap == total_chap) {
-                    total_image = 0;
-                    check_done();
-                }
+            }
+            count_skip_chap++;
+            if (count_skip_chap == total_chap) {
+                total_image = 0;
+                check_done();
             }
         }
     });

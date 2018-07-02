@@ -300,14 +300,11 @@ function display_book_info(book, is_following, tags) {
 
     var author_html = '';
     var tag_html = '';
-    for (var i = 0; i < tags.length; i++) {
-        if (tags[i].is_checked) {
-            if(tags[i].type == 1) {
-                author_html += '<a href="tag.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
-            } else {
-                tag_html += '<a href="tag.html?id=' + tags[i].id + '">' + tags[i].name + '</a> - ';
-            }
-        }
+    for (var i = 0; i < book.tags.length; i++) {
+        tag_html += '<a href="tag.html?id=' + book.tags[i].id + '">' + book.tags[i].name + '</a> - ';
+    }
+    for (var i = 0; i < book.authors.length; i++) {
+        author_html += '<a href="tag.html?id=' + book.authors[i].id + '">' + book.authors[i].name + '</a> - ';
     }
     if(tag_html == '') {
         html += '<div style="margin-bottom:10px">* Truyện chưa phân loại</div>';
@@ -316,9 +313,7 @@ function display_book_info(book, is_following, tags) {
         html += tag_html.slice(0, -3);
     }
     if(author_html != '') {
-        if(author_html != '') {
-            html += '<div class="clear5"></div>';
-        }
+        html += '<div class="clear5"></div>';
         html += '<div style="float:left;margin-right:10px">Tác giả:</div>';
         html += author_html.slice(0, -3);
     }
@@ -1757,7 +1752,11 @@ function show_bookmark(page) {
         if (res.success) {
             show_bookmark_result(res, page);
         } else {
-            dl_alert('danger', res.message, false);
+            if(res.message == 'Không có truyện') {
+                $('#list-books').html('<div class="section-container a-book" style="padding: 10px;font-size:17px;">Không có truyện</div>');
+            } else {
+                dl_alert('danger', res.message, false);
+            }
         }
     });
 }
@@ -1779,7 +1778,7 @@ function show_bookmark_result(res, page) {
             }
             pages.push(i);
         }
-        display_paging('bookmark.html?keyword='+keyword+'&page=',pages, page, res.count_pages);
+        display_paging('bookmark.html?page=',pages, page, res.count_pages);
     }
 }
 function filter_tag() {
