@@ -172,12 +172,12 @@ class Apiv1Controller extends Controller
         foreach ($book['tags'] as $tag) {
             $tag['type'] = 0;
             $tag['is_checked'] = true;
-            $tags[$tag['id']] = $tag;
+            $tags[] = $tag;
         }
         foreach ($book['authors'] as $tag) {
             $tag['type'] = 1;
             $tag['is_checked'] = true;
-            $tags[$tag['id']] = $tag;
+            $tags[] = $tag;
         }
         return array(
             'success' => true,
