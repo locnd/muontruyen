@@ -143,16 +143,13 @@ class Apiv1Controller extends Controller
         $db_book->count_views = $db_book->count_views + 1;
         $db_book->save();
         $book['count_views'] = $db_book->count_views;
-
-        $options = array(
-            'is_following' => false
-        );
+        $book['is_following'] = false;
         $groups = array();
         if(!empty($user->id)) {
             $groups = get_user_groups($user->id);
             $follow = Follow::find()->where(array('book_id'=>$id,'user_id'=>$user->id))->one();
             if(!empty($follow)) {
-                $options['is_following'] = true;
+                $book['is_following'] = true;
                 if($follow->status == Follow::UNREAD) {
                     $follow->status = Follow::READ;
                     $follow->save();
@@ -181,7 +178,6 @@ class Apiv1Controller extends Controller
             'success' => true,
             'data' => $book,
             'chapters' => $chapters,
-            'options' => $options,
             'groups' => $groups,
             'tags' => $tags,
             'unread' => get_user_unread($user)

@@ -224,8 +224,7 @@ function show_book(id) {
                     }
                 }
             }
-            var is_following = res.options.is_following;
-            display_book_info(res.data, is_following, res.tags);
+            display_book_info(res.data, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
         } else {
@@ -275,7 +274,7 @@ function send_report() {
     });
 }
 
-function display_book_info(book, is_following, tags) {
+function display_book_info(book, tags) {
     var html = '';
     html += '<div class="book-title">'+book.name+'</div>';
     html += '<div class="clear10"></div>';
@@ -288,9 +287,12 @@ function display_book_info(book, is_following, tags) {
     html += '</div>';
     html += '<div id="save-btn" onclick="save_to_offline()" class="btn-save-to-offline"><i class="fa fa-download"></i>&nbsp; Lưu đọc Offline</div>';
     html += '<div class="clear10"></div>';
+    if($.trim(book.description) == '') {
+        book.description = 'Chưa có thông tin';
+    }
     html += '<div class="book-description">'+book.description+'</div>';
     html += '<div class="clear10"></div>';
-    if(is_following) {
+    if(book.is_following) {
         html += '<div id="follow-btn" onclick="follow()" class="btn-unbookmark">';
     } else {
         html += '<div id="follow-btn" onclick="follow()" class="btn-bookmark">';
