@@ -279,19 +279,14 @@ function get_user_groups($user_id) {
     });
 }
 
-function get_tags() {
-    return Yii::$app->cache->getOrSet('tags_list', function () {
+function get_tags($type=0) {
+    return Yii::$app->cache->getOrSet('tags_list_'.$type, function () use ($type) {
         $tag_fields = array('id', 'name', 'stt', 'type');
-        $tags = app\models\Tag::find()->select($tag_fields)->where(array('status' => 1))->orderBy(array('stt' => SORT_ASC, 'name' => SORT_ASC, 'id' => SORT_DESC))->all();
+        $tags = app\models\Tag::find()->select($tag_fields)->where(array('status' => 1, 'type'=>$type))->orderBy(array('stt' => SORT_ASC, 'name' => SORT_ASC, 'id' => SORT_DESC))->all();
         $tag_data = array();
         foreach ($tags as $tag) {
             $tmp = $tag->to_array(array('id', 'name', 'type'));
             $tmp['is_checked'] = false;
-            $book_ids = array();
-            foreach ($tag->bookTags as $book_tag) {
-                $book_ids[] = $book_tag->book_id;
-            }
-            $tmp['count'] = app\models\Book::find()->where(array('id'=>$book_ids,'status'=>1))->count();
             $tag_data[] = $tmp;
         }
         return $tag_data;
@@ -348,7 +343,6 @@ function clear_book_cache($book) {
         return false;
     }
     Yii::$app->cache->delete('book_detail_'.$book->id);
-    Yii::$app->cache->delete('tags_list');
     Yii::$app->cache->delete('book_searchs');
     foreach ($book->follows as $follow) {
         Yii::$app->cache->delete('user_groups_'.$follow->user_id);

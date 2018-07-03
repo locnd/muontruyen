@@ -169,15 +169,13 @@ class Apiv1Controller extends Controller
         unset($book['chapters']);
 
         $tags = array();
-        foreach ($book['tags'] as $tag) {
-            $tag['type'] = 0;
-            $tag['is_checked'] = true;
-            $tags[] = $tag;
-        }
-        foreach ($book['authors'] as $tag) {
-            $tag['type'] = 1;
-            $tag['is_checked'] = true;
-            $tags[] = $tag;
+        if(!empty($user->is_admin)) {
+            $tags = get_tags(0);
+            foreach ($tags as $stt => $tag) {
+                if (BookTag::find()->where(array('tag_id' => $tag['id'], 'book_id' => $id))->count() > 0) {
+                    $tags[$stt]['is_checked'] = true;
+                }
+            }
         }
         return array(
             'success' => true,
@@ -652,11 +650,17 @@ class Apiv1Controller extends Controller
     }
     public function actionTags() {
         $type = (int) Yii::$app->request->get('type',0);
-        $tags = get_tags();
+        $tags = get_tags($type);
         $data = array();
         $user = $this->check_user();
         foreach ($tags as $tag) {
-            if($tag['type'] == $type) {
+            $book_tags = BookTag::find()->select(array('book_id'))->where(array('tag_id'=>$tag['id']))->all();
+            $book_ids = array();
+            foreach ($book_tags as $book_tag) {
+                $book_ids[] = $book_tag->book_id;
+            }
+            $tag['count'] = BookTag::find()->where(array('id'=>$book_ids,'status'=>1))->count();
+            if($tag['count'] > 0) {
                 $data[] = $tag;
             }
         }
@@ -925,7 +929,7 @@ class Apiv1Controller extends Controller
             $tag->status = Tag::ACTIVE;
             $tag->save();
         }
-        Yii::$app->cache->delete('tags_list');
+        Yii::$app->cache->delete('tags_list_0');
         return array(
             'success' => true,
             'data' => $tag
@@ -956,7 +960,6 @@ class Apiv1Controller extends Controller
         }
         $tag_ids = strtolower(trim(Yii::$app->request->post('tag_ids', '')));
         $book->save_tags($tag_ids);
-        Yii::$app->cache->delete('tags_list');
         return array(
             'success' => true
         );

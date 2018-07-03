@@ -43,6 +43,7 @@ class DoneController extends Controller
         if(empty($book)) {
             return ExitCode::OK;
         }
+        $is_new_book = false;
         if(empty($book->slug)) {
             $new_slug = $slug = createSlug($book->name);
             $tm = 1;
@@ -52,6 +53,7 @@ class DoneController extends Controller
             }
             $book->slug = $new_slug;
             $book->save();
+            $is_new_book = true;
         }
         echo "----- ".$book->slug."\n";
 
@@ -118,7 +120,10 @@ class DoneController extends Controller
             $book_cron->status = 2;
             $book_cron->save();
         }
-
+        if($is_new_book) {
+            Yii::$app->cache->delete('tags_list_0');
+            Yii::$app->cache->delete('tags_list_1');
+        }
         clear_book_cache($book);
         return ExitCode::OK;
     }

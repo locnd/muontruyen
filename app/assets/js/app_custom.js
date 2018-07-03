@@ -126,7 +126,7 @@ function display_paging(url,pages, current_page, total_page) {
 function display_a_book(book) {
     var html = '<div class="section-container a-book">';
     html += '<div class="a-cover-new">';
-    html += '<a href="book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
+    html += '<a href="book.html?id='+book.id+'"><img style="margin-bottom:5px" width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
     html += '<div class="a-description-new">';
     html += '<table>';

@@ -159,7 +159,7 @@ class Apiv2Controller extends Controller
                 }
             }
             if($user->is_admin == 1) {
-                $tags = get_tags();
+                $tags = get_tags(0);
                 foreach ($tags as $stt => $tag) {
                     if (BookTag::find()->where(array('tag_id' => $tag['id'], 'book_id' => $id))->count() > 0) {
                         $tags[$stt]['is_checked'] = true;
@@ -640,11 +640,17 @@ class Apiv2Controller extends Controller
     }
     public function actionTags() {
         $type = (int) Yii::$app->request->get('type',0);
-        $tags = get_tags();
+        $tags = get_tags($type);
         $data = array();
         $user = $this->check_user();
         foreach ($tags as $tag) {
-            if($tag['type'] == $type) {
+            $book_tags = BookTag::find()->select(array('book_id'))->where(array('tag_id'=>$tag['id']))->all();
+            $book_ids = array();
+            foreach ($book_tags as $book_tag) {
+                $book_ids[] = $book_tag->book_id;
+            }
+            $tag['count'] = BookTag::find()->where(array('id'=>$book_ids,'status'=>1))->count();
+            if($tag['count'] > 0) {
                 $data[] = $tag;
             }
         }
@@ -913,7 +919,7 @@ class Apiv2Controller extends Controller
             $tag->status = Tag::ACTIVE;
             $tag->save();
         }
-        Yii::$app->cache->delete('tags_list');
+        Yii::$app->cache->delete('tags_list_0');
         return array(
             'success' => true,
             'data' => $tag
@@ -944,7 +950,6 @@ class Apiv2Controller extends Controller
         }
         $tag_ids = strtolower(trim(Yii::$app->request->post('tag_ids', '')));
         $book->save_tags($tag_ids);
-        Yii::$app->cache->delete('tags_list');
         return array(
             'success' => true
         );
