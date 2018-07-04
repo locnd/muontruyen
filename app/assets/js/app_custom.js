@@ -170,7 +170,7 @@ function display_a_book(book) {
     html += '<tr>';
     html += '<td class="label-td">Cập nhật</td>';
 
-    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
+    html += '<td class="value-td">'+show_date(book.release_date)+'</td>';
     html += '</tr>';
     html += '</table>';
     html += '</div>';
@@ -747,7 +747,7 @@ function show_follow(tab, page, is_first) {
                     }
                     html += '<tr>';
                     html += '<td class="label-td">Cập nhật</td>';
-                    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
+                    html += '<td class="value-td">'+show_date(book.release_date)+'</td>';
                     html += '</tr>';
                     html += '</table>';
                     html += '</div>';
@@ -1519,7 +1519,7 @@ function display_offline_book(book) {
     }
     html += '<tr>';
     html += '<td class="label-td">Cập nhật</td>';
-    html += '<td class="value-td">'+book.release_date.replace(get_current_date()+' ','')+'</td>';
+    html += '<td class="value-td">'+show_date(book.release_date)+'</td>';
     html += '</tr>';
     html += '</table>';
     html += '</div>';
@@ -1795,8 +1795,20 @@ function filter_tag() {
         }
     }
 }
+function show_date(date) {
+    return date.replace(get_current_date()+' ','').replace(get_yesterday_date()+' ','Hôm qua ');
+}
 function get_current_date() {
     var d = new Date();
+
+    var month = d.getMonth()+1;
+    var day = d.getDate();
+
+    return (day<10?'0':'')+day +'-'+(month<10?'0':'')+month+'-'+d.getFullYear();
+}
+function get_yesterday_date() {
+    var d = new Date();
+    d.setDate(d.getDate() - 1);
 
     var month = d.getMonth()+1;
     var day = d.getDate();

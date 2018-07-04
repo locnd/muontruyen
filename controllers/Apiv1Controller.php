@@ -650,12 +650,8 @@ class Apiv1Controller extends Controller
         $data = array();
         $user = $this->check_user();
         foreach ($tags as $tag) {
-            $book_tags = BookTag::find()->select(array('book_id'))->where(array('tag_id'=>$tag['id']))->all();
-            $book_ids = array();
-            foreach ($book_tags as $book_tag) {
-                $book_ids[] = $book_tag->book_id;
-            }
-            $tag['count'] = BookTag::find()->where(array('id'=>$book_ids,'status'=>1))->count();
+            $book_tags = BookTag::find()->select(array('book_id'))->where(array('tag_id'=>$tag['id']));
+            $tag['count'] = Book::find()->where(array('id'=>$book_tags,'status'=>1))->count();
             if($tag['count'] > 0) {
                 $data[] = $tag;
             }
