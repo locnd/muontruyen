@@ -35,6 +35,7 @@ function show_home(page, sort) {
                 },1);
             }
             show_home_content(res, page, sort);
+            cache_images();
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -76,6 +77,7 @@ function get_cache_home(sort) {
                 $('#select_sort').val(sort);
                 $('#select_sort').show();
                 display_a_book(data);
+                cache_images();
                 $('#paging').show();
             });
         }
@@ -227,6 +229,7 @@ function show_book(id) {
             display_book_info(res.data, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);
+            cache_images();
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "index.html";
@@ -686,6 +689,7 @@ function show_chapter(id) {
             $('#chapter-page').show();
             $('#send-report-btn').attr('onclick','send_report()');
             check_header();
+            cache_images();
         } else {
             dl_alert('danger', res.message, true);
             window.location.href = "book.html?id="+id;
@@ -780,6 +784,7 @@ function show_follow(tab, page, is_first) {
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
             display_follow_paging(tab, page, res.count_pages);
+            cache_images();
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1097,6 +1102,7 @@ function show_tags_list(res) {
             display_a_tag(res.data[i]);
         }
     }
+    $('#list-books .a-book').append('<div style="clear:both;height:10px;"></div>');
     $('#list-books .a-book').show();
 }
 
@@ -1219,6 +1225,7 @@ function show_search(keyword, page, is_full) {
     send_api('GET', '/search', params, function(res) {
         if (res.success) {
             show_search_result(res, keyword, page);
+            cache_images();
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1283,6 +1290,7 @@ function show_tag(tag_id, page, is_full) {
             }
             $('h3.page-title').show();
             show_tag_result(res, page, 'tag');
+            cache_images();
         } else {
             dl_alert('danger', res.message, false);
         }
@@ -1753,6 +1761,7 @@ function show_bookmark(page) {
     send_api('GET', '/bookmark', params, function(res) {
         if (res.success) {
             show_bookmark_result(res, page);
+            cache_images();
         } else {
             if(res.message == 'Không có truyện') {
                 $('#list-books').html('<div class="section-container a-book" style="padding: 10px;font-size:17px;">Không có truyện</div>');

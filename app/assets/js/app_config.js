@@ -64,6 +64,7 @@ var APP_VERSION = '1.0.1';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
+var enable_cache_images = true;
 
 function getParam(name) {
     var url = window.location.href;
@@ -109,7 +110,26 @@ $(document).ready(function() {
             check_header();
         }
     });
+
+    ImgCache.options.usePersistentCache = true;
+    ImgCache.init();
 });
+function cache_images() {
+    if(enable_cache_images)
+        $('img').each(function() {
+            $img = $(this);
+            var imgSrc = $img.attr('src');
+            if(imgSrc.indexOf('http') > -1) {
+                ImgCache.isCached(imgSrc, function (path, success) {
+                    if (success) {
+                        ImgCache.useCachedFile($(this));
+                    } else {
+                        ImgCache.cacheFile(imgSrc);
+                    }
+                });
+            }
+        });
+}
 
 var mouseY = 0;
 $(document).ready(function() {
