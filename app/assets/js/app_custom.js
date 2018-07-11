@@ -281,14 +281,9 @@ function display_book_info(book, tags) {
     var html = '';
     html += '<div class="book-title">'+book.name+'</div>';
     html += '<div class="clear10"></div>';
-    html += '<div id="report">';
-    html += '<a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>';
-    html += '<div class="clear0"></div>';
-    html += '</div>';
     html += '<div class="book-cover">';
     html += '<img src="'+book.image+'">';
     html += '</div>';
-    html += '<div id="save-btn" onclick="save_to_offline()" class="btn-save-to-offline"><i class="fa fa-download"></i>&nbsp; Lưu đọc Offline</div>';
     html += '<div class="clear10"></div>';
     if($.trim(book.description) == '') {
         book.description = 'Chưa có thông tin';
@@ -322,9 +317,14 @@ function display_book_info(book, tags) {
         html += '<div style="float:left;margin-right:10px">Tác giả:</div>';
         html += author_html.slice(0, -3);
     }
-    html += '<div class="clear10" style="height:0"></div>';
-    html += '<div style="text-align:right">Số lượt xem: '+book.count_views+'</div>';
-    html += '<div class="clear10" style="height:0"></div>';
+    html += '<div class="clear5" style="height:1px"></div>';
+    html += '<div style="text-align:right"><i class="fa fa-eye"></i> '+book.count_views+'</div>';
+    html += '<div class="clear5"></div>';
+    html += '<div style="float:left;margin:0" id="save-btn" onclick="save_to_offline()" class="btn-save-to-offline"><i class="fa fa-download"></i>&nbsp; Lưu đọc Offline</div>';
+    html += '<div id="report">';
+    html += '<a onclick="open_reports()" class="report-btn fl-r"><i class="fa fa-exclamation-circle"></i> Báo lỗi</a>';
+    html += '</div>';
+    html += '<div class="clear5" style="height:1px"></div>';
 
     $('#book-info').html(html);
     $('#book-info').show();
@@ -644,9 +644,9 @@ function show_chapter(id) {
             } else {
                 html+='<a onclick="bookmark()" id="bookmark-btn" class="btn-bookmark-chap"><i class="fa fa-star"></i> Đánh dấu</a>';
             }
-            html+='<a onclick="open_reports()" class="dl-btn-default fl-r">Báo lỗi</a>';
-            html+='<div class="clear10"></div>';
+            html+='<a onclick="open_reports()" class="report-btn fl-r"><i class="fa fa-exclamation-circle"></i> Báo lỗi</a>';
             html+='</div>';
+            html+='<div class="clear10" style="height:15px"></div>';
             var paging_html = '';
             paging_html+='<select class="select-chap" onchange="change_chapter(this)">';
             for(var i=0;i<chapters.length;i++) {

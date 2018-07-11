@@ -78,9 +78,11 @@ class User extends ModelCommon implements IdentityInterface
             }
             $user->status = self::ACTIVE;
             $user->facebook_id = $data['facebook_id'];
-            $user->token = $this->randomToken();
-            while(User::find()->where(array('token'=> $user->token))->count() > 0) {
+            if(empty($user->token)) {
                 $user->token = $this->randomToken();
+                while (User::find()->where(array('token' => $user->token))->count() > 0) {
+                    $user->token = $this->randomToken();
+                }
             }
             $user->last_login = date('Y-m-d H:i:s');
             $user->save(false);
@@ -127,7 +129,7 @@ class User extends ModelCommon implements IdentityInterface
         if($user->password != md5($this->salt.'_'.$data['password'])) {
             return array('password'=>'Mật khẩu không đúng');
         }
-        if(empty($data['is_web'])) {
+        if(empty($data['is_web']) && empty($user->token)) {
             $user->token = $this->randomToken();
             while (User::find()->where(array('token' => $user->token))->count() > 0) {
                 $user->token = $this->randomToken();

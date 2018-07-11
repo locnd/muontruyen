@@ -37,7 +37,7 @@ div#header {
     width:100%;
     padding: 5px 0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 17px;
     color: #00acac;
 }
 .a-book .a-cover, .a-book .a-cover-new {
@@ -732,4 +732,14 @@ div#list-books .a-book {
 }
 i.fa-arrows-alt {
     color:black !important;
+}
+.report-btn {
+    float: right;
+    text-align: center;
+    height: 33px;
+    line-height: 33px;
+    border: 1px solid lightblue;
+    font-weight: 600;
+    padding: 0 10px;
+    color: #707478;
 }
