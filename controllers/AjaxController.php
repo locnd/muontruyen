@@ -298,6 +298,7 @@ class AjaxController extends Controller
             if(empty($image_src) || empty($stts[$num])) {
                 continue;
             }
+            $image_src = str_replace('https://','http://', $image_src);
             $id = (int) $stts[$num];
             $old_img = Image::find()->where(array('chapter_id'=>$chapter_id, 'image_source' => $image_src))->one();
             if(!empty($old_img)) {
