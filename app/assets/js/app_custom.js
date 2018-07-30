@@ -895,7 +895,11 @@ function disable() {
         send_api('POST', '/disable', params, function (res) {
             $('#loading-btn').hide();
             if (res.success) {
-                window.location.href="index.html";
+                if($('#chapter_id').length > 0) {
+                    window.location.href="book.html?id="+$('#book_id').val();
+                } else {
+                    window.location.href = "index.html";
+                }
             } else {
                 dl_alert('danger', res.message, false);
             }
@@ -1462,7 +1466,7 @@ function save_offline_book_images() {
 
 function loading_bar(running_image, count_image) {
     var tyle = running_image/count_image;
-    var width = tyle * 176;
+    var width = tyle * 166;
     $('span.saving-bar').css('width', width+'px');
 }
 function show_offline() {
@@ -1488,7 +1492,7 @@ function display_offline_book(book) {
     }
     var html = '<div class="section-container a-book">';
     html += '<div class="a-cover-new">';
-    html += '<a href="offline_book.html?id='+book.id+'"><img width="100%" src="'+book.image+'" alt="" /></a>';
+    html += '<a href="offline_book.html?id='+book.id+'"><img style="margin-bottom: 5px" width="100%" src="'+book.image+'" alt="" /></a>';
     html += '</div>';
     html += '<div class="a-description-new">';
     html += '<table>';
@@ -1500,7 +1504,7 @@ function display_offline_book(book) {
     if(book.last_chapter_id > 0) {
         html += '<tr>';
         html += '<td class="label-td">Chương mới</td>';
-        html += '<td class="value-td"><a href="offline_chapter.html?id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
+        html += '<td class="value-td"><a href="offline_chapter.html?id='+book.id+'&c_id=' + book.last_chapter_id + '">' + book.last_chapter_name + '</a></td>';
         html += '</tr>';
     }
     if(typeof(book.tags) != 'undefined' && book.tags.length > 0) {
@@ -1549,6 +1553,9 @@ function show_offline_book(id) {
                 html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i>&nbsp; Xem Online</a>';
                 html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá Offline</a>';
                 html += '<div class="clear10"></div>';
+                if($.trim(book.description) == '') {
+                    book.description = 'Chưa có thông tin';
+                }
                 html += '<div class="book-description">'+book.description+'</div>';
                 html += '</div>';
                 html += '<div class="clear10"></div>';

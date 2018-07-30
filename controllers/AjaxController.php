@@ -294,22 +294,23 @@ class AjaxController extends Controller
         }
         $urls = Yii::$app->request->post('url', array());
         $stts = Yii::$app->request->post('stt', array());
-        $scraper = new Scraper();
         foreach($urls as $num => $image_src) {
             if(empty($image_src) || empty($stts[$num])) {
                 continue;
             }
-            if(Image::find()->where(array('chapter_id'=>$chapter_id, 'image_source' => $image_src))->count() > 0) {
+            $id = (int) $stts[$num];
+            $old_img = Image::find()->where(array('chapter_id'=>$chapter_id, 'image_source' => $image_src))->one();
+            if(!empty($old_img)) {
+                if($old_img->stt != $id) {
+                    $old_img->stt = $id;
+                    $old_img->save();
+                }
                 continue;
             }
-            $id = (int) $stts[$num];
-            $dir = Yii::$app->params['app'].'/web/uploads/books/'.$chapter->book->server->slug.'/'.$chapter->book->slug.'/chap'.$chapter->id;
-            $image_name = $scraper->save_image($image_src, $dir, $id);
-
             $new_image = new Image();
             $new_image->chapter_id = $chapter->id;
             $new_image->image_source = $image_src;
-            $new_image->image = $image_name;
+            $new_image->image = 'error.jpg';
             $new_image->status = Image::ACTIVE;
             $new_image->stt = $id;
             $new_image->save();

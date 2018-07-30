@@ -1,7 +1,7 @@
 body {
     background: url('../img/bg.jpg') center top fixed no-repeat;
     background-size: cover;
-    font-size: 15px;
+    font-size: 14px;
     min-height: 100vh;
 }
 .dl_bg_color {
@@ -37,7 +37,7 @@ div#header {
     width:100%;
     padding: 5px 0;
     font-weight: bold;
-    font-size: 17px;
+    font-size: 16px;
     color: #00acac;
 }
 .a-book .a-cover, .a-book .a-cover-new {
@@ -153,7 +153,7 @@ div.alert {
     margin-top: 10px;
 }
 .form-page .form-group input {
-    font-size: 16px;
+    font-size: 15px;
     height: 38px;
 }
 .form-page .form-error {
@@ -170,7 +170,7 @@ div.alert {
     padding: 5px 0;
 }
 #footer-copyright.footer-copyright .copyright{
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
     line-height: 30px;
 }
@@ -244,11 +244,11 @@ ul.social-media-list li a {
     color: black;
 }
 .btn-bookmark {
-    width: 160px;
+    width: 150px;
     background: url(../img/bookmark.png) center left no-repeat;
 }
 .btn-unbookmark {
-    width: 180px;
+    width: 172px;
     background: url(../img/unbookmark.png) center left no-repeat;
 }
 .btn-bookmark:before {

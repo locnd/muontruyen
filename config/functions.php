@@ -162,7 +162,7 @@ function make_page_url($url, $filters, $sorts='', $page=1) {
     }
     $url .= '?';
     foreach ($filters as $key => $filter) {
-        if(!empty($filter)) {
+        if($filter != '' ) {
             if(is_string($filter)) {
                 $url .= $key.'='.$filter.'&';
             } elseif(is_array($filter)) {
