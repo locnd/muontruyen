@@ -313,7 +313,7 @@ class Apiv1Controller extends Controller
                 $errors['email'] = 'Tài khoản không khả dụng';
             } else {
                 $date = date('YmdHis');
-                $tmp_password = $date[0].''.$date[2].''.$date[4].''.$date[6].''.$date[8].''.$date[10].''.$date[12];
+                $tmp_password = $date[0].''.$date[3].''.$date[5].''.$date[7].''.$date[9].''.$date[11].''.$date[13];
                 $user_model = new User();
                 $user->tmp_password = md5($user_model->salt.'_'.$tmp_password);
                 $user->save();

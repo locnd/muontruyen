@@ -809,7 +809,7 @@ function forgotpassword() {
             $('#login-btn').hide();
             $('#login-to-btn').attr('style','padding-left:0');
             $('#input-area').html('');
-            $('#input-area').append('<p>Mật khẩu mới của bạn là <b>'.res.data.new_password.'</b>.</p>');
+            $('#input-area').append('<p>Mật khẩu mới của bạn là <b>'+res.data.new_password+'</b>.</p>');
             $('#input-area').append('<p>Vui lòng đăng nhập bằng tên đăng nhập đã đăng ký và mật khẩu mới trong vòng 15\'.</p>');
             $('#input-area').append('<p>Cảm ơn !</p>');
         } else {
