@@ -60,7 +60,7 @@ class Apiv1Controller extends Controller
         }
 
         $fields = array('id');
-        $books = Book::find()->select($fields)->where(array('status'=>Book::ACTIVE));
+        $books = Book::find()->select($fields)->where(array('dl_books.status'=>Book::ACTIVE));
         $total = $books->count();
 
         $limit = get_limit('mobile_limit');
@@ -93,8 +93,8 @@ class Apiv1Controller extends Controller
             $books->joinWith('reads')->andWhere(array('dl_readed.user_id'=>$user->id));
             $sort_array['dl_readed.id'] = SORT_DESC;
         }
-        $sort_array['release_date'] = SORT_DESC;
-        $sort_array['id'] = SORT_DESC;
+        $sort_array['dl_books.release_date'] = SORT_DESC;
+        $sort_array['dl_books.id'] = SORT_DESC;
         $books->orderBy($sort_array);
         $books = $books->all();
 
