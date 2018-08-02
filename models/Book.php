@@ -30,6 +30,10 @@ class Book extends ModelCommon
     {
         return $this->hasMany(BookTag::className(), ['book_id' => 'id']);
     }
+    public function getReads()
+    {
+        return $this->hasMany(Read::className(), ['book_id' => 'id']);
+    }
 
     public function save_tags($tag_ids) {
         foreach ($this->bookTags as $book_tag) {
