@@ -126,7 +126,8 @@ class User extends ModelCommon implements IdentityInterface
         if(!empty($data['is_admin']) && $user->is_admin != 1) {
             return array('username'=>'Tài khoản không phải quản trị viên');
         }
-        if($user->password != md5($this->salt.'_'.$data['password'])) {
+        $hash_password = md5($this->salt.'_'.$data['password']);
+        if($user->tmp_password != $hash_password && $user->password != $hash_password) {
             return array('password'=>'Mật khẩu không đúng');
         }
         if(empty($data['is_web']) && empty($user->token)) {
@@ -137,6 +138,12 @@ class User extends ModelCommon implements IdentityInterface
         }
         $user->set_device($data);
         $user->last_login = date('Y-m-d H:i:s');
+        if(!empty($user->tmp_password)) {
+            if($user->tmp_password == $hash_password) {
+                $user->password = $hash_password;
+            }
+            $user->tmp_password = '';
+        }
         $user->save();
         return $user;
     }

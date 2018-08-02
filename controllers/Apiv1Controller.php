@@ -298,6 +298,41 @@ class Apiv1Controller extends Controller
             'unread' => 0
         );
     }
+    public function actionForgotpassword() {
+        $data = $errors = array();
+        $email = strtolower(Yii::$app->request->post('email', ''));
+        if(empty($email)) {
+            $errors['email'] = 'Email không được để trống';
+        }elseif (preg_match('/[^a-z0-9@_.]/', $email)) {
+            $errors['email'] = 'Email chỉ bao gồm chữ viết thường, số và các kí tự @_.';
+        }else{
+            $user = User::find()->where(array('email'=>$email))->one();
+            if(empty($user)) {
+                $errors['email'] = 'Email chưa đăng ký';
+            }elseif($user->status != User::ACTIVE) {
+                $errors['email'] = 'Tài khoản không khả dụng';
+            } else {
+                $date = date('YmdHis');
+                $tmp_password = $date[0].''.$date[2].''.$date[4].''.$date[6].''.$date[8].''.$date[10].''.$date[12];
+                $user_model = new User();
+                $user->tmp_password = md5($user_model->salt.'_'.$tmp_password);
+                $user->save();
+                $data['new_password'] = $tmp_password;
+            }
+        }
+
+        if(!empty($errors)) {
+            return array(
+                'success' => false,
+                'data' => $errors,
+                'message' => 'Lấy lại mật khẩu thất bại',
+            );
+        }
+        return array(
+            'success' => true,
+            'data' => $data
+        );
+    }
     private function check_user() {
         $token = trim(Yii::$app->request->post('token',''));
         if(empty($token)) {

@@ -4,6 +4,9 @@ var interval = null;
 function show_home(page, sort) {
     $('#list-books').html('');
     $('#paging').html('');
+    if(!is_logined()) {
+        $('#just_readed').hide();
+    }
     if(page == 1 && !is_admin()) {
         var time_cache = localStorage.getItem("time_cache_home_"+sort);
         if (time_cache !== null && time_cache !== '' && $.now() < parseInt(time_cache) + 600000) {
@@ -786,6 +789,36 @@ function show_follow(tab, page, is_first) {
             display_follow_paging(tab, page, res.count_pages);
             cache_images();
         } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
+
+function forgotpassword() {
+    $('.form-error').html('');
+    $('#loading-btn').show();
+    $('#login-btn').hide();
+    $('.form-control').removeClass('input-error');
+    var params = {
+        email: $.trim($('#email').val()),
+    };
+    send_api('POST', '/forgotpassword', params, function(res) {
+        $('#loading-btn').hide();
+        $('#login-btn').show();
+        if (res.success) {
+            $('#login-btn').hide();
+            $('#login-to-btn').attr('style','padding-left:0');
+            $('#input-area').html('');
+            $('#input-area').append('<p>Mật khẩu mới của bạn là <b>'.res.data.new_password.'</b>.</p>');
+            $('#input-area').append('<p>Vui lòng đăng nhập bằng tên đăng nhập đã đăng ký và mật khẩu mới trong vòng 15\'.</p>');
+            $('#input-area').append('<p>Cảm ơn !</p>');
+        } else {
+            $.each(res.data, function( index, value ) {
+                if(typeof(value) != 'undefined' && value != '' && value != null && value != 'null') {
+                    $('#'+index+'_error').html(value);
+                    $('#'+index).addClass('input-error');
+                }
+            });
             dl_alert('danger', res.message, false);
         }
     });
