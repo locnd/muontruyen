@@ -59,7 +59,7 @@ class Apiv1Controller extends Controller
             $device_model->add_device($device_id, $app_version, $device_type);
         }
 
-        $fields = array('id');
+        $fields = array('dl_books.id');
         $books = Book::find()->select($fields)->where(array('dl_books.status'=>Book::ACTIVE));
         $total = $books->count();
 
