@@ -61,15 +61,6 @@ class Apiv1Controller extends Controller
 
         $fields = array('dl_books.id');
         $books = Book::find()->select($fields)->where(array('dl_books.status'=>Book::ACTIVE));
-        $total = $books->count();
-
-        $limit = get_limit('mobile_limit');
-        $total_page = ceil($total / $limit);
-        $page = max((int) getParam('page', 1),1);
-        $page = min($page, $total_page);
-        $offset = ($page - 1) * $limit;
-
-        $books->limit($limit)->offset($offset);
 
         $sort = (int) Yii::$app->request->get('sort',0);
         $sort_array = array();
@@ -93,6 +84,16 @@ class Apiv1Controller extends Controller
             $books->joinWith('reads')->andWhere(array('dl_readed.user_id'=>$user->id));
             $sort_array['dl_readed.id'] = SORT_DESC;
         }
+
+        $total = $books->count();
+        $limit = get_limit('mobile_limit');
+        $total_page = ceil($total / $limit);
+        $page = max((int) getParam('page', 1),1);
+        $page = min($page, $total_page);
+        $offset = ($page - 1) * $limit;
+
+        $books->limit($limit)->offset($offset);
+
         $sort_array['dl_books.release_date'] = SORT_DESC;
         $sort_array['dl_books.id'] = SORT_DESC;
         $books->orderBy($sort_array);
