@@ -88,13 +88,17 @@ class Apiv1Controller extends Controller
         if($sort == 5) {
             $sort_array['name'] = SORT_DESC;
         }
+        $user = $this->check_user();
+        if($sort == 6 && !empty($user->id)) {
+            $books->joinWith('reads')->andWhere(array('dl_readed.user_id'=>$user->id));
+            $sort_array['dl_readed.id'] = SORT_DESC;
+        }
         $sort_array['release_date'] = SORT_DESC;
         $sort_array['id'] = SORT_DESC;
         $books->orderBy($sort_array);
         $books = $books->all();
 
         $data = array();
-        $user = $this->check_user();
         foreach($books as $tmp_book) {
             $data_book = get_book_detail($tmp_book->id);
             if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$data_book['last_chapter_id']))->count() > 0) {
