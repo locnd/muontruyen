@@ -897,6 +897,34 @@ function logout() {
     window.location.href = 'index.html';
 }
 
+function delete_chap() {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    if($('#loading-btn').is(":visible")) {
+        return true;
+    }
+    if(confirm('Bạn có chắc là muốn xóa chương này không ?')) {
+        $('#loading-btn').show();
+        var params = {
+            chapter_id: $('#chapter_id').val()
+        };
+        send_api('POST', '/deletechapter', params, function (res) {
+            $('#loading-btn').hide();
+            if (res.success) {
+                window.location.href="book.html?id="+$('#book_id').val();
+            } else {
+                dl_alert('danger', res.message, false);
+            }
+        });
+    }
+}
+
 function disable() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
@@ -1066,7 +1094,7 @@ function show_profile() {
                 var html ='<div class="section-container a-book" id="admin-cp">';
                 html += '<div class="a-profile"><h3>Dành cho quản trị</h3></div>';
                 html += '<div class="clear5"></div>';
-                html += '<a style="margin-left:20px" href="http://muontruyen.tk">Administrator Backend</a>';
+                html += '<a style="margin-left:20px" target="_blank" href="http://muontruyen.tk">Administrator Backend</a>';
                 html += '<div class="clear5"></div>';
                 html += '<hr>';
                 html += '<div class="clear5"></div>';

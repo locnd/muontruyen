@@ -549,6 +549,42 @@ class Apiv1Controller extends Controller
             'unread' => get_user_unread($user)
         );
     }
+    public function actionDeletechapter()
+    {
+        $user = $this->check_user();
+        if (!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        if (empty($user->is_admin)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có quyền thực hiện'
+            );
+        }
+        $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
+        $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
+        if(empty($chapter)) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy chương truyện'
+            );
+        }
+        Yii::$app->db->createCommand()
+            ->delete('dl_images', ['chapter_id' => $chapter->id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
+            ->execute();
+        clear_book_cache($chapter->book);
+        Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+        $chapter->delete();
+        return array(
+            'success' => true
+        );
+    }
     public function actionDisable()
     {
         $user = $this->check_user();
