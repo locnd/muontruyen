@@ -578,6 +578,9 @@ class Apiv1Controller extends Controller
         Yii::$app->db->createCommand()
             ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
             ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_readed', ['chapter_id' => $chapter->id])
+            ->execute();
         clear_book_cache($chapter->book);
         Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
         $chapter->delete();
