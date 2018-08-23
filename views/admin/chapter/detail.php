@@ -193,26 +193,28 @@
         });
     }
     function delete_chapter() {
-        var params = {};
-        params['chapter_id'] = $('#chapter_id').val();
-        params['_csrf'] = $('#crsf_token').val();
-        var url = '/ajax/deletechapter';
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: params,
-            dataType: 'json',
-            success: function(result){
-                if(result.success) {
-                    var book_id = $('#book_id').val();
-                    window.location.href = '/admin/book/detail/'+book_id;
-                } else {
-                    alert(result.message);
+        if(confirm('Bạn có thực sự muốn xoá chương này không?')) {
+            var params = {};
+            params['chapter_id'] = $('#chapter_id').val();
+            params['_csrf'] = $('#crsf_token').val();
+            var url = '/ajax/deletechapter';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: params,
+                dataType: 'json',
+                success: function(result){
+                    if(result.success) {
+                        var book_id = $('#book_id').val();
+                        window.location.href = '/admin/book/detail/'+book_id;
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function( xhr ) {
+                    window.location.reload();
                 }
-            },
-            error: function( xhr ) {
-                window.location.reload();
-            }
-        });
+            });
+        }
     }
 </script>
