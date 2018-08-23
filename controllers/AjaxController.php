@@ -119,6 +119,32 @@ class AjaxController extends Controller
             'success' => true
         );
     }
+    public function actionDeletechapter()
+    {
+        $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
+        $chapter = Chapter::find()->where(array('id' => $chapter_id))->one();
+        if (empty($chapter)) {
+            return array(
+                'success' => false,
+                'message' => 'Chapter not found'
+            );
+        }
+        Yii::$app->db->createCommand()
+            ->delete('dl_images', ['chapter_id' => $chapter->id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_readed', ['chapter_id' => $chapter->id])
+            ->execute();
+        clear_book_cache($chapter->book);
+        Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+        $chapter->delete();
+        return array(
+            'success' => true
+        );
+    }
     public function actionSortchapters()
     {
         $book_id = (int) Yii::$app->request->post('book_id',0);

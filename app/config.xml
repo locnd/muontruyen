@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
-        id        = "com.iragon.MuonTruyen"
-	versionCode = "1"
-        version   = "1.0.1">
+        id        = "iragon.apps.MuonTruyen"
+		versionCode = "2"
+        version   = "1.0.2">
 	<name>Mượn Truyện</name>
 	<description>
 		Mượn truyện của các bạn về đọc chút nhé
@@ -25,11 +25,6 @@
 	<plugin name="phonegap-plugin-push" spec="1.8.0" source="npm">
 		<param name="SENDER_ID" value="154739668435" />
 	</plugin>
-
-	<preference name="android-minSdkVersion" value="26" />
-	<preference name="android-compileSdkVersion" value="26" />
-	<preference name="android-targetSdkVersion" value="26" />
-	<preference name="android-buildToolsVersion" value="26.0.1" />
 
 	<access origin="*"/>
 	<allow-intent href="http://*/*" />

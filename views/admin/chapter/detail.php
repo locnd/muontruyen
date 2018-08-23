@@ -19,7 +19,9 @@
                             <th style="text-align: right">
                             </th>
                             <th class="po-re">
-                                <h4 id="cur_title"><?php echo $book->name;?></h4>
+                                <h4 id="cur_title"><?php echo $book->name;?>
+                                    <a style="float:right;margin-top:-10px" onclick="delete_chapter()" class="btn btn-danger btn-icon btn-circle btn-lg"><i class="fa fa-trash"></i></a>
+                                </h4>
                                 <input type="text" class="form-control" id="new_title" value="<?php echo $book->name;?>" style="display: none">
                                 <button onclick="save('name')" id="btn_title" style="margin-top: 10px;display:none" class="btn btn-primary">Save</button>
                             </th>
@@ -181,6 +183,29 @@
             success: function(result){
                 if(result.success) {
                     window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function( xhr ) {
+                window.location.reload();
+            }
+        });
+    }
+    function delete_chapter() {
+        var params = {};
+        params['chapter_id'] = $('#chapter_id').val();
+        params['_csrf'] = $('#crsf_token').val();
+        var url = '/ajax/deletechapter';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: params,
+            dataType: 'json',
+            success: function(result){
+                if(result.success) {
+                    var book_id = $('#book_id').val();
+                    window.location.href = '/admin/book/detail/'+book_id;
                 } else {
                     alert(result.message);
                 }
