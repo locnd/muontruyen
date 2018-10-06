@@ -168,10 +168,18 @@ function get_list_chapter_reload(chapter) {
 }
 
 function update_chapter(chapter) {
-    var sql = 'UPDATE dl_chapters SET will_reload=0,status=0, updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
-    con.query(sql, function (err, result) {
-        delete_images(chapter);
-    });
+    if(chapter.reload_time >=3) {
+        var sql = 'UPDATE dl_chapters SET will_reload=0,status=0,reload_time=0, updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
+        con.query(sql, function (err, result) {
+            count_chapter++;
+        });
+    } else {
+        var reload_time = chapter.reload_time + 1;
+        var sql = 'UPDATE dl_chapters SET will_reload=0,status=0,reload_time='+reload_time+' updated_at="' + current_time() + '" WHERE id="' + chapter.id + '"';
+        con.query(sql, function (err, result) {
+            delete_images(chapter);
+        });
+    }
 }
 
 function delete_images(chapter) {
