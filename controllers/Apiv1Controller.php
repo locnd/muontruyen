@@ -698,11 +698,15 @@ class Apiv1Controller extends Controller
                     'message' => 'Không tìm thấy truyện'
                 );
             }
-            $chapters = Chapter::find()->where(array('book_id'=>$book_id))->one();
-            foreach($chapters as $chapter) {
-                $chapter->will_reload = 1;
-                $chapter->save();
+            $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
+            if(empty($book_cron)) {
+                return array(
+                    'success' => false,
+                    'message' => 'Không tìm thấy truyện'
+                );
             }
+            $book_cron->status = 0;
+            $book_cron->save();
         }elseif($book_id == 0 && $chapter_id > 0) {
             $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
             if(empty($chapter)) {
