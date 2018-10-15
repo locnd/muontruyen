@@ -781,8 +781,9 @@ class Apiv1Controller extends Controller
                 foreach ($inactive_chapters as $inactive_chapter) {
                     $options['-'] .= '<tr style="border: 1px solid #ccc;">';
                     $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
-                    $options['-'] .= $inactive_chapter->name.' - '.$inactive_chapter->book->name.'<br>';
-                    $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">Xem nguồn</a>';
+                    $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">';
+                    $options['-'] .= $inactive_chapter->name.' - '.$inactive_chapter->book->name;
+                    $options['-'] .= '</a>';
                     $options['-'] .= '</td>';
                     $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= $inactive_chapter->will_reload == 1 ? 'Reload' : 'Wait';
