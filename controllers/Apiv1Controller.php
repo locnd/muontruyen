@@ -565,7 +565,7 @@ class Apiv1Controller extends Controller
             );
         }
         $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
-        $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
+        $chapter = Chapter::find()->where(array('id'=>$chapter_id))->one();
         if(empty($chapter)) {
             return array(
                 'success' => false,
@@ -780,17 +780,17 @@ class Apiv1Controller extends Controller
                 $options['-'] = '<table style="border-collapse: collapse;width:100%">';
                 foreach ($inactive_chapters as $inactive_chapter) {
                     $options['-'] .= '<tr style="border: 1px solid #ccc;">';
-                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= $inactive_chapter->name.' - '.$inactive_chapter->book->name.'<br>';
                     $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">Xem nguồn</a>';
                     $options['-'] .= '</td>';
-                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= $inactive_chapter->will_reload == 1 ? 'Reload' : 'Wait';
                     $options['-'] .= '</td>';
-                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= '<input class="dl-btn-default" type="button" value="Reload" onclick="reload_chapter('.$inactive_chapter->id.')">';
                     $options['-'] .= '</td>';
-                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= '<input class="dl-btn-default" type="button" value="Delete" onclick="delete_chapter('.$inactive_chapter->id.')">';
                     $options['-'] .= '</td>';
                     $options['-'] .= '</tr>';

@@ -1123,7 +1123,9 @@ function show_profile() {
             $.each(res.data.options, function( index, value ) {
                 var admin_html = '';
                 admin_html += '<div class="a-profile">';
-                admin_html += '<label>'+index+'</label>';
+                if(index != '-' && index != '--') {
+                    admin_html += '<label>' + index + '</label>';
+                }
                 admin_html += '<span>'+show_number(value)+'</span>';
                 admin_html += '</div>';
                 $('#profile').append(admin_html);
@@ -1141,8 +1143,14 @@ function show_profile() {
                 $.each(res.options, function( index, value ) {
                     var admin_html = '';
                     admin_html += '<div class="a-profile">';
-                    admin_html += '<label>'+index+'</label>';
-                    admin_html += '<span>'+show_number(value)+'</span>';
+                    if(index != '-' && index != '--') {
+                        admin_html += '<label>' + index + '</label>';
+                    }
+                    if(index != '-' && index != '--') {
+                        admin_html += '<span>'+show_number(value)+'</span>';
+                    } else {
+                        admin_html += '<span>'+value+'</span>';
+                    }
                     admin_html += '</div>';
                     $('#admin-cp').append(admin_html);
                 });
