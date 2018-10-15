@@ -359,6 +359,8 @@ div.for-admin, img.loading-btn, div.input-admin {
 }
 .a-profile{
     padding: 5px 20px;
+    clear: both;
+    width: 100%;
 }
 .a-profile h3 {
     margin:0;

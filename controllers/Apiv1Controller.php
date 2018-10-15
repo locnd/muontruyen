@@ -777,17 +777,21 @@ class Apiv1Controller extends Controller
 
             if($options['Số chương bị ẩn'] > 0) {
                 $inactive_chapters = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->all();
-                $options['-'] = '<table>';
+                $options['-'] = '<table style="border-collapse: collapse;width:100%">';
                 foreach ($inactive_chapters as $inactive_chapter) {
-                    $options['-'] .= '<tr>';
-                    $options['-'] .= '<td>';
+                    $options['-'] .= '<tr style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= $inactive_chapter->title.' - '.$inactive_chapter->book->title.'<br>';
                     $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">Xem nguồn</a>';
                     $options['-'] .= '</td>';
-                    $options['-'] .= '<td>';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
                     $options['-'] .= $inactive_chapter->will_reload == 1 ? 'Reload' : 'Wait';
                     $options['-'] .= '</td>';
-                    $options['-'] .= '<td>';
-                    $options['-'] .= '<input class="dl-btn-default" type="button" value="Reload" onclick="reload(0,'.$inactive_chapter->id.')">';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<input class="dl-btn-default" type="button" value="Reload" onclick="reload_chapter('.$inactive_chapter->id.')">';
+                    $options['-'] .= '</td>';
+                    $options['-'] .= '<td style="border: 1px solid #ccc;">';
+                    $options['-'] .= '<input class="dl-btn-default" type="button" value="Delete" onclick="delete_chapter('.$inactive_chapter->id.')">';
                     $options['-'] .= '</td>';
                     $options['-'] .= '</tr>';
                 }

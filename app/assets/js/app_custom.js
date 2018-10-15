@@ -598,10 +598,6 @@ function show_chapter(id) {
             $('#book_id').val(res.book.id);
             $('#chapter_id').val(res.data.id);
             if(is_admin()) {
-                $('#reload-btn').attr('onclick','reload(0,'+res.data.id+')');
-                $('#disable-btn').attr('onclick','disable(0,'+res.data.id+')');
-                $('#edit-name-btn').attr('onclick','edit_name()');
-                $('#moving-manage-btn').attr('onclick','');
                 $('#input-textarea').val(res.data.name);
             }
             var chapter = res.data;
@@ -896,7 +892,49 @@ function logout() {
     localStorage.setItem("is_admin", '');
     window.location.href = 'index.html';
 }
-
+function reload_chapter(chapter_id) {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    if(confirm('Bạn có chắc là muốn lấy lại truyện này không ?')) {
+        var params = {
+            book_id: 0,
+            chapter_id: chapter_id
+        };
+        send_api('POST', '/reload', params, function (res) {
+            if (res.success) {
+                window.location.reload();
+            } else {
+                dl_alert('danger', res.message, false);
+            }
+        });
+    }
+}
+function delete_chapter(chapter_id) {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    var params = {
+        chapter_id: chapter_id
+    };
+    send_api('POST', '/deletechapter', params, function (res) {
+        if (res.success) {
+            window.location.reload();
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
 function delete_chap() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
