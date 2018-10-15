@@ -776,12 +776,12 @@ class Apiv1Controller extends Controller
             $options['Số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
 
             if($options['Số chương bị ẩn'] > 0) {
-                $inactive_chapters = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->all();
+                $inactive_chapters = Chapter::find()->with(array('book'))->where(array('status'=>Chapter::INACTIVE))->all();
                 $options['-'] = '<table style="border-collapse: collapse;width:100%">';
                 foreach ($inactive_chapters as $inactive_chapter) {
                     $options['-'] .= '<tr style="border: 1px solid #ccc;">';
                     $options['-'] .= '<td style="border: 1px solid #ccc;">';
-                    $options['-'] .= $inactive_chapter->title.' - '.$inactive_chapter->book->title.'<br>';
+                    $options['-'] .= $inactive_chapter->name.' - '.$inactive_chapter->book->name.'<br>';
                     $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">Xem nguồn</a>';
                     $options['-'] .= '</td>';
                     $options['-'] .= '<td style="border: 1px solid #ccc;">';
