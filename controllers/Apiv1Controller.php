@@ -774,6 +774,26 @@ class Apiv1Controller extends Controller
             $options['Số truyện bị ẩn'] = Book::find()->where(array('status'=>Book::INACTIVE))->count();
             $options['Số chương'] = Chapter::find()->count();
             $options['Số chương bị ẩn'] = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->count();
+
+            if($options['Số chương bị ẩn'] > 0) {
+                $inactive_chapters = Chapter::find()->where(array('status'=>Chapter::INACTIVE))->all();
+                $options['-'] = '<table>';
+                foreach ($inactive_chapters as $inactive_chapter) {
+                    $options['-'] .= '<tr>';
+                    $options['-'] .= '<td>';
+                    $options['-'] .= '<a target="_blank" href="'.$inactive_chapter->url.'">Xem nguồn</a>';
+                    $options['-'] .= '</td>';
+                    $options['-'] .= '<td>';
+                    $options['-'] .= $inactive_chapter->will_reload == 1 ? 'Reload' : 'Wait';
+                    $options['-'] .= '</td>';
+                    $options['-'] .= '<td>';
+                    $options['-'] .= '<input class="dl-btn-default" type="button" value="Reload" onclick="reload(0,'.$inactive_chapter->id.')">';
+                    $options['-'] .= '</td>';
+                    $options['-'] .= '</tr>';
+                }
+                $options['-'] .= '</table>';
+            }
+
             $options['Số ảnh'] = Image::find()->count();
             $options['Will Reload'] = Book::find()->where(array('will_reload'=>1))->count().' - '.Chapter::find()->where(array('will_reload'=>1))->count();
 

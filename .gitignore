@@ -5,13 +5,12 @@ nbproject
 .settings
 Thumbs.db
 composer.phar
+web/uploads/*
+phantom/*
+vendor/*
 .DS_Store
 phpunit.phar
 /phpunit.xml
 tests/_output/*
 tests/_support/_generated
 /.vagrant
-
-web/uploads/*
-phantom/*
-vendor/*
