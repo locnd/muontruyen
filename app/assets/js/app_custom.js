@@ -346,6 +346,7 @@ function display_list_chapters(chapters) {
             if(is_admin()) {
                 moving_html += '<span class="admin-btn mov-btn" onclick="move_chapter('+chapter.id+',0)"><i class="fa fa-angle-double-up"></i></span>';
                 moving_html += '<span class="admin-btn mov-btn" onclick="move_chapter('+chapter.id+',1)"><i class="fa fa-angle-double-down"></i></span>';
+                moving_html += '<span class="admin-btn mov-btn" onclick="delete_chapter('+chapter.id+')"><i class="fa fa-trash"></i></span>';
             }
             html += '<div class="a-chapter">';
             html += '<div style="width: calc(100% - 150px);float:left">';
@@ -901,7 +902,7 @@ function reload_chapter(chapter_id) {
         dl_alert('danger', 'Không có quyền thực hiện', false);
         return true;
     }
-    if(confirm('Bạn có chắc là muốn lấy lại truyện này không ?')) {
+    if(confirm('Bạn có chắc là muốn lấy lại chương truyện này không ?')) {
         var params = {
             book_id: 0,
             chapter_id: chapter_id
@@ -927,13 +928,15 @@ function delete_chapter(chapter_id) {
     var params = {
         chapter_id: chapter_id
     };
-    send_api('POST', '/deletechapter', params, function (res) {
-        if (res.success) {
-            window.location.reload();
-        } else {
-            dl_alert('danger', res.message, false);
-        }
-    });
+    if(confirm('Bạn có chắc là muốn xóa chương này không ?')) {
+        send_api('POST', '/deletechapter', params, function (res) {
+            if (res.success) {
+                window.location.reload();
+            } else {
+                dl_alert('danger', res.message, false);
+            }
+        });
+    }
 }
 function delete_chap() {
     if(!is_logined()) {

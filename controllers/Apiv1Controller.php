@@ -790,8 +790,7 @@ class Apiv1Controller extends Controller
                     $options['-'] .= '</td>';
                     $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
                     $options['-'] .= '<input class="dl-btn-default" type="button" value="Reload" onclick="reload_chapter('.$inactive_chapter->id.')">';
-                    $options['-'] .= '</td>';
-                    $options['-'] .= '<td style="border: 1px solid #ccc;padding: 5px 10px;">';
+                    $options['-'] .= '<br>';
                     $options['-'] .= '<input class="dl-btn-default" type="button" value="Delete" onclick="delete_chapter('.$inactive_chapter->id.')">';
                     $options['-'] .= '</td>';
                     $options['-'] .= '</tr>';
@@ -813,8 +812,7 @@ class Apiv1Controller extends Controller
                 }
             }
 
-            $options['Số báo lỗi'] = Report::find()->count();
-            $options['Số báo lỗi mới'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count();
+            $options['Số báo lỗi'] = Report::find()->where(array('status'=>Report::STATUS_NEW))->count().' - '.Report::find()->count();
 
             $options['Clear cache'] = '<input class="dl-btn-default" type="button" value="Clear" onclick="clear_cache()">';
         }
