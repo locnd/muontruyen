@@ -606,7 +606,7 @@ class Apiv1Controller extends Controller
         $book_id = (int)Yii::$app->request->post('book_id', 0);
         $chapter_id = (int)Yii::$app->request->post('chapter_id', 0);
         if($book_id > 0 && $chapter_id == 0) {
-            $book = Book::find()->where(array('id'=>$book_id, 'status' => Book::ACTIVE))->one();
+            $book = Book::find()->where(array('id'=>$book_id))->one();
             if(empty($book)) {
                 return array(
                     'success' => false,
@@ -647,7 +647,7 @@ class Apiv1Controller extends Controller
             clear_book_cache($book);
             $book->delete();
         }elseif($book_id == 0 && $chapter_id > 0) {
-            $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
+            $chapter = Chapter::find()->where(array('id'=>$chapter_id))->one();
             if(empty($chapter)) {
                 return array(
                     'success' => false,
@@ -691,7 +691,7 @@ class Apiv1Controller extends Controller
         $book_id = (int) Yii::$app->request->post('book_id',0);
         $chapter_id = (int) Yii::$app->request->post('chapter_id',0);
         if($book_id > 0 && $chapter_id == 0) {
-            $book = Book::find()->where(array('id'=>$book_id, 'status' => Book::ACTIVE))->one();
+            $book = Book::find()->where(array('id'=>$book_id))->one();
             if(empty($book)) {
                 return array(
                     'success' => false,
@@ -708,7 +708,7 @@ class Apiv1Controller extends Controller
             $book_cron->status = 0;
             $book_cron->save();
         }elseif($book_id == 0 && $chapter_id > 0) {
-            $chapter = Chapter::find()->where(array('id'=>$chapter_id, 'status' => Chapter::ACTIVE))->one();
+            $chapter = Chapter::find()->where(array('id'=>$chapter_id))->one();
             if(empty($chapter)) {
                 return array(
                     'success' => false,
@@ -1019,13 +1019,18 @@ class Apiv1Controller extends Controller
                 'message' => 'Hãy điền tên thẻ tag'
             );
         }
-        $tag = Tag::find()->where(array('name'=>$tag_name, 'status' => Tag::ACTIVE))->one();
-        if(empty($image)) {
+        $tag = Tag::find()->where(array('name'=>$tag_name))->one();
+        if(empty($tag)) {
             $tag = new Tag();
             $tag->name = $tag_name;
             $tag->slug = generate_key($tag_name);
             $tag->status = Tag::ACTIVE;
             $tag->save();
+        } else {
+            if($tag->status != Tag::ACTIVE) {
+                $tag->status = Tag::ACTIVE;
+                $tag->save();
+            }
         }
         Yii::$app->cache->delete('tags_list_0');
         return array(
