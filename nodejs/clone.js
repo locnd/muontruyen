@@ -198,6 +198,9 @@ function parse_book(url, body) {
                 sql += " VALUES (";
                 sql += '"1","' + url + '"';
                 var name = nodes[0].innerHTML.trim();
+                if(name.substring(name.length-7) == ': video') {
+                    name = name.substring(0, name.length-7);
+                }
                 sql += ',"' + addslashes(name) + '"';
 
                 var nodes = dom.getElementsByClassName('col-xs-4 col-image');

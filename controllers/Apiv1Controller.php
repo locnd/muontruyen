@@ -674,6 +674,60 @@ class Apiv1Controller extends Controller
             'success' => true
         );
     }
+    public function actionReset() {
+        $user = $this->check_user();
+        if(!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        if(empty($user->is_admin)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có quyền thực hiện'
+            );
+        }
+        $book_id = (int) Yii::$app->request->post('book_id',0);
+        $book = Book::find()->where(array('id'=>$book_id))->one();
+        if(empty($book)) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy truyện'
+            );
+        }
+        $chapters = Chapter::find()->where(array('book_id'=>$book_id))->all();
+        $chapter_ids = array();
+        foreach ($chapters as $stt =>$chapter) {
+            $chapter_ids[] = $chapter->id;
+        }
+        Yii::$app->db->createCommand()
+            ->delete('dl_images', ['chapter_id' => $chapter_ids])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_chapters', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_bookmarks', ['book_id' => $book_id])
+            ->execute();
+        Yii::$app->db->createCommand()
+            ->delete('dl_readed', ['book_id' => $book_id])
+            ->execute();
+        clear_book_cache($book);
+
+        $book_cron = BookCron::find()->where(array('book_url'=>$book->url))->one();
+        if(empty($book_cron)) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy truyện'
+            );
+        }
+        $book_cron->status = 0;
+        $book_cron->save();
+        return array(
+            'success' => true
+        );
+    }
     public function actionReload() {
         $user = $this->check_user();
         if(!empty($user['error'])) {

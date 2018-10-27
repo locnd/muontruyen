@@ -1044,6 +1044,34 @@ function save_tags() {
         }
     });
 }
+function reset() {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    if($('#loading-btn').is(":visible")) {
+        return true;
+    }
+    if(confirm('Bạn có chắc là muốn lấy lại truyện này không ?')) {
+        $('#loading-btn').show();
+        var book_id = $('#book_id').val();
+        var params = {
+            book_id: book_id
+        };
+        send_api('POST', '/reset', params, function (res) {
+            $('#loading-btn').hide();
+            if (res.success) {
+                window.location.reload();
+            } else {
+                dl_alert('danger', res.message, false);
+            }
+        });
+    }
+}
 function reload() {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
