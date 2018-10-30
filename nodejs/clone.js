@@ -198,9 +198,6 @@ function parse_book(url, body) {
                 sql += " VALUES (";
                 sql += '"1","' + url + '"';
                 var name = nodes[0].innerHTML.trim();
-                if(name.substring(name.length-7) == ': video') {
-                    name = name.substring(0, name.length-7);
-                }
                 sql += ',"' + addslashes(name) + '"';
 
                 var nodes = dom.getElementsByClassName('col-xs-4 col-image');
@@ -431,6 +428,9 @@ function update_book(book, dom) {
             continue;
         }
         chap_name = ucfirst(chap_name);
+        if(chap_name.substring(chap_name.length-7) == ': video') {
+            chap_name = name.substring(0, chap_name.length-7);
+        }
 
         var parse_str = chap.split('href="');
         var href = parse_str[1];
