@@ -343,6 +343,8 @@ class AjaxController extends Controller
             $new_image->stt = $stt;
             $new_image->save();
         }
+        $chapter->status = Chapter::ACTIVE;
+        $chapter->save();
         Yii::$app->cache->delete('chapter_detail_'.$chapter_id);
         clear_book_cache($chapter->book);
         return array(
