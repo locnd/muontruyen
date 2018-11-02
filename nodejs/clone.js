@@ -429,7 +429,7 @@ function update_book(book, dom) {
         }
         chap_name = ucfirst(chap_name);
         if(chap_name.substring(chap_name.length-7) == ': video') {
-            chap_name = name.substring(0, chap_name.length-7);
+            chap_name = chap_name.substring(0, chap_name.length-7);
         }
 
         var parse_str = chap.split('href="');
