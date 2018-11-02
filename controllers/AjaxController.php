@@ -318,31 +318,33 @@ class AjaxController extends Controller
                 'message' => 'Chapter not found'
             );
         }
-        $urls = Yii::$app->request->post('url', array());
-        $stts = Yii::$app->request->post('stt', array());
-        foreach($urls as $num => $image_src) {
-            if(empty($image_src) || empty($stts[$num])) {
-                continue;
-            }
-            $image_src = str_replace('https://','http://', $image_src);
-            $id = (int) $stts[$num];
-            $old_img = Image::find()->where(array('chapter_id'=>$chapter_id, 'image_source' => $image_src))->one();
-            if(!empty($old_img)) {
-                if($old_img->stt != $id) {
-                    $old_img->stt = $id;
-                    $old_img->save();
-                }
-                continue;
-            }
+        $list_images = Yii::$app->request->post('list_images', '');
+        if($list_images == '') {
+            return array(
+                'success' => false,
+                'message' => 'Please input list images'
+            );
+        }
+        Yii::$app->db->createCommand()
+            ->delete('dl_images', ['chapter_id' => $chapter->id])
+            ->execute();
+        $image_srcs = explode(',',$list_images);
+        $stt = 0;
+        foreach ($image_srcs as $image_src) {
+            $src= trim($image_src);
+            if(empty($src)) continue;
+            $src = str_replace('https://','http://', $src);
+            $stt++;
             $new_image = new Image();
             $new_image->chapter_id = $chapter->id;
-            $new_image->image_source = $image_src;
+            $new_image->image_source = $src;
             $new_image->image = 'error.jpg';
             $new_image->status = Image::ACTIVE;
-            $new_image->stt = $id;
+            $new_image->stt = $stt;
             $new_image->save();
         }
         Yii::$app->cache->delete('chapter_detail_'.$chapter_id);
+        clear_book_cache($chapter->book);
         return array(
             'success' => true
         );

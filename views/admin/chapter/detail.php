@@ -93,11 +93,12 @@
         <div class="profile-info">
             <h4 style="float: left;"><?php echo count($images); ?> ảnh</h4>
             <div class="clear0"></div>
-            <form id="add-image-form">
+            <form id="add-image-form" style="display:none">
+                <textarea name="list_images" style="width: 100%;min-height: 100px;margin-bottom: 10px"></textarea>
             </form>
             <div class="clear5"></div>
             <a id="save-btn" style="margin-right: 10px;width: 50px;display:none" class="dl-default-btn fl-l" onclick="save_images()" href="javascript:;">Save</a>
-            <a class="dl-default-btn fl-l" onclick="add_image()" href="javascript:;"><i class="fa fa-plus"></i></a>
+            <a id="add-btn" class="dl-default-btn fl-l" onclick="add_image()" href="javascript:;"><i class="fa fa-refresh"></i></a>
             <div class="clear5"></div>
             <?php foreach ($images as $image) { ?>
                 <img style="width:100%;max-width: 500px" src="<?php echo $image->get_image(); ?>">
@@ -108,13 +109,9 @@
 </div>
 <script>
     function add_image() {
-        var stt = <?php echo count($chapter->images); ?> + $('.a-new-image').length + 1;
-        var html = '<div class="a-new-image">';
-        html += '<input placeholder="URL" type="text" class="form-control img-url" name="url[]">';
-        html += '<input value='+stt+' placeholder="STT" type="text" class="form-control img-stt" name="stt[]">';
-        html += '</div>';
-        $('#add-image-form').append(html);
+        $('#add-image-form').show();
         $('#save-btn').show();
+        $('#add-btn').hide();
     }
     function mark_fixed() {
         if(confirm('Bạn đã hoàn thành sửa truyện?')) {
