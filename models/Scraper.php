@@ -319,6 +319,7 @@ page.open("%s", function (status) {
                 continue;
             }
             echo '' . "\n";
+            echo count($list_images).' images'."\n";
             foreach ($list_images as $ind => $image) {
                 $src = $image->find('img')[0]->src;
                 $db_img = new Image();
@@ -328,6 +329,7 @@ page.open("%s", function (status) {
                 $db_img->stt = $ind +1;
                 $db_img->status = 1;
                 $db_img->save();
+                echo $db_img->image_source."\n";
             }
             if(count($list_images) > 0) {
                 $chapter->status = Chapter::ACTIVE;
