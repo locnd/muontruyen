@@ -510,26 +510,6 @@ function get_request() {
     return request;
 }
 function parse_chap(chap, body) {
-    var nodes = body.split('page-chapter');
-    if (nodes.length < 2) {
-        clone_chap(chap, false);
-    } else {
-        if (total_image == -1) {
-            total_image = 0;
-        }
-        total_image += nodes.length - 2;
-        for (var i = 1; i < nodes.length-1; i++) {
-            var image_str = nodes[i].trim();
-            var image = get_image_url(image_str);
-            if (image == '') {
-                count_image++;
-            } else {
-                console.log('create image ' + i);
-                create_image(chap, image, i);
-            }
-        }
-    }
-    /*
     var dom = parser.parseFromString(body, 'text/html');
     if(dom == null || typeof(dom) == 'undefined') {
         clone_chap(chap, false);
@@ -558,7 +538,6 @@ function parse_chap(chap, body) {
             }
         }
     }
-    */
 }
 function clone_chap(chap, inc_count_chap) {
     var proxiedRequest = get_request();
