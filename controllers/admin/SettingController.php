@@ -27,7 +27,7 @@ class SettingController extends Controller
 
     public function actionIndex() {
         if(!empty($_GET['action']) && $_GET['action'] == 'delete_images_base64') {
-            $images = Image::find()->where(['like', 'image_source', 'data:image'])->groupBy(['chapter_id'])->all();
+            $images = Image::find()->where(['like', 'image_source', 'data:image'])->all();
             $total = count($images);
             foreach ($images as $image) {
                 $chapter = Chapter::find()->where(array('id'=>$image->chapter_id))->one();
