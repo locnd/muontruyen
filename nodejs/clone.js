@@ -420,6 +420,11 @@ function update_book(book, dom) {
         var chap = nodes[i].innerHTML;
 
         var parse_str = chap.split('>');
+        if(parse_str.length < 2) {
+            console.log(chap);
+            count_skip_chap++;
+            continue;
+        }
         var chap_name = parse_str[1];
         parse_str = chap_name.split('<');
         chap_name = parse_str[0].trim().toLowerCase();
@@ -516,7 +521,7 @@ function parse_chap(chap, body) {
             var image_str = nodes[i].trim();
             var image = get_image_url(image_str);
             if (image == '') {
-                chap.count_image++;
+                count_image++;
             } else {
                 console.log('create image ' + i);
                 create_image(chap, image, i);
