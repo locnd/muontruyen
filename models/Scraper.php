@@ -274,6 +274,7 @@ page.open("%s", function (status) {
             $chapter->reload_time++;
             $chapter->save();
             $chapter_urls[] = $chapter->url;
+            echo $chapter->url."\n";
             Yii::$app->db->createCommand()
                 ->delete('dl_images', ['chapter_id' => $chapter->id])
                 ->execute();
@@ -282,7 +283,7 @@ page.open("%s", function (status) {
         if(empty($chapter_urls)) {
             return true;
         }
-        $server = Server::find()->where('slug','nettruyen')->one();
+        $server = Server::find()->where(array('slug'=>'nettruyen'))->one();
         $chapters_data = $this->run_curl_multiple($chapter_urls);
         foreach ($chapters_data as $stt => $chapter_html) {
             $chapter = '';
