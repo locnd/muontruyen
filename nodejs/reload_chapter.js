@@ -290,7 +290,8 @@ function current_time() {
 }
 function get_image_url(image_str) {
     image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
-    if(image_str.indexOf('original="') > -1) {
+    image_str = image_str.replace('src="https://','src="http://').replace('original="https://','original="http://');
+    if(image_str.indexOf('original="http://') > -1) {
         var image_parser = image_str.split('original="');
         image_str = image_parser[1];
         image_parser = image_str.split('"');
@@ -302,7 +303,7 @@ function get_image_url(image_str) {
         }
         return img;
     }
-    if(image_str.indexOf('src="') > -1) {
+    if(image_str.indexOf('src="http://') > -1) {
         var image_parser = image_str.split('src="');
         image_str = image_parser[1];
         image_parser = image_str.split('"');
