@@ -504,6 +504,27 @@ function get_request() {
     return request;
 }
 function parse_chap(chap, body) {
+    var nodes = body.split('page-chapter');
+    if (nodes.length < 2) {
+        clone_chap(chap, false);
+    } else {
+        if (total_image == -1) {
+            total_image = 0;
+        }
+        total_image += nodes.length - 2;
+        for (var i = 1; i < nodes.length-1; i++) {
+            var stt = i + 1;
+            var image_str = nodes[i].trim();
+            var image = get_image_url(image_str);
+            if (image == '') {
+                chap.count_image++;
+            } else {
+                console.log('create image ' + stt);
+                create_image(chap, image, stt);
+            }
+        }
+    }
+    /*
     var dom = parser.parseFromString(body);
     if(dom == null || typeof(dom) == 'undefined') {
         clone_chap(chap, false);
@@ -532,103 +553,104 @@ function parse_chap(chap, body) {
             }
         }
     }
+    */
 }
 function clone_chap(chap, inc_count_chap) {
-    var proxiedRequest = get_request();
-    proxiedRequest.get( chap.url, function(error, response, body){
-        if (error){
-            console.log('Can not get html '+ chap.url +'. Try again....');
-            clone_chap(chap, inc_count_chap);
-        } else {
-            if(inc_count_chap) {
-                count_clone_chap++;
-                console.log('count clone chap = '+ count_clone_chap);
-            }
-            parse_chap(chap, body);
+var proxiedRequest = get_request();
+proxiedRequest.get( chap.url, function(error, response, body){
+    if (error){
+        console.log('Can not get html '+ chap.url +'. Try again....');
+        clone_chap(chap, inc_count_chap);
+    } else {
+        if(inc_count_chap) {
+            count_clone_chap++;
+            console.log('count clone chap = '+ count_clone_chap);
         }
-    });
+        parse_chap(chap, body);
+    }
+});
 }
 function create_image(chap, image, stt) {
-    var sql = "INSERT INTO dl_images (chapter_id, image_source, image, stt, status, updated_at, created_at)";
-    sql += " VALUES (";
-    sql += '"'+chap.id+'","' + image + '","error.jpg","' + stt + '",1,"' + current_time() + '","' + current_time() + '"';
-    sql += ")";
-    con.query(sql, function (err, result) {
-        count_image++;
-        check_done();
-    });
+var sql = "INSERT INTO dl_images (chapter_id, image_source, image, stt, status, updated_at, created_at)";
+sql += " VALUES (";
+sql += '"'+chap.id+'","' + image + '","error.jpg","' + stt + '",1,"' + current_time() + '","' + current_time() + '"';
+sql += ")";
+con.query(sql, function (err, result) {
+    count_image++;
+    check_done();
+});
 }
 function clear_cache() {
-    if(count_skip_chap == total_chap) {
-        finish_book_cron();
-    } else {
-        console.log(command_exit + "" + cm_book_id);
-        exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
-            console.log('---- Done');
-            process.exit();
-        });
-    }
+if(count_skip_chap == total_chap) {
+    finish_book_cron();
+} else {
+    console.log(command_exit + "" + cm_book_id);
+    exec(command_exit + "" + cm_book_id, function (err, stdout, stderr) {
+        console.log('---- Done');
+        process.exit();
+    });
+}
 }
 function ucfirst(txt) {
-    return txt.substr(0,1).toUpperCase()+txt.substr(1);
+return txt.substr(0,1).toUpperCase()+txt.substr(1);
 }
 
 function current_time() {
-    var di = new Date();
-    var utc = di.getTime() + (di.getTimezoneOffset() * 60000);
+var di = new Date();
+var utc = di.getTime() + (di.getTimezoneOffset() * 60000);
 
-    var currentdate = new Date(utc + (3600000*7));
-    var y = currentdate.getFullYear();
-    var mon = currentdate.getMonth()+1;
-    if(mon < 10) {
-        mon = '0' + mon;
-    }
-    var d = currentdate.getDate();
-    if(d < 10) {
-        d = '0' + d;
-    }
-    var h = currentdate.getHours();
-    if(h < 10) {
-        h = '0' + h;
-    }
-    var min = currentdate.getMinutes();
-    if(min < 10) {
-        min = '0' + min;
-    }
-    var s = currentdate.getSeconds();
-    if(s < 10) {
-        s = '0' + s;
-    }
-    return y + '-' + mon + "-" + d + " " + h + ":" + min + ":" + s;
+var currentdate = new Date(utc + (3600000*7));
+var y = currentdate.getFullYear();
+var mon = currentdate.getMonth()+1;
+if(mon < 10) {
+    mon = '0' + mon;
+}
+var d = currentdate.getDate();
+if(d < 10) {
+    d = '0' + d;
+}
+var h = currentdate.getHours();
+if(h < 10) {
+    h = '0' + h;
+}
+var min = currentdate.getMinutes();
+if(min < 10) {
+    min = '0' + min;
+}
+var s = currentdate.getSeconds();
+if(s < 10) {
+    s = '0' + s;
+}
+return y + '-' + mon + "-" + d + " " + h + ":" + min + ":" + s;
 }
 function addslashes(string) {
-    return string.replace(/\\/g, '\\\\').
-    replace(/\u0008/g, '\\b').
-    replace(/\t/g, '\\t').
-    replace(/\n/g, '\\n').
-    replace(/\f/g, '\\f').
-    replace(/\r/g, '\\r').
-    replace(/'/g, '\\\'').
-    replace(/"/g, '\\"');
+return string.replace(/\\/g, '\\\\').
+replace(/\u0008/g, '\\b').
+replace(/\t/g, '\\t').
+replace(/\n/g, '\\n').
+replace(/\f/g, '\\f').
+replace(/\r/g, '\\r').
+replace(/'/g, '\\\'').
+replace(/"/g, '\\"');
 }
 
 function generate_slug(str) {
-    str = str.replace(/^\s+|\s+$/g, ''); // trim
-    str = str.toLowerCase();
-    var from = "àáãạảăằắẵặẳâầấậẫẩđèéẹẽẻêềếễệểìíịĩỉòóọõỏôồốỗộổơờỡớợởùúụủũưừứựữửỳýỵỹỷ";
-    var to   = "aaaaaaaaaaaaaaaaadeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyy";
-    for (var i=0; i<from.length ; i++) {
-        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
-    }
-    return str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-        .replace(/\s+/g, '-') // collapse whitespace and replace by -
-        .replace(/-+/g, '-'); // collapse dashes
+str = str.replace(/^\s+|\s+$/g, ''); // trim
+str = str.toLowerCase();
+var from = "àáãạảăằắẵặẳâầấậẫẩđèéẹẽẻêềếễệểìíịĩỉòóọõỏôồốỗộổơờỡớợởùúụủũưừứựữửỳýỵỹỷ";
+var to   = "aaaaaaaaaaaaaaaaadeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyy";
+for (var i=0; i<from.length ; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+}
+return str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, '-') // collapse whitespace and replace by -
+    .replace(/-+/g, '-'); // collapse dashes
 }
 
 function is_error_page(dom) {
-    var nodes = dom.getElementsByClassName('error-title');
-    if(nodes.length > 0) {
-        return true;
-    }
-    return false;
+var nodes = dom.getElementsByClassName('error-title');
+if(nodes.length > 0) {
+    return true;
+}
+return false;
 }

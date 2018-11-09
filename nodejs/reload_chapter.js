@@ -205,13 +205,12 @@ function parse_chapter(chap, body) {
     if (nodes.length < 2) {
         clone_chap(chap);
     } else {
-        chap.total_image = nodes.length - 1;
+        chap.total_image = nodes.length - 2;
         chap.count_image = 0;
         for (var i = 1; i < nodes.length-1; i++) {
             var stt = i + 1;
             var image_str = nodes[i].trim();
             var image = get_image_url(image_str);
-            console.log(stt + ' - '+image);
             if (image == '') {
                 chap.count_image++;
             } else {
