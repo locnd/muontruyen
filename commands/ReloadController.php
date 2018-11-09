@@ -26,7 +26,7 @@ use app\models\Server;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class CronController extends Controller
+class ReloadController extends Controller
 {
     /**
      * This command echoes what you have entered as the message.
@@ -44,7 +44,7 @@ class CronController extends Controller
             echo 'chapter is reloading..';
             return ExitCode::OK;
         }
-        $setting_model->set_setting('reloading', 'yes');
+        // $setting_model->set_setting('reloading', 'yes');
 
         $chapter = Chapter::find()->where('will_reload', 1)->one();
         if(empty($chapter)) {
