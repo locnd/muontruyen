@@ -26,35 +26,34 @@ class SettingController extends Controller
     }
 
     public function actionIndex() {
+        if(!empty($_GET['action']) && $_GET['action'] == 'delete_images_base64') {
+            $images = Image::find()->where(['like', 'image_source', 'data:image'])->groupBy(['chapter_id'])->all();
+            $total = count($images);
+            foreach ($images as $image) {
+                $chapter = Chapter::find()->where(array('id'=>$image->chapter_id))->one();
+                if(empty($chapter) || $chapter->will_reload == 1) {
+                    continue;
+                }
+                $chapter->status = Chapter::INACTIVE;
+                $chapter->will_reload = 1;
+                $chapter->save();
+                Yii::$app->db->createCommand()
+                    ->delete('dl_images', ['chapter_id' => $chapter->id])
+                    ->execute();
+                Yii::$app->db->createCommand()
+                    ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
+                    ->execute();
+                clear_book_cache($chapter->book);
+                Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+            }
+            echo 'Make reload '.$total.' chapters';
+            exit();
+        }
         $this->view->params['page_id'] = 'setting';
-
         $settings = Setting::find()->all();
         return $this->render('/admin/setting/index', array(
             'settings' => $settings
         ));
-    }
-    public function actionDeleteImagesBase64() {
-        $images = Image::find()->where(['like', 'image_source', 'data:image'])->groupBy(['chapter_id'])->all();
-        $total = count($images);
-        foreach ($images as $image) {
-            $chapter = Chapter::find()->where(array('id'=>$image->chapter_id))->one();
-            if(empty($chapter) || $chapter->will_reload == 1) {
-                continue;
-            }
-            $chapter->status = Chapter::INACTIVE;
-            $chapter->will_reload = 1;
-            $chapter->save();
-            Yii::$app->db->createCommand()
-                ->delete('dl_images', ['chapter_id' => $chapter->id])
-                ->execute();
-            Yii::$app->db->createCommand()
-                ->delete('dl_bookmarks', ['chapter_id' => $chapter->id])
-                ->execute();
-            clear_book_cache($chapter->book);
-            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
-        }
-        echo 'Make reload '.$total.' chapters';
-        exit();
     }
 }
 
