@@ -318,10 +318,10 @@ page.open("%s", function (status) {
                 echo ' - can not get html3'."\n";
                 continue;
             }
-            echo '' . "\n";
             echo count($list_images).' images'."\n";
             foreach ($list_images as $ind => $image) {
                 $src = $image->find('img')[0]->src;
+                echo $src."\n";
                 $db_img = new Image();
                 $db_img->chapter_id = $chapter->id;
                 $db_img->image_source = $this->get_full_href($server, $src);
@@ -329,7 +329,6 @@ page.open("%s", function (status) {
                 $db_img->stt = $ind +1;
                 $db_img->status = 1;
                 $db_img->save();
-                echo $db_img->image_source."\n";
             }
             if(count($list_images) > 0) {
                 $chapter->status = Chapter::ACTIVE;
