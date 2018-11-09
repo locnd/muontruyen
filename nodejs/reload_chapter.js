@@ -201,13 +201,13 @@ function clone_chap(chap) {
     });
 }
 function parse_chapter(chap, body) {
-    var nodes = body.split('"page-chapter"');
+    var nodes = body.split('page-chapter');
     if (nodes.length < 2) {
         clone_chap(chap);
     } else {
         chap.total_image = nodes.length - 1;
         chap.count_image = 0;
-        for (var i = 1; i < nodes.length; i++) {
+        for (var i = 1; i < nodes.length-1; i++) {
             var stt = i + 1;
             var image_str = nodes[i].trim();
             var image = get_image_url(image_str);
@@ -311,6 +311,7 @@ function current_time() {
     return y + '-' + mon + "-" + d + " " + h + ":" + min + ":" + s;
 }
 function get_image_url(image_str) {
+    image_str = image_str.replace(/'/g, '"');
     image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
     image_str = image_str.replace('src="https://','src="http://').replace('original="https://','original="http://');
     if(image_str.indexOf('original="http://') > -1) {
