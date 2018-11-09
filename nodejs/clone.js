@@ -385,6 +385,7 @@ function check_done() {
     }
 }
 function get_image_url(image_str) {
+    image_str = image_str.replace(/'/g, '"');
     image_str = image_str.replace('src="//','src="http://').replace('original="//','original="http://');
     image_str = image_str.replace('src="https://','src="http://').replace('original="https://','original="http://');
     if(image_str.indexOf('original="http://') > -1) {
@@ -560,19 +561,19 @@ function parse_chap(chap, body) {
     */
 }
 function clone_chap(chap, inc_count_chap) {
-var proxiedRequest = get_request();
-proxiedRequest.get( chap.url, function(error, response, body){
-    if (error){
-        console.log('Can not get html '+ chap.url +'. Try again....');
-        clone_chap(chap, inc_count_chap);
-    } else {
-        if(inc_count_chap) {
-            count_clone_chap++;
-            console.log('count clone chap = '+ count_clone_chap);
+    var proxiedRequest = get_request();
+    proxiedRequest.get( chap.url, function(error, response, body){
+        if (error){
+            console.log('Can not get html '+ chap.url +'. Try again....');
+            clone_chap(chap, inc_count_chap);
+        } else {
+            if(inc_count_chap) {
+                count_clone_chap++;
+                console.log('count clone chap = '+ count_clone_chap);
+            }
+            parse_chap(chap, body);
         }
-        parse_chap(chap, body);
-    }
-});
+    });
 }
 function create_image(chap, image, stt) {
 var sql = "INSERT INTO dl_images (chapter_id, image_source, image, stt, status, updated_at, created_at)";
