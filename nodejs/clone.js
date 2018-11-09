@@ -513,14 +513,13 @@ function parse_chap(chap, body) {
         }
         total_image += nodes.length - 2;
         for (var i = 1; i < nodes.length-1; i++) {
-            var stt = i + 1;
             var image_str = nodes[i].trim();
             var image = get_image_url(image_str);
             if (image == '') {
                 chap.count_image++;
             } else {
-                console.log('create image ' + stt);
-                create_image(chap, image, stt);
+                console.log('create image ' + i);
+                create_image(chap, image, i);
             }
         }
     }
