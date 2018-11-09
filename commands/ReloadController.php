@@ -46,7 +46,7 @@ class ReloadController extends Controller
         }
         // $setting_model->set_setting('reloading', 'yes');
 
-        $chapter = Chapter::find()->where('will_reload', 1)->one();
+        $chapter = Chapter::find()->where(array('will_reload'=> 1))->one();
         if(empty($chapter)) {
             $setting_model->set_setting('reloading', '');
             echo 'No chapter need reload..';
