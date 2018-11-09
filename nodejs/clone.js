@@ -183,7 +183,7 @@ function check_book(cron) {
 }
 
 function parse_book(url, body) {
-    var dom = parser.parseFromString(body);
+    var dom = parser.parseFromString(body, 'text/html');
     if(dom == null || typeof(dom) == 'undefined') {
         create_book(url);
     } else {
@@ -251,7 +251,7 @@ function create_book(url) {
 }
 
 function parse_existed_book(book, body) {
-    var dom = parser.parseFromString(body);
+    var dom = parser.parseFromString(body, 'text/html');
     if(dom == null || typeof(dom) == 'undefined') {
         update_book_without_dom(book);
     } else {
@@ -530,7 +530,7 @@ function parse_chap(chap, body) {
         }
     }
     /*
-    var dom = parser.parseFromString(body);
+    var dom = parser.parseFromString(body, 'text/html');
     if(dom == null || typeof(dom) == 'undefined') {
         clone_chap(chap, false);
     } else {

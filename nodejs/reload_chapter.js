@@ -219,7 +219,7 @@ function parse_chapter(chap, body) {
         }
     }
     /*
-    var dom = parser.parseFromString(body);
+    var dom = parser.parseFromString(body, 'text/html');
     if(dom == null || typeof(dom) == 'undefined') {
         clone_chap(chap);
     } else {
