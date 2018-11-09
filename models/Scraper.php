@@ -258,4 +258,98 @@ page.open("%s", function (status) {
         }
         return $content;
     }
+
+    public function reload_chapters($chapters) {
+        $chapter_urls = array();
+        $book = array(); $success = false;
+        foreach($chapters as $chapter) {
+            if(empty($book)) $book = $chapter->book;
+            $chapter->status = Chapter::INACTIVE;
+            if($chapter->reload_time >=3) {
+                $chapter->will_reload=0;
+                $chapter->reload_time=0;
+                $chapter->save();
+                continue;
+            }
+            $chapter->reload_time++;
+            $chapter->save();
+            $chapter_urls[] = $chapter->url;
+            Yii::$app->db->createCommand()
+                ->delete('dl_images', ['chapter_id' => $chapter->id])
+                ->execute();
+            Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+        }
+        if(empty($chapter_urls)) {
+            return true;
+        }
+        $server = Server::find()->where('slug','nettruyen')->one();
+        $chapters_data = $this->run_curl_multiple($chapter_urls);
+        foreach ($chapters_data as $stt => $chapter_html) {
+            $chapter = '';
+            foreach($chapters as $in_chapter) {
+                if($chapter_urls[$stt] == $in_chapter->url) {
+                    $chapter = $in_chapter; break;
+                }
+            }
+            $html_base = HtmlDomParser::str_get_html($chapter_html);
+            unset($chapter_html);
+            $chapters_data[$stt] = '';
+            if (empty($html_base)) {
+                $html_base = $this->get_html_base($chapter_urls[$stt], '', true);
+                if (empty($html_base)) {
+                    echo ' - can not get html1'."\n";
+                    continue;
+                }
+            }
+            $list_images = $html_base->find('.page-chapter');
+            if (count($list_images) == 0) {
+                $html_base->clear();
+                unset($html_base);
+                $html_base = $this->get_html_base($chapter_urls[$stt], 'phantom', true);
+                if (empty($html_base)) {
+                    echo ' - can not get html2'."\n";
+                    continue;
+                }
+                $list_images = $html_base->find('.page-chapter');
+            }
+            if (count($list_images) == 0) {
+                $html_base->clear();
+                echo ' - can not get html3'."\n";
+                continue;
+            }
+            echo '' . "\n";
+            foreach ($list_images as $ind => $image) {
+                $src = $image->find('img')[0]->src;
+                $db_img = new Image();
+                $db_img->chapter_id = $chapter->id;
+                $db_img->image_source = $this->get_full_href($server, $src);
+                $db_img->image ="error.jpg";
+                $db_img->stt = $ind +1;
+                $db_img->status = 1;
+                $db_img->save();
+            }
+            if(count($list_images) > 0) {
+                $chapter->status = Chapter::ACTIVE;
+                $chapter->will_reload = 0;
+                $chapter->reload_time=0;
+                $chapter->save();
+                echo "----- ----- ".$chapter->name." - ".$chapter->status."\n";
+                Yii::$app->cache->delete('chapter_detail_'.$chapter->id);
+                $success = true;
+            }
+            $html_base->clear();
+            unset($html_base);
+        }
+        if($success) {
+            $book->release_date = date('Y-m-d H:i:s');
+            foreach ($book->follows as $follow) {
+                $follow->status = Follow::UNREAD;
+                $follow->save();
+                send_push_notification($follow->user_id);
+            }
+            $book->status = Book::ACTIVE;
+            $book->save();
+            clear_book_cache($book);
+        }
+    }
 }
