@@ -201,6 +201,26 @@ function clone_chap(chap) {
     });
 }
 function parse_chapter(chap, body) {
+    var nodes = body.split('"page-chapter"');
+    if (nodes.length < 2) {
+        clone_chap(chap);
+    } else {
+        chap.total_image = nodes.length - 1;
+        chap.count_image = 0;
+        for (var i = 1; i < nodes.length; i++) {
+            var stt = i + 1;
+            var image_str = nodes[i].trim();
+            var image = get_image_url(image_str);
+            console.log(stt + ' - '+image);
+            if (image == '') {
+                chap.count_image++;
+            } else {
+                console.log('create image ' + stt);
+                create_image(chap, image, stt);
+            }
+        }
+    }
+    /*
     var dom = parser.parseFromString(body);
     if(dom == null || typeof(dom) == 'undefined') {
         clone_chap(chap);
@@ -208,6 +228,7 @@ function parse_chapter(chap, body) {
         if(is_error_page(dom)) {
             count_chapter++;
         } else {
+
             var nodes = dom.getElementsByClassName('page-chapter');
             if (nodes.length == 0) {
                 clone_chap(chap);
@@ -228,6 +249,7 @@ function parse_chapter(chap, body) {
             }
         }
     }
+    */
 }
 function get_request() {
     if(use_proxy) {
