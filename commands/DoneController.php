@@ -85,7 +85,7 @@ class DoneController extends Controller
             curl_close($ch);
             fclose($fp);
         }
-        $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->all();
+        $chapters = Chapter::find()->where(array('book_id' => $book->id, 'status'=>Chapter::INACTIVE))->andWhere(['<', 'reload_time', 4])->all();
         echo "----- chapters ".count($chapters)."\n";
         $success = false;
         foreach ($chapters as $chapter) {

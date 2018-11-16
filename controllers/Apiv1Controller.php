@@ -770,6 +770,7 @@ class Apiv1Controller extends Controller
                 );
             }
             $chapter->will_reload = 1;
+            $chapter->reload_time = 0;
             $chapter->save();
         } else {
             return array(

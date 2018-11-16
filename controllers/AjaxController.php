@@ -273,6 +273,7 @@ class AjaxController extends Controller
         }
         if($chapter->will_reload == 0) {
             $chapter->will_reload = 1;
+            $chapter->reload_time = 0;
         } else {
             $chapter->will_reload = 0;
         }
