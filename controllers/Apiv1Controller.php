@@ -863,6 +863,7 @@ class Apiv1Controller extends Controller
                 $book_crons = BookCron::find()->where(array('status'=>1))->all();
                 foreach ($book_crons as  $book_cron) {
                     $book = Book::find()->where(array('url'=>$book_cron->book_url))->one();
+                    if(empty($book)) continue;
                     $options['Book #'.$book->id] = 'Cronning';
                 }
             }
