@@ -602,6 +602,9 @@ function show_chapter(id) {
                 $('#input-textarea').val(res.data.name);
             }
             var chapter = res.data;
+            if(typeof(chapter.url) != 'undefined') {
+                $('#source-btn').attr('onclick','view_source(\''+chapter.url+'\')');
+            }
             var book = res.book;
             var images = res.images;
             var chapters = res.chapters;
@@ -2060,4 +2063,10 @@ function clear_cache() {
             }
         });
     }
+}
+function view_source(url) {
+    if(url == '') {
+        return;
+    }
+    window.open(url, '_blank');
 }

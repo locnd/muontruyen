@@ -201,7 +201,7 @@ class Apiv1Controller extends Controller
                 'unread' => get_user_unread($user)
             );
         }
-        $fields = array('id', 'book_id','name', 'images');
+        $fields = array('id', 'book_id','url','name', 'images');
         $chapter = filter_values($data_chapter, $fields);
         if(!empty($user->id) && Read::find()->where(array('user_id'=>$user->id, 'chapter_id'=>$chapter['id']))->count() == 0) {
             $read = new Read();
