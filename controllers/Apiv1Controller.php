@@ -1123,6 +1123,44 @@ class Apiv1Controller extends Controller
             'success' => true
         );
     }
+    public function actionDeleteimage()
+    {
+        ini_set('memory_limit', '-1');
+        $user = $this->check_user();
+        if (!empty($user['error'])) {
+            return array(
+                'success' => false,
+                'message' => $user['message']
+            );
+        }
+        if (empty($user->is_admin)) {
+            return array(
+                'success' => false,
+                'message' => 'Không có quyền thực hiện'
+            );
+        }
+        $image_id = (int)Yii::$app->request->post('image_id', 0);
+
+        $image = Image::find()->where(array('id'=>$image_id, 'status' => Image::ACTIVE))->one();
+        if(empty($image)) {
+            return array(
+                'success' => false,
+                'message' => 'Không tìm thấy hình ảnh'
+            );
+        }
+        $chapter_id = $image->chapter_id;
+        $image->delete();
+        $imgs = Image::find()->where(array('chapter_id'=>$chapter_id,'status' => Image::ACTIVE))->orderBy(['stt' => SORT_ASC, 'id' => SORT_DESC])->all();
+        $data = array();
+        foreach ($imgs as $img) {
+            $data[] = $img->to_array();
+        }
+        Yii::$app->cache->delete('chapter_detail_'.$image->chapter_id);
+        return array(
+            'success' => true,
+            'data' =>$data
+        );
+    }
     public function actionMoveimage()
     {
         ini_set('memory_limit', '-1');

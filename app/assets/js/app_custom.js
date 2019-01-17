@@ -394,6 +394,42 @@ function move_chapter(chapter_id, is_down) {
         }
     });
 }
+function delete_image(image_id) {
+    if(!is_logined()) {
+        dl_alert('danger', 'Vui lòng đăng nhập', false);
+        return true;
+    }
+    if(!is_admin()) {
+        dl_alert('danger', 'Không có quyền thực hiện', false);
+        return true;
+    }
+    if($('#loading-btn').is(":visible")) {
+        return true;
+    }
+    $('#loading-btn').show();
+    var params = {
+        image_id: image_id
+    };
+    send_api('POST', '/delete-image', params, function (res) {
+        $('#loading-btn').hide();
+        if (res.success) {
+            var html = '';
+            for(var i=0;i<res.data.length;i++) {
+                var moving_html = '';
+                if(is_admin()) {
+                    moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+res.data[i].id+',0)"><i class="fa fa-angle-double-up"></i></span>';
+                    moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+res.data[i].id+',1)"><i class="fa fa-angle-double-down"></i></span>';
+                    moving_html += '<span class="admin-btn mov-btn" onclick="delete_image('+res.data[i].id+')"><i class="fa fa-trash"></i></span>';
+                }
+                html+=moving_html + '<img style="width: 100%;margin:5px 0;" src="'+res.data[i].image+'">';
+            }
+            $('#images_list').html(html);
+            $('.mov-btn').show();
+        } else {
+            dl_alert('danger', res.message, false);
+        }
+    });
+}
 function move_image(image_id, is_down) {
     if(!is_logined()) {
         dl_alert('danger', 'Vui lòng đăng nhập', false);
@@ -420,6 +456,7 @@ function move_image(image_id, is_down) {
                 if(is_admin()) {
                     moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+res.data[i].id+',0)"><i class="fa fa-angle-double-up"></i></span>';
                     moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+res.data[i].id+',1)"><i class="fa fa-angle-double-down"></i></span>';
+                    moving_html += '<span class="admin-btn mov-btn" onclick="delete_image('+res.data[i].id+')"><i class="fa fa-trash"></i></span>';
                 }
                 html+=moving_html + '<img style="width: 100%;margin:5px 0;" src="'+res.data[i].image+'">';
             }
@@ -678,6 +715,7 @@ function show_chapter(id) {
                 if(is_admin()) {
                     moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+images[i].id+',0)"><i class="fa fa-angle-double-up"></i></span>';
                     moving_html += '<span class="admin-btn mov-btn" onclick="move_image('+images[i].id+',1)"><i class="fa fa-angle-double-down"></i></span>';
+                    moving_html += '<span class="admin-btn mov-btn" onclick="delete_image('+images[i].id+')"><i class="fa fa-trash"></i></span>';
                 }
                 html+=moving_html + '<img style="width: 100%;margin:5px 0;" src="'+images[i].image+'">';
             }
