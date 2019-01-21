@@ -2,8 +2,8 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "iragon.apps.MuonTruyen"
-		versionCode = "3"
-        version   = "1.0.3">
+		versionCode = "5"
+        version   = "1.0.5">
 	<name>Mượn Truyện</name>
 	<description>
 		Mượn truyện của các bạn về đọc chút nhé

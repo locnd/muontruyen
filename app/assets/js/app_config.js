@@ -31,6 +31,7 @@ function onDeviceReady() {
 }
 var db1;
 var db2;
+var db3;
 document.addEventListener("DOMContentLoaded", function(){
     if("indexedDB" in window) {
         var openRequest = indexedDB.open("offline_books",1);
@@ -57,10 +58,22 @@ document.addEventListener("DOMContentLoaded", function(){
         };
         openRequest2.onerror = function(e) {
         };
+        var openRequest3 = indexedDB.open("offline_chapters",1);
+        openRequest3.onupgradeneeded = function(e) {
+            var thisDB3 = e.target.result;
+            if(!thisDB3.objectStoreNames.contains("offline_chapters")) {
+                thisDB3.createObjectStore("offline_chapters");
+            }
+        };
+        openRequest3.onsuccess = function(e) {
+            db3 = e.target.result;
+        };
+        openRequest3.onerror = function(e) {
+        };
     }
 },false);
 
-var APP_VERSION = '1.0.3';
+var APP_VERSION = '1.0.5';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -422,15 +435,20 @@ function check_device_type() {
     }
     localStorage.setItem('device_type', "Unknown");
 }
-function save_offline_book(book, noti){
+function save_offline_book(book, callback){
     var transaction = db1.transaction(["offline_books"],"readwrite");
     var offline_books = transaction.objectStore("offline_books");
     var req = offline_books.put(book, Number(book.id));
     req.onsuccess = function(e) {
-        if(noti) {
-            $('#save-btn').html('<i class="fa fa-check"></i>&nbsp; Đã lưu Offline');
-            dl_alert('success', 'Đã lưu truyện Offline', false);
-        }
+        callback();
+    };
+}
+function save_offline_chapter(chapter, callback) {
+    var transaction = db3.transaction(["offline_chapters"],"readwrite");
+    var offline_chapters = transaction.objectStore("offline_chapters");
+    var req = offline_chapters.put(chapter, Number(chapter.id));
+    req.onsuccess = function(e) {
+        callback();
     };
 }
 function delete_offline_book(book_id, callback){
@@ -439,7 +457,20 @@ function delete_offline_book(book_id, callback){
 
     var req = offline_books.delete(Number(book_id));
     req.onsuccess = function(e) {
+        get_list_offline_chapters(book_id, function(chapters) {
+            for(var i=0;i<chapters.length;i++) {
+                delete_offline_chapter(chapters[i]);
+            }
+        });
         callback();
+    };
+}
+function delete_offline_chapter(chapter) {
+    var transaction = db3.transaction(["offline_chapters"],"readwrite");
+    var offline_chapters = transaction.objectStore("offline_chapters");
+
+    var req = offline_chapters.delete(Number(chapter.id));
+    req.onsuccess = function(e) {
     };
 }
 function get_offline_book(book_id, callback) {
@@ -452,6 +483,28 @@ function get_offline_book(book_id, callback) {
     request.onerror = function(e) {
         dl_alert('danger', 'Truyện lưu Offline không khả dụng', true);
         window.location.href = "offline.html";
+    };
+}
+function get_list_offline_chapters(book_id, callback) {
+    var transaction = db3.transaction(["offline_chapters"],"readonly");
+    var offline_chapters = transaction.objectStore("offline_chapters");
+    var cursor = offline_chapters.openCursor();
+
+    var data = [];
+    cursor.onsuccess = function(e) {
+        var res = e.target.result;
+        if(res) {
+            if(res.value.book_id == book_id) {
+                data.push(res.value);
+            }
+            res.continue();
+        } else {
+            var tmp_data = [];
+            for(var i=data.length-1;i>=0;i--) {
+                tmp_data.push(data[i]);
+            }
+            callback(tmp_data);
+        }
     };
 }
 function get_all_offline_books(callback) {
