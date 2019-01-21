@@ -1645,8 +1645,18 @@ function show_offline() {
 }
 function delete_offline(book_id) {
     delete_offline_book(book_id, function(){
-        dl_alert('success', 'Đã xoá truyện xem offline', true);
-        window.location.href="offline.html";
+        get_list_offline_chapters(book_id, function(chapters) {
+            var count_chapters = chapters.length;
+            for(var i=0;i<chapters.length;i++) {
+                delete_offline_chapter(chapters[i], function () {
+                    count_chapters--;
+                    if(count_chapters == 0) {
+                        dl_alert('success', 'Đã xoá truyện xem offline', true);
+                        window.location.href="offline.html";
+                    }
+                });
+            }
+        });
     });
 }
 function display_offline_book(book) {
@@ -1707,6 +1717,11 @@ function show_offline_book(id) {
         if(typeof(db1) != 'undefined') {
             clearInterval(interval);
             get_offline_book(id, function(book) {
+                if(typeof(book) == 'undefined') {
+                    dl_alert('danger', 'Truyện lưu Offline không khả dụng', true);
+                    window.location.href = "offline.html";
+                    return false;
+                }
                 var html = '';
                 html += '<div class="book-title">'+book.name+'</div>';
                 html += '<div class="clear10"></div>';
@@ -1714,7 +1729,7 @@ function show_offline_book(id) {
                 html += '<img src="'+book.image+'">';
                 html += '</div>';
                 html += '<a href="book.html?id='+book.id+'" class="btn-save-to-offline"><i class="fa fa-globe"></i>&nbsp; Xem Online</a>';
-                html += '<a href="javacript:;" onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá Offline</a>';
+                html += '<a onclick="delete_offline('+book.id+')" class="btn-save-to-offline"><i class="fa fa-trash"></i>&nbsp; Xoá Offline</a>';
                 html += '<div class="clear10"></div>';
                 if($.trim(book.description) == '') {
                     book.description = 'Chưa có thông tin';
@@ -1773,7 +1788,7 @@ function display_offline_chapter_list(chapters) {
     } else {
         html += '<div class="book-chapter-list">Danh sách chương ('+chapters.length+' chương)<a href="javascript:;" onclick="move_to_bottom()" class="right-btn">Đến chương đầu</a></div>';
         html += '<div class="clear10"></div>';
-        for(var i=0;i<chapter.length;i++) {
+        for(var i=0;i<chapters.length;i++) {
             var chapter = chapters[i];
             html += '<div class="a-chapter">';
             html += '<div style="width: calc(100% - 150px);float:left">';

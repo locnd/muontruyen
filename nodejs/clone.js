@@ -429,7 +429,9 @@ function update_book(book, dom) {
         var chap_name = parse_str[1];
         parse_str = chap_name.split('<');
         chap_name = parse_str[0].trim().toLowerCase();
-        chap_name = chap_name.replace('chuong','chương').replace('chapter','chương').replace('chap','chương');
+        chap_name = chap_name.replace('chuong','chương');
+        chap_name = chap_name.replace('chapter','chương');
+        chap_name = chap_name.replace('chap','chương');
         if(chap_name.indexOf('raw') > -1) {
             count_skip_chap++;
             continue;

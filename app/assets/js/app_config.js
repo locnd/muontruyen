@@ -457,20 +457,16 @@ function delete_offline_book(book_id, callback){
 
     var req = offline_books.delete(Number(book_id));
     req.onsuccess = function(e) {
-        get_list_offline_chapters(book_id, function(chapters) {
-            for(var i=0;i<chapters.length;i++) {
-                delete_offline_chapter(chapters[i]);
-            }
-        });
         callback();
     };
 }
-function delete_offline_chapter(chapter) {
+function delete_offline_chapter(chapter, callback) {
     var transaction = db3.transaction(["offline_chapters"],"readwrite");
     var offline_chapters = transaction.objectStore("offline_chapters");
 
     var req = offline_chapters.delete(Number(chapter.id));
     req.onsuccess = function(e) {
+        callback();
     };
 }
 function get_offline_book(book_id, callback) {
