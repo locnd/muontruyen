@@ -495,11 +495,16 @@ function get_list_offline_chapters(book_id, callback) {
             }
             res.continue();
         } else {
-            var tmp_data = [];
-            for(var i=data.length-1;i>=0;i--) {
-                tmp_data.push(data[i]);
+            for(var i=0; i<data.length-1;i++) {
+                for(var j=i+1;j<data.length;j++) {
+                    if(data[i].stt < data[j].stt) {
+                        var tmp = data[i];
+                        data[i] = data[j];
+                        data[j] = tmp;
+                    }
+                }
             }
-            callback(tmp_data);
+            callback(data);
         }
     };
 }

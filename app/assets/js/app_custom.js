@@ -1609,6 +1609,7 @@ function save_cache_chapter(res, ind) {
     tmp_chapter.name = chapter.name;
     tmp_chapter.release_date = chapter.release_date;
     tmp_chapter.read = chapter.read;
+    tmp_chapter.stt = chapter.stt;
     tmp_chapter.images = [];
     var chapter_running_image = 0;
     for(var i=0;i<chapter.images.length;i++) {
