@@ -229,6 +229,9 @@ function show_book(id) {
                     }
                 }
             }
+            if(typeof(res.data.url) != 'undefined') {
+                $('#source-btn').attr('onclick','view_source(\''+res.data.url+'\')');
+            }
             display_book_info(res.data, res.tags);
             display_list_chapters(res.chapters);
             display_groups(res.data.id, res.groups);

@@ -141,7 +141,7 @@ class Apiv1Controller extends Controller
             );
         }
         $fields = array(
-            'id', 'name', 'description', 'image', 'tags', 'authors', 'chapters'
+            'id', 'name', 'url', 'description', 'image', 'tags', 'authors', 'chapters'
         );
         $book = filter_values($book_data, $fields);
         $db_book = Book::find()->select(array('id', 'count_views'))->where(array('id'=>$id))->one();
