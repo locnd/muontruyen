@@ -4,6 +4,9 @@ body {
     font-size: 14px;
     min-height: 100vh;
 }
+a {
+    text-decoration: none !important;
+}
 .dl_bg_color {
     background: lightblue !important;
 }

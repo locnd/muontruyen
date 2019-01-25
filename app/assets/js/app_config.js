@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.6';
+var APP_VERSION = '1.0.7';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -144,6 +144,7 @@ function cache_images() {
         });
 }
 
+/*
 var mouseY = 0;
 $(document).ready(function() {
     $('body').bind('touchstart', function (ev) {
@@ -178,6 +179,7 @@ $(document).ready(function() {
         }
     });
 });
+*/
 
 function checkLogin(is_need_login) {
     if(is_need_login == 0) { // index, search, book, chapter, tag, tags

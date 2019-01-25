@@ -103,10 +103,11 @@ class DoneController extends Controller
         }
         if($success) {
             $book->release_date = date('Y-m-d H:i:s');
+            $message = 'Truyện "'.$book->name.'" có cập nhật chương mới';
             foreach ($book->follows as $follow) {
                 $follow->status = Follow::UNREAD;
                 $follow->save();
-                send_push_notification($follow->user_id);
+                send_push_notification($follow->user_id, $message);
             }
         }
         $book->status = Book::ACTIVE;
