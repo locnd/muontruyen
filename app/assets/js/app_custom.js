@@ -803,7 +803,6 @@ function show_follow(tab, page, is_first) {
                     html += '</div>';
                 }
             }
-            $('#list_follows').html(html);
             if(groups.length == 0) {
                 $('#list_groups').hide();
                 $('.dl-content').css('width','100%');
@@ -824,6 +823,7 @@ function show_follow(tab, page, is_first) {
                     }
                 }
             }
+            $('#list_follows').html(html);
             $('.a-book.active').removeClass('active');
             $('#group'+tab).addClass('active');
             $('html, body').animate({scrollTop: 0}, 1);
@@ -1651,14 +1651,19 @@ function delete_offline(book_id) {
     delete_offline_book(book_id, function(){
         get_list_offline_chapters(book_id, function(chapters) {
             var count_chapters = chapters.length;
-            for(var i=0;i<chapters.length;i++) {
-                delete_offline_chapter(chapters[i], function () {
-                    count_chapters--;
-                    if(count_chapters == 0) {
-                        dl_alert('success', 'Đã xoá truyện xem offline', true);
-                        window.location.href="offline.html";
-                    }
-                });
+            if(count_chapters == 0) {
+                dl_alert('success', 'Đã xoá truyện xem offline', true);
+                window.location.href="offline.html";
+            } else {
+                for (var i = 0; i < chapters.length; i++) {
+                    delete_offline_chapter(chapters[i], function () {
+                        count_chapters--;
+                        if (count_chapters == 0) {
+                            dl_alert('success', 'Đã xoá truyện xem offline', true);
+                            window.location.href = "offline.html";
+                        }
+                    });
+                }
             }
         });
     });
@@ -1919,12 +1924,13 @@ function change_offline_chapter(ele, book_id) {
 function display_follow_paging(tab, current_page, total_page) {
     var html = '<ul class="a-pagging">';
     if(current_page > 1) {
-        html += '<li style="float:left;margin:0"><a onclick="show_follow('+tab+','+(current_page-1)+',false)">Trước</a></li>';
+        html += '<li style="background:#fff;float:left;margin:0"><a onclick="show_follow('+tab+','+(current_page-1)+',false)"><i style="color:black;font-size:20" class="fa fa-angle-double-left"></i></a></li>';
     }
     if(current_page < total_page) {
-        html += '<li style="float:right;margin:0"><a onclick="show_follow('+tab+','+(current_page+1)+',false)">Sau</a></li>';
+        html += '<li style="background:#fff;float:right;margin:0"><a onclick="show_follow('+tab+','+(current_page+1)+',false)"><i style="color:black;font-size:20" class="fa fa-angle-double-right"></i></a></li>';
     }
     html += '</ul>';
+    html += '<div class="clear10"></div>';
     $('#paging').html(html);
 }
 

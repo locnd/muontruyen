@@ -144,32 +144,34 @@ function cache_images() {
         });
 }
 
-/*
 var mouseY = 0;
 $(document).ready(function() {
     $('body').bind('touchstart', function (ev) {
-        var touch_start = ev.originalEvent.touches[0] || ev.originalEvent.changedTouches[0];
-        mouseY = touch_start.pageY;
-        $(document).bind('touchmove', function (e) {
-            var touch_move = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-            var moving = touch_move.pageY - mouseY;
-            if (moving > 0) {
-                if (moving >= 200) {
-                    $('#image-refresh').show();
-                }
-                var screen = localStorage.getItem("screen");
-                if (screen !== null && screen !== '') {} else {
-                    screen = 'normal';
-                }
-                if(screen == 'normal') {
-                    $('body').css('margin-top', (65 + moving / 3) + 'px');
+        if($(window).scrollTop() == 0) {
+            var touch_start = ev.originalEvent.touches[0] || ev.originalEvent.changedTouches[0];
+            mouseY = touch_start.pageY;
+            $(document).bind('touchmove', function (e) {
+                var touch_move = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                var moving = touch_move.pageY - mouseY;
+                if (moving > 0) {
+                    if (moving >= 200) {
+                        $('#image-refresh').show();
+                    }
+                    var screen = localStorage.getItem("screen");
+                    if (screen !== null && screen !== '') {
+                    } else {
+                        screen = 'normal';
+                    }
+                    if (screen == 'normal') {
+                        $('body').css('margin-top', (65 + moving / 3) + 'px');
+                    } else {
+                        $('body').css('margin-top', (moving / 3) + 'px');
+                    }
                 } else {
-                    $('body').css('margin-top', (moving / 3) + 'px');
+                    $(document).unbind("touchmove");
                 }
-            } else {
-                $(document).unbind("touchmove");
-            }
-        });
+            });
+        }
     });
     $('body').bind('touchend', function () {
         $('body').css('margin-top', '0');
@@ -179,7 +181,6 @@ $(document).ready(function() {
         }
     });
 });
-*/
 
 function checkLogin(is_need_login) {
     if(is_need_login == 0) { // index, search, book, chapter, tag, tags

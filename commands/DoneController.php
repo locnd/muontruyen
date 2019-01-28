@@ -107,7 +107,7 @@ class DoneController extends Controller
             foreach ($book->follows as $follow) {
                 $follow->status = Follow::UNREAD;
                 $follow->save();
-                send_push_notification($follow->user_id, $message);
+                send_push_notification($follow->user_id);
             }
         }
         $book->status = Book::ACTIVE;
