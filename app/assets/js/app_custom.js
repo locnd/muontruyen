@@ -804,6 +804,7 @@ function show_follow(tab, page, is_first) {
                 }
             }
             if(groups.length == 0) {
+                $('#list_follows').html(html);
                 $('#list_groups').hide();
                 $('.dl-content').css('width','100%');
                 return true;

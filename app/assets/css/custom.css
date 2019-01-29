@@ -2,6 +2,7 @@ body {
     background: url('../img/bg.jpg') center top fixed no-repeat;
     background-size: cover;
     font-size: 14px;
+    min-height: calc(100vh - 100px);
 }
 a {
     text-decoration: none !important;

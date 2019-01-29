@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 },false);
 
-var APP_VERSION = '1.0.7';
+var APP_VERSION = '1.0.8';
 
 // var API_URL = 'http://muontruyen.me/api/v1';
 var API_URL = 'http://muontruyen.tk/api/v1';
@@ -224,9 +224,11 @@ function mark_reads() {
 
 function show_unread(unread) {
     if(parseInt(unread) > 0) {
+        $('title').html('Mượn Truyện ('+unread+')');
         $('.dl-notify').html(unread);
         $('#btn-more-menu i.dl-notify').removeClass('hidden');
     } else {
+        $('title').html('Mượn Truyện');
         $('.dl-notify').html('');
         if(!$('#btn-more-menu i.dl-notify').hasClass('hidden')) {
             $('#btn-more-menu i.dl-notify').addClass('hidden');
